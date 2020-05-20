@@ -1,0 +1,54 @@
+
+<!--.col-	.col-sm-	.col-md-	.col-lg-	.col-xl- -->
+{{!-- to show ALL accounts in the database --}}
+
+<div class="container">
+{{#if account}}
+	<div class="card card-body">
+		<h3 class="text-primary">Accounts</h3>
+			<div>
+                <table class="table table-hover table-dark">
+                    <thead>
+                        <tr>
+                            <th>Employee ID</th>
+                            <th>Type</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Gender</th>
+                            <th>Email</th>
+                            <th>HP</th>
+                            <th>DOB</th>
+                            <th>Address</th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each accounts}}
+                            <tr>
+                                <td>{{dbID}}</td>
+                                <td>{{type}}</td>
+                                <td>{{fName}}</td>
+                                <td>{{lName}}</td>
+                                <td>{{gender}}</td>
+                                <td>{{email}}</td>
+                                <td>{{hp}}</td>
+                                <td>{{dob}}</td>
+                                <td>{{address}}</td>
+                                <td><a href=""class="btn btn-warning">Update</a></td>
+                                <td>
+                                    <form action="" method="POST">
+                                        <input type="submit" value="Delete" class="btn btn-danger">
+                                    </form>
+                                </td>
+                            </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+	</div>
+
+</div>
+{{else}}
+	<h3>No accounts registered.</h3>
+{{/if}}

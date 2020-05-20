@@ -1,0 +1,62 @@
+<div class="staffForms">
+    <h1 class="display-4">New Staff</h1>
+    <hr class="titleHR">
+    <form method="POST" action="/staff/createStaff">
+        <div class="col-12 col-sm-12 col-md-6 col-lg-6">
+            <label class="font-italic">Account Type</label>
+            <br>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" id="Staff" value="Staff" name="accType" checked>
+                <label class="form-check-label" for="Staff">Staff</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" id="Admin" value="Admin" name="accType">
+                <label class="form-check-label" for="Admin">Admin</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="font-italic" for="fName">First Name</label>
+            <input class="form-control" type="text" name="fName">
+        </div>
+        <div class="form-group mb-4">
+            <label class="font-italic" for="lName">Last Name</label>
+            <input class="form-control" type="text" name="lName">
+        </div>
+
+        <div class="col-12 col-sm-12 col-md-6 col-lg-6">
+            <label class="font-italic">Gender</label>
+            <br>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" id="sFemale" value="Female" name="gender">
+                <label class="form-check-label" for="sFemale">Female</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" id="sMale" value="Male" name="gender">
+                <label class="form-check-label" for="sMale">Male</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="sDOB">Date</label>
+			<input type="date" class="form-control" name="sDOB" value="">
+        </div>
+        <div class="form-group">
+            <label for="sHP">HP</label>
+			<input type="text" class="form-control" name="sHP" value="" placeholder="6550 9999">
+        </div>
+        <div class="form-group">
+            <label class="font-italic" for="sAddr">Address</label>
+			<textarea class="form-control" id="sAddr" name="sAddr" rows="7"></textarea>
+        </div>
+        <div class="form-group halfField">
+            <label for="sPW">Password</label>
+			<input type="password" class="form-control" name="sPW" value="" placeholder="">
+        </div>
+        <div class="form-group halfFieldPass">
+            <label for="sPW2">Confirm Password</label>
+			<input type="password" class="form-control" name="sPW2" value="" placeholder="">
+        </div>
+        <input type="submit" value="Submit" class="btn btn-primary"/>
+    </form>
+</div>

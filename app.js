@@ -12,6 +12,7 @@ const bodyParser = require('body-parser');
 const flash = require('connect-flash');
 const FlashMessenger = require('flash-messenger');
 const MySQLStore = require('express-mysql-session');
+const db = require('./config/db');
 const passport = require('passport');
 
 /*
@@ -56,15 +57,31 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(methodOverride('_method'));
 
 // Enables session to be stored using browser's Cookie ID
-// app.use(cookieParser());
+app.use(cookieParser());
+app.use(session({
+	key: 'monoqlo_session',
+	secret: 'onom',
+	store: new MySQLStore({
+		host: db.host,
+		port: 3306,
+		user: db.username,
+		password: db.password,
+		database: db.database,
+		clearExpired: true,
+		checkExpirationInterval: 900000,
+		expiration: 900000,
+	}),
+	resave: false,
+	saveUninitialized: false,
+}));
 
-// app.use(passport.initialize());
-// app.use(passport.session());
+app.use(passport.initialize());
+app.use(passport.session());
 
 
 
-// app.use(flash());
-// app.use(FlashMessenger.middleware);
+app.use(flash());
+app.use(FlashMessenger.middleware);
 // app.use(function(req, res, next){
 // 	res.locals.success_msg = req.flash('success_msg');
 // 	res.locals.error_msg = req.flash('error_msg');
@@ -74,9 +91,9 @@ app.use(methodOverride('_method'));
 // });
 
 // Place to define global variables - not used in practical 1
-// app.use(function (req, res, next) {
-// 	next();
-// });
+app.use(function (req, res, next) {
+	next();
+});
 
 // Use Routes
 /*

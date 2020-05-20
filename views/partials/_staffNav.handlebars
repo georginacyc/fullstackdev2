@@ -1,0 +1,46 @@
+<nav class="navbar navbar-expand-sm navbar-dark bg-primary mb-3">
+	<div class="container">
+		<a class="navbar-brand" href="/">VidJot</a>
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav"
+				  aria-expanded="false"
+				  aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbarNav">
+			<ul class="navbar-nav">
+				<li class="nav-item">
+					<a class="nav-link" href="">items</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="">inventory</a>
+				</li>
+			</ul>
+			<ul class="navbar-nav ml-auto">
+				{{!-- {{#if user}} --}}
+					<li class="nav-item dropdown">
+						<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" id="navbarDropdownMenuLink">username</a>
+						<div class="dropdown-menu">
+							<a href="" class="dropdown-item">Manage Accounts</a>
+							<a href="" class="dropdown-item">Manage Store Announcements</a>
+                            <a href="" class="dropdown-item">Manage Staff Announcements</a>
+                            <a href="" class="dropdown-item">Create Staff Account</a>
+                            <a href="" class="dropdown-item">Create Announcement</a>
+                            <div class="dropdown-divider"></div>
+                            <a href="/logout" class="dropdown-item">Logout</a>
+						</div>
+					</li>
+					<li class="nav-item">
+						<a href="/logout" class="nav-link">logout</a>
+					</li>
+				{{!-- {{else}}
+				<!--directs to a page to show ALL announcements-->
+                    <a class="dropdown-item" href="/retrieveNormalAnnouncements">All Announcements</a>
+                <!--allows normal staff to see their own account details-->
+                    <a class="dropdown-item" href="/staffAccountDetails">Your Details</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="/logout">Log Out</a>
+				{{/if}} --}}
+			</ul>
+		</div>
+	</div>
+</nav>

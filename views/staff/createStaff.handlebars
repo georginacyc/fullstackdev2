@@ -1,27 +1,27 @@
 <div class="staffForms">
     <h1 class="display-4">New Staff</h1>
     <hr class="titleHR">
-    <form method="POST" action="/staff/createStaff">
+    <form method="POST" action="/staff/createStaffAccount">
         <div class="col-12 col-sm-12 col-md-6 col-lg-6">
             <label class="font-italic">Account Type</label>
             <br>
             <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" id="Staff" value="Staff" name="accType" checked>
+                <input class="form-check-input" type="radio" id="Staff" value="Staff" name="type" checked>
                 <label class="form-check-label" for="Staff">Staff</label>
             </div>
             <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" id="Admin" value="Admin" name="accType">
+                <input class="form-check-input" type="radio" id="Admin" value="Admin" name="type">
                 <label class="form-check-label" for="Admin">Admin</label>
             </div>
         </div>
 
         <div class="form-group">
-            <label class="font-italic" for="fName">First Name</label>
-            <input class="form-control" type="text" name="fName">
+            <label class="font-italic" for="fname">First Name</label>
+            <input class="form-control" type="text" id="fname" name="fname">
         </div>
         <div class="form-group mb-4">
-            <label class="font-italic" for="lName">Last Name</label>
-            <input class="form-control" type="text" name="lName">
+            <label class="font-italic" for="lname">Last Name</label>
+            <input class="form-control" type="text" id="lname" name="lname">
         </div>
 
         <div class="col-12 col-sm-12 col-md-6 col-lg-6">
@@ -38,24 +38,24 @@
         </div>
 
         <div class="form-group">
-            <label for="sDOB">Date</label>
-			<input type="date" class="form-control" name="sDOB" value="">
+            <label for="sDOB">Date of Birth</label>
+			<input type="date" class="form-control" id="sDOB" name="dob" value="">
         </div>
         <div class="form-group">
             <label for="sHP">HP</label>
-			<input type="text" class="form-control" name="sHP" value="" placeholder="6550 9999">
+			<input type="text" class="form-control" id="sHP" name="hp" value="" placeholder="6550 9999">
         </div>
         <div class="form-group">
             <label class="font-italic" for="sAddr">Address</label>
-			<textarea class="form-control" id="sAddr" name="sAddr" rows="7"></textarea>
+			<textarea class="form-control" id="sAddr" name="address" rows="7"></textarea>
         </div>
         <div class="form-group halfField">
-            <label for="sPW">Password</label>
-			<input type="password" class="form-control" name="sPW" value="" placeholder="">
+            <label for="pw1">Password</label>
+			<input type="password" class="form-control" id="pw1" name="password" value="" placeholder="">
         </div>
         <div class="form-group halfFieldPass">
-            <label for="sPW2">Confirm Password</label>
-			<input type="password" class="form-control" name="sPW2" value="" placeholder="">
+            <label for="pw2">Confirm Password</label>
+			<input type="password" class="form-control" id="pw2" name="pw2" value="" placeholder="">
         </div>
         <input type="submit" value="Submit" class="btn btn-primary"/>
     </form>

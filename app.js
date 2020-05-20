@@ -14,6 +14,8 @@ const FlashMessenger = require('flash-messenger');
 const MySQLStore = require('express-mysql-session');
 const db = require('./config/db');
 const passport = require('passport');
+const monoqloDB = require('./config/DBConnection');
+monoqloDB.setUpDB(false)
 
 /*
 * Loads routes file main.js in routes directory. The main.js determines which function

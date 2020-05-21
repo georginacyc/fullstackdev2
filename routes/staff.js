@@ -5,6 +5,7 @@ const router = express.Router();
 const Staff = require('../models/Staff');
 const alertMessage = require('../helpers/messenger');
 const bcrypt = require('bcryptjs');
+const db = require('../config/db');
 
 router.get('/home', (req, res) => {
     res.render('staff/staffhome')
@@ -49,14 +50,23 @@ router.post('/createStaffAccount', (req, res) => {
             pw2
         });
     } else {
-        password = bcrypt.hashSync(password, 10);
-        // check = bcrypt.compareSync(pw2, password);
-        Staff.create({type, fname, lname, gender, dob, hp, address, password})
-        .then(staff => {
-            res.redirect('/staff/accounts');
-            alertMessage(res, 'success', staff.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
-        })
-        .catch(err => console.log(err));
+        // SELECT * FROM monoqlo.staffs WHERE type="Staff"
+        var sql = 'SELECT COUNT(*) FROM staffs';
+        db.query(sql, function(error, results, fields) {
+            if (error) throw error;
+            console.log(results)
+        });
+        console.log("aaa");
+        res.render('staff/createStaff');
+        
+        // password = bcrypt.hashSync(password, 10);
+        
+        // Staff.create({type, fname, lname, gender, dob, hp, address, password})
+        // .then(staff => {
+        //     res.redirect('/staff/accounts');
+        //     alertMessage(res, 'success', staff.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
+        // })
+        // .catch(err => console.log(err));
     }
 });
 

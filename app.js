@@ -13,9 +13,11 @@ const flash = require('connect-flash');
 const FlashMessenger = require('flash-messenger');
 const MySQLStore = require('express-mysql-session');
 const db = require('./config/db');
-const passport = require('passport');
 const monoqloDB = require('./config/DBConnection');
-monoqloDB.setUpDB(false)
+monoqloDB.setUpDB(false);
+const passport = require('passport');
+const authenticate = require('./config/passport');
+authenticate.localStrategy(passport);
 
 /*
 * Loads routes file main.js in routes directory. The main.js determines which function
@@ -117,5 +119,3 @@ const port = 5000;
 app.listen(port, () => {
 	console.log(`Server started on port ${port}`);
 });
-
-// module.exports = router;

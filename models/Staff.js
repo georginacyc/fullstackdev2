@@ -5,6 +5,9 @@ const Staff = db.define('staff', {
     type: {
         type: Sequelize.STRING
     },
+    email: {
+        type: Sequelize.STRING
+    },
     fname: {
         type: Sequelize.STRING
     },

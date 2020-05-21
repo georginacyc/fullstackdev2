@@ -11,14 +11,14 @@ function localStrategy(passport) {
             }
             check = bcrypt.compareSync(password, staff.password)
             if (check) {
-                return done(null, user)
+                return done(null, staff)
             } else {
                 return done(null, false, {message: "Incorrect password."})
             }
         })
     }));
 
-    passport.serializeUser((user, done) => {
+    passport.serializeUser((staff, done) => {
         done(null, staff.id);
     });
 

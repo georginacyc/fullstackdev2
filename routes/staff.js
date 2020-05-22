@@ -3,10 +3,10 @@
 const express = require('express');
 const router = express.Router();
 const Staff = require('../models/Staff');
+const sNotif = require('../models/StaffNotifs');
 const alertMessage = require('../helpers/messenger');
 const bcrypt = require('bcryptjs');
 const mysql = require('mysql');
-const dbCheck = require('../config/dbTableCheck');
 const passport = require('passport')
 let num = "000001";
 console.log("1", num);
@@ -42,7 +42,9 @@ router.get('/home', (req, res) => {
 });
 
 router.get('/accounts', (req, res) => {
-    Staff.findAll()
+    Staff.findAll({
+        raw: true
+    })
     .then((staffs) => {
         res.render('staff/accountList', {
             accounts: staffs
@@ -53,6 +55,32 @@ router.get('/accounts', (req, res) => {
 
 router.get('/createAnnouncement', (req, res) => {
     res.render('staff/createAnnouncements');
+})
+
+router.post('/createAnnouncement', (req, res) => {
+    let errors = [];
+
+    let {date, title, description} = req.body;
+
+    if (title.length == 0) {
+        errors.push({text: "Please enter a title"});
+    }
+
+    if (errors.length > 0) {
+        res.render("staff/createAnnouncements", {
+            errors,
+            date,
+            title,
+            description
+        });
+    } else {
+        sNotif.create({date, title, description})
+        .then(snotif => {
+            res.redirect('/staff/createAnnouncement');
+            alertMessage(res, 'success', 'Annoucement successfully added.', 'fas fa-sign-in-alt', true);
+        })
+        .catch(err => console.log(err));
+    }
 });
 
 router.get('/createStaffAccount', (req, res) => {

@@ -10,7 +10,7 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Employee ID</th>
+                            <th>No.</th>
                             <th>Type</th>
                             <th>First Name</th>
                             <th>Last Name</th>
@@ -26,14 +26,14 @@
                     <tbody>
                         {{#each accounts}}
                             <tr>
-                                <td></td>
+                                <td>{{id}}</td>
                                 <td>{{type}}</td>
                                 <td>{{fname}}</td>
                                 <td>{{lname}}</td>
                                 <td>{{gender}}</td>
                                 <td>{{email}}</td>
                                 <td>{{hp}}</td>
-                                <td>{{dob}}</td>
+                                <td>{{formatDate dob 'DD MMM YYYY'}}</td>
                                 <td>{{address}}</td>
                                 <td><a href=""class="btn btn-warning">Update</a></td>
                                 <td>
@@ -52,3 +52,11 @@
 {{else}}
 	<h3>No accounts registered.</h3>
 {{/if}}
+
+<script>
+    $('#datepicker').datepicker({
+        format: 'yyyy-mm-dd',
+        uiLibrary: 'bootstrap4',
+        defaultDate: "{{formatDate content.dob 'YYYY-MM-DD'}}"
+    });
+</script>

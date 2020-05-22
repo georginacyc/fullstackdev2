@@ -18,7 +18,7 @@ const Staff = db.define('staff', {
         type: Sequelize.STRING
     },
     dob: {
-        type: Sequelize.DATE
+        type: Sequelize.DATEONLY
     },
     hp: {
         type: Sequelize.STRING

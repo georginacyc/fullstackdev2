@@ -7,7 +7,9 @@ const sNotif = require('../models/StaffNotifs');
 const alertMessage = require('../helpers/messenger');
 const bcrypt = require('bcryptjs');
 const mysql = require('mysql');
-const passport = require('passport')
+const passport = require('passport');
+// const staff = require('../views/layouts/staff');
+const staffMain = "../layouts/staff";
 let num = "000001";
 console.log("1", num);
 
@@ -21,7 +23,7 @@ var con = mysql.createConnection({
 });
 
 router.get('/login', (req, res) => {
-    res.render('staff/login');
+    res.render('staff/login', {layout: staffMain});
 });
 
 router.post('/login', (req, res, next) => {
@@ -38,7 +40,7 @@ router.get('/logout', (req, res) => {
 });
 
 router.get('/home', (req, res) => {
-    res.render('staff/staffhome');
+    res.render('staff/staffhome', {layout: staffMain});
 });
 
 router.get('/accounts', (req, res) => {
@@ -47,14 +49,15 @@ router.get('/accounts', (req, res) => {
     })
     .then((staffs) => {
         res.render('staff/accountList', {
-            accounts: staffs
+            accounts: staffs,
+            layout: staffMain
         });
     })
     // res.render('staff/accountList');
 });
 
 router.get('/createAnnouncement', (req, res) => {
-    res.render('staff/createAnnouncements');
+    res.render('staff/createAnnouncements', {layout: staffMain});
 })
 
 router.post('/createAnnouncement', (req, res) => {
@@ -71,7 +74,8 @@ router.post('/createAnnouncement', (req, res) => {
             errors,
             date,
             title,
-            description
+            description,
+            layout: staffMain
         });
     } else {
         sNotif.create({date, title, description})
@@ -84,7 +88,7 @@ router.post('/createAnnouncement', (req, res) => {
 });
 
 router.get('/createStaffAccount', (req, res) => {
-    res.render('staff/createStaff');
+    res.render('staff/createStaff', {layout: staffMain});
 });
 
 router.post('/createStaffAccount', (req, res) => {
@@ -111,7 +115,8 @@ router.post('/createStaffAccount', (req, res) => {
             hp,
             address,
             password,
-            pw2
+            pw2,
+            layout: staffMain
         });
     } else {
         console.log("4", num);
@@ -154,7 +159,7 @@ router.post('/createStaffAccount', (req, res) => {
                 console.log(num);
                 Staff.create({type, email, fname, lname, gender, dob, hp, address, password})
                 .then(staff => {
-                    res.redirect('/staff/accounts');
+                    res.redirect('/staff/accounts', {layout: staffMain});
                     alertMessage(res, 'success', staff.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
                 })
                 .catch(err => console.log(err));
@@ -168,11 +173,11 @@ router.post('/createStaffAccount', (req, res) => {
 
 
 router.get('/yourAccount', (req, res) => {
-    res.render('staff/accountDetails')
+    res.render('staff/accountDetails', {layout: staffMain})
 });
 
 router.get('/manageAccount', (req, res) => {
-    res.render('staff/updateAccount')
+    res.render('staff/updateAccount', {layout: staffMain})
 });
 
 module.exports = router;

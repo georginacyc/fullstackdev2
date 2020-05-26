@@ -1,1 +1,187 @@
-<p>Hello!</p>
+<style>
+
+body{
+  margin:0;
+}
+
+.image1{
+  display:grid;
+   margin:auto;
+ max-width:100%;
+ max-height:100%;
+}
+.container {
+ margin:auto;
+ max-width:100%;
+ max-height:100%;
+ padding: 0 ;
+}
+.banner{
+  background-color: #3f3f3f;
+  padding-left: 45%;
+  color:white;
+  text-shadow: 2px;
+  justify: center;
+}
+
+
+/* buttons */
+.button {
+  border:2px solid tan;
+  background-color: white; /* Green background */
+  color: black; /* White text */
+  font-weight: bold;
+  padding: 10px 24px; /* Some padding */
+  cursor: pointer; /* Pointer/hand icon */
+  margin : 20px 20px 20px 20px;
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+  transition: 0.3s;
+}
+
+/* Clear floats (clearfix hack) */
+.button:after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+
+/* Add a background color on hover */
+.button:hover {
+  background-color: 	#D3D3D3;
+  opacity: 1;
+  color:black;
+  text-decoration: none;
+}
+
+
+footer {
+background-color: #3f3f3f;
+color: #d5d5d5;
+padding-top: 1rem;
+margin-left: auto;
+width: 100%;
+display: block;
+}
+
+
+
+
+
+
+
+.carousel-caption {
+position: absolute;
+top: 60%;
+transform: translateY(-50%);
+}
+.carousel-caption h1{
+font-size: 500%;
+text-shadow: 1px 1px 15px #000;
+padding-bottom: : 5rem;
+}
+.carousel-caption h3{
+font-size: 200%;
+font-weight: 500;
+text-shadow: 1px 1px 10px #000;
+padding-top: 5rem;
+}
+.carousel-caption h4{
+text-shadow: 1px 10px 10px #000;
+
+}
+
+
+h5 {
+padding: 1rem;
+}
+h6 {
+padding-top: 1rem;
+font-size: 75%;
+}
+hr.light {
+border-top: 1px solid #d5d5d5;
+width: 75%;
+margin-top: .8rem;
+margin-bottom: 1rem;
+}
+footer a{
+color: #d5d5d5
+}
+hr.light-100{
+border-top: 1px solid #d5d5d5;
+width: 100%;
+margin-top: .8rem;
+margin-bottom: 1rem;
+}
+
+.content-section {
+ margin: 1em;
+}
+
+
+.section-header {
+ font-weight: normal;
+ color: #333;
+ text-align: center;
+ font-size: 2.5em;
+}
+</style>
+
+<div class="banner">
+<b><a>SALE!!! FINAL CLEARANCE</a>
+<br><a>ALL NEW COLLECTIONS</a>
+<br><a>  UP TO 40% OFF</a></b>
+</div>
+<!-- Container -->
+
+<div class= "container">
+  <img src= "C:\Users\Cody Tong\PycharmProjects\appdevproj\SimpleApplication\static\picforhomepage.jpg " class="image1">
+  <div class="carousel-caption">
+ <h1 class="display-2"></h1>
+ <h3>WHERE TRUE FASHION BEGINS</h3>
+ <h4>Shop now at MONOQLO</h4>
+ <div class="btn-group">
+  <a class="button" href="/catalogueHis">SHOP HIS</a>
+  <a class="button" href="/catalogueHers">SHOP HERS</a>
+</div>
+</div>
+  <footer>
+<div class="row text-center">
+<div class="col-md-4">
+<hr class="light">
+<h5>Customer Enquires</h5>
+<hr class="light">
+<br>
+<p>+65 6444 555</p>
+<p>Monoqlo@gmail.com</p>
+<p>Ang Mo Kio avenue 1, Singapore 65564</p>
+</div>
+<div class="col-md-4">
+<hr class="light">
+<h5>Our Hours</h5>
+<hr class="light">
+<br>
+<p>Mon - Fri: 9am -5pm</p>
+<p>Sat: 10am - 4pm</p>
+<p>Sun & PH: Closed</p>
+</div>
+<div class="col-md-4">
+<hr class="light">
+<h5>Our Team</h5>
+<hr class="light">
+<p>Nicholas.H</p>
+<p>Cody.T</p>
+<p>Georgina.C</p>
+<p>Jonathan.L</p>
+<p>Danae.k</p>
+</div>
+<div class="col-12">
+<hr class="light-100">
+<h6>Copyright © 2019 Monoqlo Inc. All rights reserved.</h6>
+</div>
+</div>
+
+
+</footer>
+</div>

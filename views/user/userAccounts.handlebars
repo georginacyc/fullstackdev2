@@ -1,0 +1,36 @@
+{{#if accounts}}
+	<div class="card card-body">
+		<h3 class="text-primary">Accounts</h3>
+			<div>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Password</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each accounts}}
+                            <tr>
+                                <td>{{name}}</td>
+                                <td>{{email}}</td>
+                                <td>{{password}}</td>
+                                <td><a href=""class="btn btn-warning">Update</a></td>
+                                <td>
+                                    <form action="" method="POST">
+                                        <input type="submit" value="Delete" class="btn btn-danger">
+                                    </form>
+                                </td>
+                            </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+            </div>
+	</div>
+
+</div>
+{{else}}
+	<h3>No accounts registered.</h3>
+{{/if}}

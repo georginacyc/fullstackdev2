@@ -10,8 +10,15 @@ const mysql = require('mysql');
 const passport = require('passport');
 // const staff = require('../views/layouts/staff');
 const staffMain = "../layouts/staff";
+const Item = require('../models/Item');
+const moment = require('moment');
+const StockOrder = require('../models/StockOrder')
 let num = "000001";
 console.log("1", num);
+
+var Handlebars = require("handlebars");
+var MomentHandler = require("handlebars.moment");
+MomentHandler.registerHelpers(Handlebars);
 
 let domain = "@monoqlo.com";
 
@@ -179,5 +186,92 @@ router.get('/yourAccount', (req, res) => {
 router.get('/manageAccount', (req, res) => {
     res.render('staff/updateAccount', {layout: staffMain})
 });
+
+//item routes
+
+router.get('/itempage', (req, res) => {
+    Item.findAll({
+        raw: true
+    })
+        .then((item) => {
+            res.render('staff/itempage', {
+            layout:staffMain
+        })
+    })
+    
+});
+
+router.get('/createItem', (req, res) => {
+    res.render('staff/createItem', { layout: staffMain })
+});
+
+router.post('/createItem', (req, res) => {
+    let errors = [];
+
+    //Adds new item
+    let itemName = req.body.itemName;
+    let itemSerial = req.body.itemSerial;
+    let itemCategory = req.body.itemCategory;
+    let itemGender = req.body.itemGender;
+    let itemCost = req.body.itemCost;
+    let itemPrice = req.body.itemPrice;
+    let itemDescription = req.body.itemDescription;
+
+    Item.create({
+        itemName,
+        itemSerial,
+        itemCategory,
+        itemGender,
+        itemCost,
+        itemPrice,
+        itemDescription
+    }).then(item => {
+        res.redirect('/staff/item', {layout: staffMain}
+        );
+    })
+    .catc(err => console.log(err))
+
+})
+
+//Inventory Routes
+router.get('/inventory', (req, res) => {
+    res.render('staff/inventory', { layout: staffMain })
+});
+
+//Stock Order Routes
+
+router.get('/createStockOrder', (req, res) => {
+    res.render('staff/createStockOrder', {
+        layout: staffMain
+    })
+});
+
+router.post('/createStockOrder', (req, res) => {
+    let errors = [];
+
+    //Adds new item
+    let stockorderDate = moment(req.body.stockorderDate, 'DD-MM-YYY');
+    let shipmentStatus = req.body.shipmentStatus;
+    let shipmentDate = moment(req.body.shipmentDate, 'DD-MM-YYY');
+    let itemSerial = req.body.itemSerial;
+    let stockorderQuantity = req.body.stockorderQuantity;
+    let receivedDate = "";
+
+    StockOrder.create({
+        stockorderDate,
+        shipmentStatus,
+        shipmentDate,
+        itemSerial,
+        stockorderQuantity,
+        receivedDate
+        }).then(stockorder => {
+            res.redirect('/staff/inventory', {
+                layout: staffMain
+            });
+        })
+        .catc(err => console.log(err))
+
+})
+
 
 module.exports = router;

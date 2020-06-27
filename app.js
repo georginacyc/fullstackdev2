@@ -19,6 +19,7 @@ const passport = require('passport');
 const authenticate = require('./config/passport');
 authenticate.localStrategy(passport);
 
+
 /*
 * Loads routes file main.js in routes directory. The main.js determines which function
 * will be called based on the HTTP request and URL.
@@ -44,6 +45,8 @@ const app = express();
 * 3. 'defaultLayout' specifies the main.handlebars file under views/layouts as the main template
 *
 * */
+
+
 app.engine('handlebars', exphbs({
 	helpers: {
 		"formatDate": formatDate
@@ -51,6 +54,8 @@ app.engine('handlebars', exphbs({
 	defaultLayout: 'main' // Specify default template views/layout/main.handlebar 
 }));
 app.set('view engine', 'handlebars');
+
+
 
 // Body parser middleware to parse HTTP body in order to read HTTP data
 app.use(bodyParser.urlencoded({

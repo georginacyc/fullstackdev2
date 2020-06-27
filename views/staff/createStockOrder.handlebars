@@ -1,0 +1,33 @@
+{{!-- create stock order form --}}
+
+<form method="POST" action="" enctype=multipart/form-data>
+    <div class="form-group">
+        <label for "stockorderDate">Order Date</label>
+        <input type="date" id="stockorderDate"class="form-control" name="stockorderDate" value="{{moment}}" required disabled>
+    </div>
+
+    <div class="form-group">
+        <label for "shipmentStatus">Shipment Status</label>
+        <input type="text" class="form-control" name="shipmentStatus" value="Ordered" disabled required>
+    </div>
+
+    <div class="form-group">
+        <label for "shipmentDate">Shipment Date</label>
+        <input type="date" id="shipmentDate" class="form-control" name="shipmentDate" value="" required>
+    </div>
+
+    <div class="form-group">
+        <label for "itemSerial">Item Serial</label>
+        <input type="text" class="form-control" name="itemSerial" value="" required>
+    </div>
+
+    <div class="form-group">
+        <label for "stockorderQuantity">Order Quantity</label>
+        <input type="number" class="form-control" name="stockorderQuantity" value="" required>
+    </div>
+
+    <br>
+    <button type="submit" class="btn btn-primary">Submit Order</button>
+
+</form>
+

@@ -1,33 +1,33 @@
 const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcryptjs');
-const Staff = require("../models/Staff");
+const User = require("../models/User");
 
 
 
 function localStrategy(passport) {
     passport.use(new LocalStrategy({usernameField: 'email'}, (email, password, done) => {
-        Staff.findOne({where: {email: email}})
-        .then(staff => {
-            if (!staff) {
+        User.findOne({where: {email: email}})
+        .then(user => {
+            if (!user) {
                 return done(null, false, {message: 'No user found.'});
             }
-            check = bcrypt.compareSync(password, staff.password)
+            check = bcrypt.compareSync(password, user.password)
             if (check) {
-                return done(null, staff)
+                return done(null, user)
             } else {
                 return done(null, false, {message: "Incorrect password."})
             }
         })
     }));
 
-    passport.serializeUser((staff, done) => {
-        done(null, staff.id);
+    passport.serializeUser((user, done) => {
+        done(null, user.id);
     });
 
-    passport.deserializeUser((staffId, done) => {
-        Staff.findByPk(staffId)
-        .then((staff) => {
-            done(null, staff);
+    passport.deserializeUser((userId, done) => {
+        Staff.findByPk(userId)
+        .then((user) => {
+            done(null, user);
         })
         .catch((done) => {
             console.log(done);

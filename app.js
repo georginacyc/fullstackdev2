@@ -18,6 +18,8 @@ monoqloDB.setUpDB(false);
 const passport = require('passport');
 const authenticate = require('./config/passport');
 authenticate.localStrategy(passport);
+const authenticate2 = require('./config/passport2');
+authenticate2.localStrategy(passport);
 
 
 /*

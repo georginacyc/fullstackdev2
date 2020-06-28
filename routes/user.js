@@ -101,7 +101,15 @@ router.get('/accounts', (req, res) => {
      //res.render('user/userAccount');
 });
     
+//user shopping cart
+router.get('/cart', (req, res) => {
+	res.render('user/cart') // renders views/cart.handlebars
+});
 
+//user checkout
+router.get('/checkout', (req, res) => {
+	res.render('user/checkout') // renders views/checkout.handlebars
+});
 
 
 module.exports = router;

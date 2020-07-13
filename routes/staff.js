@@ -30,7 +30,7 @@ var con = mysql.createConnection({
 });
 
 router.get('/login', (req, res) => {
-    res.render('staff/login', {layout: staffMain});
+    res.render('staff/login');
 });
 
 router.post('/login', (req, res, next) => {
@@ -57,6 +57,7 @@ router.get('/accounts', (req, res) => {
     .then((users) => {
         res.render('staff/accountList', {
             accounts: users,
+            layout: staffMain
         });
     })
     // res.render('staff/accountList');
@@ -182,9 +183,18 @@ router.get('/yourAccount', (req, res) => {
     res.render('staff/accountDetails', {layout: staffMain})
 });
 
-router.get('/manageAccount', (req, res) => {
-    res.render('staff/updateAccount', {layout: staffMain})
+router.get('/manageAccount/:id', (req, res) => {
+    // res.render('staff/updateStaff', {layout: staffMain})
+    User.findOne({
+        where: {
+            id: req.params.id
+        }
+    }).then((user)=> {
+        res.render("staff/updateStaff", {layout: staffMain, user});
+    }).catch(err => console.log(err));
 });
+
+
 
 //item routes
 

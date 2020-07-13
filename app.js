@@ -28,6 +28,7 @@ const mainRoute = require('./routes/main');
 const userRoute = require('./routes/user');
 const staffRoute = require('./routes/staff');
 const formatDate = require('./helpers/hbs');
+const radioCheck = require('./helpers/radioCheck');
 
 /*
 * Creates an Express server - Express is a web application framework for creating web applications
@@ -49,7 +50,8 @@ const app = express();
 
 app.engine('handlebars', exphbs({
 	helpers: {
-		"formatDate": formatDate
+		"formatDate": formatDate,
+		"radioCheck": radioCheck
 	},
 	defaultLayout: 'main' // Specify default template views/layout/main.handlebar 
 }));

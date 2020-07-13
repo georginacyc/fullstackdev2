@@ -184,7 +184,6 @@ router.get('/yourAccount', (req, res) => {
 });
 
 router.get('/manageAccount/:id', (req, res) => {
-    // res.render('staff/updateStaff', {layout: staffMain})
     User.findOne({
         where: {
             id: req.params.id
@@ -194,7 +193,46 @@ router.get('/manageAccount/:id', (req, res) => {
     }).catch(err => console.log(err));
 });
 
+router.put('/saveStaff/:id', (req, res) => {
+    let {type, fname, lname, gender, dob, hp, address} = req.body;
+    User.update({
+        type,
+        fname,
+        lname,
+        gender,
+        dob,
+        hp,
+        address
+    }, {
+        where: {
+            id: req.params.id
+        }
+    }).then(() => {
+        res.redirect("/staff/accounts");
+    }).catch(err => console.log(err));
+});
 
+router.get('/deleteStaff/:id', (req, res) => {
+    User.findOne({
+        where: {
+            id: req.params.id
+        }
+    }).then((user) => {
+        if (user == null) {
+            alertMessage(res, "danger", "User does not exist", 'fas fa-exclamation-circle', true);
+            res.redirect('/staff/accounts');
+        } else {
+            User.destroy({
+                where: {
+                    id: req.params.id
+                }
+            }).then((user) => {
+                alertMessage(res, "info", "Staff deleted", 'fas fa-exclamation-circle', true);
+                res.redirect("/staff/accounts");
+            }).catch(err => console.log(err));
+        };
+    }).catch(err => console.log(err))
+});
 
 //item routes
 

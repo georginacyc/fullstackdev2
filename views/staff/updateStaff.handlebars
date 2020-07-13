@@ -3,7 +3,8 @@
 <div class="staffForms">
     <h1 class="display-4">Update Staff Details</h1>
     <hr class="titleHR">
-    <form method="POST" action="/staff/createStaffAccount">
+    <form method="POST" action="/staff/saveStaff/{{user.id}}?_method=PUT">
+        <input type="hidden" name="_method" value="PUT">
         <div class="col-12 col-sm-12 col-md-6 col-lg-6">
             <label class="font-italic">Account Type</label>
             <br>
@@ -58,7 +59,7 @@
         <div class="form-group halfFieldPass">
             <label for="pw2">Confirm Password</label>
 			<input type="password" class="form-control" id="pw2" name="pw2" value="" placeholder="">
-        </div>
-        <input type="submit" value="Submit" class="btn btn-primary"/> --}}
+        </div> --}}
+        <input type="submit" value="Submit" class="btn btn-primary"/>
     </form>
 </div>

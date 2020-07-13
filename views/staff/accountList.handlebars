@@ -37,9 +37,10 @@
                                 <td>{{address}}</td>
                                 <td><a href="/staff/manageAccount/{{id}}" class="btn btn-warning">Update</a></td>
                                 <td>
-                                    <form action="" method="POST">
+                                    <a href="/staff/deleteStaff/{{id}}" class="btn btn-danger">Delete</a></td>
+                                    {{!-- <form action="" method="POST">
                                         <input type="submit" value="Delete" class="btn btn-danger">
-                                    </form>
+                                    </form> --}}
                                 </td>
                             </tr>
                         {{/each}}

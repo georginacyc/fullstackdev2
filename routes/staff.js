@@ -187,7 +187,39 @@ router.get('/yourAccount', (req, res) => {
     }).then((user) => {
         res.render('staff/accountDetails', {layout: staffMain, user})
     })
-    
+});
+
+router.put('/changePassword/:id', (req, res) => {
+    let {oldpw, newpw, newpw2} = req.body;
+    User.findOne({
+        where: {
+            id: req.user.id
+        }
+    }).then((user) => {
+        check = bcrypt.compareSync(oldpw, user.password)
+        console.log(check);
+        if (check) {
+            if (newpw == newpw2) {
+                pw = bcrypt.hashSync(newpw, 10);
+                User.update({
+                    password: pw
+                }, {
+                    where: {
+                        id: req.user.id
+                    }
+                })
+                alertMessage(res, 'success', 'Successfully changed password!', true);
+                req.logout()
+                res.redirect('/staff/login');
+            } else {
+                alertMessage(res, 'danger', 'New passwords must match.', true);
+                res.redirect('/staff/yourAccount');
+            }
+        } else {
+            alertMessage(res, 'danger', 'Old password is incorrect.', true);
+            res.redirect('/staff/yourAccount');
+        }
+    }).catch(err => console.log(err))
 });
 
 router.get('/manageAccount/:id', (req, res) => {

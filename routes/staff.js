@@ -2,7 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
-const Staff = require('../models/Staff');
+const User = require('../models/User');
 const sNotif = require('../models/StaffNotifs');
 const alertMessage = require('../helpers/messenger');
 const bcrypt = require('bcryptjs');
@@ -16,9 +16,9 @@ const StockOrder = require('../models/StockOrder')
 let num = "000001";
 console.log("1", num);
 
-var Handlebars = require("handlebars");
-var MomentHandler = require("handlebars.moment");
-MomentHandler.registerHelpers(Handlebars);
+// var Handlebars = require("handlebars");
+// var MomentHandler = require("handlebars.moment");
+// MomentHandler.registerHelpers(Handlebars);
 
 let domain = "@monoqlo.com";
 
@@ -51,13 +51,12 @@ router.get('/home', (req, res) => {
 });
 
 router.get('/accounts', (req, res) => {
-    Staff.findAll({
+    User.findAll({
         raw: true
     })
-    .then((staffs) => {
+    .then((users) => {
         res.render('staff/accountList', {
-            accounts: staffs,
-            layout: staffMain
+            accounts: users,
         });
     })
     // res.render('staff/accountList');
@@ -151,10 +150,10 @@ router.post('/createStaffAccount', (req, res) => {
                 num = num.padStart(6, "0");
                 console.log("2a", num);
                 email = num.toString() + domain;
-                Staff.create({type, email, fname, lname, gender, dob, hp, address, password})
-                .then(staff => {
+                User.create({type, email, fname, lname, gender, dob, hp, address, password})
+                .then(user => {
                     res.redirect('/staff/accounts');
-                    alertMessage(res, 'success', staff.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
+                    alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
                 })
                 .catch(err => console.log(err));
                 });
@@ -164,10 +163,10 @@ router.post('/createStaffAccount', (req, res) => {
                 console.log("2b", num);
                 email = num.toString() + domain;
                 console.log(num);
-                Staff.create({type, email, fname, lname, gender, dob, hp, address, password})
-                .then(staff => {
-                    res.redirect('/staff/accounts', {layout: staffMain});
-                    alertMessage(res, 'success', staff.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
+                User.create({type, email, fname, lname, gender, dob, hp, address, password})
+                .then(user => {
+                    res.redirect('/staff/accounts');
+                    alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
                 })
                 .catch(err => console.log(err));
             };
@@ -226,8 +225,7 @@ router.post('/createItem', (req, res) => {
         itemPrice,
         itemDescription
     }).then(item => {
-        res.redirect('/staff/item', {layout: staffMain}
-        );
+        res.redirect('/staff/item');
     })
     .catc(err => console.log(err))
 
@@ -265,9 +263,7 @@ router.post('/createStockOrder', (req, res) => {
         stockorderQuantity,
         receivedDate
         }).then(stockorder => {
-            res.redirect('/staff/inventory', {
-                layout: staffMain
-            });
+            res.redirect('/staff/inventory');
         })
         .catc(err => console.log(err))
 

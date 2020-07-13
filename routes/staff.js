@@ -180,7 +180,14 @@ router.post('/createStaffAccount', (req, res) => {
 
 
 router.get('/yourAccount', (req, res) => {
-    res.render('staff/accountDetails', {layout: staffMain})
+    User.findOne({
+        where: {
+            id: req.user.id
+        }
+    }).then((user) => {
+        res.render('staff/accountDetails', {layout: staffMain, user})
+    })
+    
 });
 
 router.get('/manageAccount/:id', (req, res) => {

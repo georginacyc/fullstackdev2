@@ -1,2 +1,91 @@
 {{!-- for normal staff view of their own account --}}
+{{!-- for admin view --}}
+<div class="card card-body">
+    <div class="staffForms">
+        <h1 class="display-4">Your Details</h1>
+        <hr class="titleHR">
+        <div class="row">
+            <div class="form-group col-6 col-sm-12 col-md-6 col-lg-6">
+                <label class="font-italic" for="fname">First Name</label>
+                <input class="form-control" type="text" id="fname" name="fname" value="{{user.fname}}" readonly>
+            </div>
+            <div class="form-group mb-4 col-6 col-sm-12 col-md-6 col-lg-6">
+                <label class="font-italic" for="lname">Last Name</label>
+                <input class="form-control" type="text" id="lname" name="lname" value="{{user.lname}}" readonly>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group col-12 col-sm-12 col-md-6 col-lg-6">
+                <label class="font-italic" for="fname">Staff Email</label>
+                <input class="form-control" type="text" id="email" value="{{user.email}}" readonly>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-6 col-sm-12 col-md-6 col-lg-6">
+                <label class="font-italic">Account Type</label>
+                <br>
+                <input class="form-control" type="text" id="gender" value="{{user.type}}" readonly>
+            </div>
+
+            <div class="col-6 col-sm-12 col-md-6 col-lg-6">
+                <label class="font-italic">Gender</label>
+                <br>
+                <input class="form-control" type="text" id="gender" value="{{user.gender}}" readonly>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group col-12 col-sm-12 col-md-12 col-lg-12">
+                <label class="font-italic" for="sDOB">Date of Birth</label>
+                <input class="form-control" type="text" id="dob" value="{{user.dob}}" readonly>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group col-12 col-sm-12 col-md-12 col-lg-12">
+                <label class="font-italic" for="sHP">HP</label>
+                <input class="form-control" type="text" id="hp" value="{{user.hp}}" readonly>
+            </div>
+        </div>
+            
+
+        <div class="row">
+            <div class="form-group col-12 col-sm-12 col-md-12 col-lg-12">
+                <label class="font-italic" for="sAddr">Address</label>
+                <textarea class="form-control" id="sAddr" name="address" rows="3" readonly>{{user.address}}</textarea>
+            </div>
+        </div>
+        
+        <hr>
+
+        <form method="POST" action="/staff/saveStaff/{{user.id}}?_method=PUT">
+        <input type="hidden" name="_method" value="PUT">
+            <p style="font-weight:bold">Update Password</p>
+            <div class="row">
+                {{!-- old pass --}}
+                <div class="form-group col-12 col-sm-12 col-md-12 col-lg-12">
+                    <label for="oldpw">Current Password</label>
+                    <input type="password" id="oldpw" name="oldpassword" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="row">
+                {{!-- new pass and confirm --}}
+                <div class="form-group col-6 col-sm-12 col-md-6 col-lg-6">
+                    <label for="newpw">New Password</label>
+                    <input type="password" id="newpw" name="newpassword" class="form-control" required>
+                </div>
+
+                <div class="form-group col-6 col-sm-12 col-md-6 col-lg-6">
+                    <label for="newpw2">Confirm New Password</label>
+                    <input type="password" id="newpw2" name="newpassword2" class="form-control" required>
+                </div>
+            </div>
+            <input type="submit" value="Update" class="btn btn-primary"/>
+        </form>
+    </div>
+</div>
+    
 

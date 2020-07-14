@@ -30,6 +30,7 @@ const userRoute = require('./routes/user');
 const staffRoute = require('./routes/staff');
 const formatDate = require('./helpers/hbs');
 const radioCheck = require('./helpers/radioCheck');
+const { allowedNodeEnvironmentFlags } = require('process');
 
 /*
 * Creates an Express server - Express is a web application framework for creating web applications
@@ -38,15 +39,29 @@ const radioCheck = require('./helpers/radioCheck');
 const app = express();
 
 
-// function staffAnnouncements(res, req, next) {
-// 	var con = mysql.createConnection({
-// 		host: "localhost",
-// 		user: "monoqlo",
-// 		password: "monoqlo",
-// 		database: "monoqlo"
-// 	});
-// 	con.query('SELECT * FROM monoqlo.snotifs AS notifs ORDER BY id DESC LIMIT 5')
-// }
+app.use(function(req, res, next) {
+	let announcements = []
+	var con = mysql.createConnection({
+		host: "localhost",
+		user: "monoqlo",
+		password: "monoqlo",
+		database: "monoqlo"
+	});
+	con.query('SELECT * FROM monoqlo.snotifs AS notifs ORDER BY id DESC LIMIT 3', function(err, results, fields) {
+		if (err) throw err;
+		let count = 0;
+		while (count < results.length) {
+			let a = {};
+			a['date'] = results[count].date;
+			a['title'] = results[count].title;
+
+			announcements.push(a);
+			count += 1
+		}
+		res.locals.announcements = announcements;
+		next();
+	})
+}); 
 // Handlebars Middleware
 /*
 * 1. Handlebars is a front-end web templating engine that helps to create dynamic web pages using variables

@@ -5,6 +5,6 @@
 
 {{!--Loop through each {{text}} in errors array to display errors  --}}
 {{#each errors}}
-    <div class="alert alert-danger">{{this}}</div>
+    <div class="alert alert-danger">{{this.text}}</div>
 {{else}}
 {{/each}}

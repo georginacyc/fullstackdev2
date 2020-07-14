@@ -61,7 +61,7 @@ router.get('/home', ensureAuthenticated, staffAuth, (req, res) => {
     
 });
 
-router.get('/accounts', ensureAuthenticated, adminAuth, (req, res) => {
+router.get('/accounts', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
     User.findAll({
         raw: true
     })
@@ -74,11 +74,11 @@ router.get('/accounts', ensureAuthenticated, adminAuth, (req, res) => {
     // res.render('staff/accountList');
 });
 
-router.get('/createAnnouncement', ensureAuthenticated, adminAuth, (req, res) => {
+router.get('/createAnnouncement', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
     res.render('staff/createAnnouncements', {layout: staffMain});
 })
 
-router.post('/createAnnouncement', ensureAuthenticated, adminAuth, (req, res) => {
+router.post('/createAnnouncement', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
     let errors = [];
 
     let {date, title, description} = req.body;
@@ -113,13 +113,19 @@ router.post('/createStaffAccount', ensureAuthenticated, staffAuth, adminAuth, (r
     let errors = [];
 
     let {type, fname, lname, gender, dob, hp, address, password, pw2} = req.body;
+
+    let isnum = /^\d+$/.test(hp);
     
     if (password !== pw2) {
         errors.push({text: 'Password must match'});
     }
 
-    if  (password.length < 8 || pw2.length < 8 ) {
+    if (password.length < 8 || pw2.length < 8 ) {
         errors.push({text: 'Password must be at least 8 characters'});
+    }
+
+    if (hp.length != 8 || isnum == false) {
+        errors.push({text: 'Please enter a valid contact number.'});
     }
 
     if (errors.length > 0) {

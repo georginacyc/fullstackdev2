@@ -11,6 +11,7 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const flash = require('connect-flash');
 const FlashMessenger = require('flash-messenger');
+const mysql = require('mysql');
 const MySQLStore = require('express-mysql-session');
 const db = require('./config/db');
 const monoqloDB = require('./config/DBConnection');
@@ -36,6 +37,16 @@ const radioCheck = require('./helpers/radioCheck');
 */
 const app = express();
 
+
+// function staffAnnouncements(res, req, next) {
+// 	var con = mysql.createConnection({
+// 		host: "localhost",
+// 		user: "monoqlo",
+// 		password: "monoqlo",
+// 		database: "monoqlo"
+// 	});
+// 	con.query('SELECT * FROM monoqlo.snotifs AS notifs ORDER BY id DESC LIMIT 5')
+// }
 // Handlebars Middleware
 /*
 * 1. Handlebars is a front-end web templating engine that helps to create dynamic web pages using variables
@@ -109,6 +120,7 @@ app.use(FlashMessenger.middleware);
 app.use(function (req, res, next) {
 	next();
 });
+
 
 // Use Routes
 /*

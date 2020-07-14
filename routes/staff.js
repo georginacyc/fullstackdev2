@@ -50,7 +50,15 @@ router.get('/logout', (req, res) => {
 });
 
 router.get('/home', ensureAuthenticated, staffAuth, (req, res) => {
-    res.render('staff/staffhome', {layout: staffMain});
+    admin = req.user.type;
+    console.log(admin);
+    name = req.user.fname;
+    if (admin == "Admin") {
+        res.render('staff/staffhome', {layout: staffMain, admin, name: name});
+    } else {
+        res.render('staff/staffhome', {layout: staffMain, name: name});
+    }
+    
 });
 
 router.get('/accounts', ensureAuthenticated, adminAuth, (req, res) => {

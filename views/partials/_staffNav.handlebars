@@ -16,9 +16,15 @@
 				</li>
 			</ul>
 			<ul class="navbar-nav ml-auto">
-				{{!-- {{#if user}} --}}
+				{{#if admin}} {{!-- Admin View--}}
 					<li class="nav-item dropdown">
-						<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" id="navbarDropdownMenuLink">username</a>
+						<a href="#" class="nav-link" data-toggle="dropdown" id="navAnnouncements"><i class="fas fa-bell"></i></a>
+						<div class="dropdown-menu">
+							<a class="dropdown-item" href="/staff/retrieveNormalAnnouncements">All Announcements</a>
+						</div>
+					</li>
+					<li class="nav-item dropdown">
+						<a href="#" class="nav-link" data-toggle="dropdown" id="navbarDropdownMenuLink">{{name}} <i class="fas fa-caret-down"></i></a>
 						<div class="dropdown-menu">
 							<a href="/staff/accounts" class="dropdown-item">Manage Accounts</a>
 							<a href="/staff/yourAccount" class="dropdown-item">Your Account</a>
@@ -31,17 +37,27 @@
                             <a href="/staff/logout" class="dropdown-item">Logout</a>
 						</div>
 					</li>
-					<li class="nav-item">
-						<a href="/staff/logout" class="nav-link">logout</a>
-					</li>
-				{{!-- {{else}}
+				{{else}} {{!-- Staff View--}}
 				<!--directs to a page to show ALL announcements-->
-                    <a class="dropdown-item" href="/retrieveNormalAnnouncements">All Announcements</a>
-                <!--allows normal staff to see their own account details-->
-                    <a class="dropdown-item" href="/staffAccountDetails">Your Details</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="/logout">Log Out</a>
-				{{/if}} --}}
+					<li class="nav-item dropdown">
+						<a href="#" class="nav-link" data-toggle="dropdown" id="navAnnouncements"><i class="fas fa-bell"></i></a>
+						<div class="dropdown-menu">
+							<a class="dropdown-item" href="/staff/retrieveNormalAnnouncements">All Announcements</a>
+						</div>
+					</li>
+
+					<li class="nav-item dropdown">
+						<a href="#" class="nav-link" data-toggle="dropdown" id="navUser">{{name}} <i class="fas fa-caret-down"></i></a>
+						<div class="dropdown-menu">
+							<!--allows normal staff to see their own account details-->
+							<a class="dropdown-item" href="/staff/yourAccount">Your Details</a>
+							<div class="dropdown-divider"></div>
+							<a class="dropdown-item" href="/staff/logout">Log Out</a>
+						</div>
+					</li>
+					
+                	
+				{{/if}}
 			</ul>
 		</div>
 	</div>

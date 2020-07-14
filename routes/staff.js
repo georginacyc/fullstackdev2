@@ -12,7 +12,10 @@ const passport = require('passport');
 const staffMain = "../layouts/staff";
 const Item = require('../models/Item');
 const moment = require('moment');
-const StockOrder = require('../models/StockOrder')
+const StockOrder = require('../models/StockOrder');
+const ensureAuthenticated = require('../helpers/auth'); // to verify that a user is logged in
+const staffAuth = require('../helpers/staffAuth'); // to verify that user logged in is a Staff
+const adminAuth = require('../helpers/adminAuth'); // to verify that user logged in is an Admin
 let num = "000001";
 console.log("1", num);
 
@@ -46,11 +49,11 @@ router.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-router.get('/home', (req, res) => {
+router.get('/home', ensureAuthenticated, staffAuth, (req, res) => {
     res.render('staff/staffhome', {layout: staffMain});
 });
 
-router.get('/accounts', (req, res) => {
+router.get('/accounts', ensureAuthenticated, adminAuth, (req, res) => {
     User.findAll({
         raw: true
     })
@@ -63,11 +66,11 @@ router.get('/accounts', (req, res) => {
     // res.render('staff/accountList');
 });
 
-router.get('/createAnnouncement', (req, res) => {
+router.get('/createAnnouncement', ensureAuthenticated, adminAuth, (req, res) => {
     res.render('staff/createAnnouncements', {layout: staffMain});
 })
 
-router.post('/createAnnouncement', (req, res) => {
+router.post('/createAnnouncement', ensureAuthenticated, adminAuth, (req, res) => {
     let errors = [];
 
     let {date, title, description} = req.body;
@@ -94,11 +97,11 @@ router.post('/createAnnouncement', (req, res) => {
     }
 });
 
-router.get('/createStaffAccount', (req, res) => {
+router.get('/createStaffAccount', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
     res.render('staff/createStaff', {layout: staffMain});
 });
 
-router.post('/createStaffAccount', (req, res) => {
+router.post('/createStaffAccount', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
     let errors = [];
 
     let {type, fname, lname, gender, dob, hp, address, password, pw2} = req.body;
@@ -132,7 +135,7 @@ router.post('/createStaffAccount', (req, res) => {
         console.log("fcheck1");
         console.log("fcheck2");
         console.log("fcheck3");
-        con.query("SELECT COUNT(*) AS tableCheck FROM information_schema.tables WHERE table_schema = 'monoqlo' AND table_name = 'staffs'", function(err, result, fields) {
+        con.query("SELECT COUNT(*) AS tableCheck FROM users WHERE type='Admin' OR type='Staff'", function(err, result, fields) {
             
             let email = ""
             
@@ -142,21 +145,18 @@ router.post('/createStaffAccount', (req, res) => {
             console.log("fchec5");
             console.log(result[0].tableCheck);
             if (result[0].tableCheck > 0) {
-                console.log("fcheck6");
-                console.log(result[0].tableCheck)
-                con.query("SELECT COUNT(type) AS count FROM staffs", function(err, result, fields) {
-                if (err) throw err;
-                num = result[0].count + 1;
-                num = num.toString();
-                num = num.padStart(6, "0");
-                console.log("2a", num);
-                email = num.toString() + domain;
-                User.create({type, email, fname, lname, gender, dob, hp, address, password})
-                .then(user => {
-                    res.redirect('/staff/accounts');
-                    alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
-                })
-                .catch(err => console.log(err));
+                con.query("SELECT MAX(id) AS count FROM users WHERE type='Admin' or type='Staff'", function(err, result, fields) {
+                    if (err) throw err;
+                    console.log(result);
+                    num = result[0].count + 1;
+                    num = num.toString().padStart(6, "0");
+                    console.log(num)
+                    email = num.toString() + domain;
+                    User.create({type, email, fname, lname, gender, dob, hp, address, password})
+                    .then(user => {
+                        res.redirect('/staff/accounts');
+                        alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
+                    }).catch(err => console.log(err));
                 });
             } else {
                 num = "000001";
@@ -179,7 +179,7 @@ router.post('/createStaffAccount', (req, res) => {
 });
 
 
-router.get('/yourAccount', (req, res) => {
+router.get('/yourAccount', ensureAuthenticated, staffAuth, (req, res) => {
     User.findOne({
         where: {
             id: req.user.id
@@ -189,7 +189,7 @@ router.get('/yourAccount', (req, res) => {
     })
 });
 
-router.put('/changePassword/:id', (req, res) => {
+router.put('/changePassword/:id', ensureAuthenticated, staffAuth, (req, res) => {
     let {oldpw, newpw, newpw2} = req.body;
     User.findOne({
         where: {
@@ -222,7 +222,7 @@ router.put('/changePassword/:id', (req, res) => {
     }).catch(err => console.log(err))
 });
 
-router.get('/manageAccount/:id', (req, res) => {
+router.get('/manageAccount/:id', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
     User.findOne({
         where: {
             id: req.params.id
@@ -232,16 +232,29 @@ router.get('/manageAccount/:id', (req, res) => {
     }).catch(err => console.log(err));
 });
 
-router.put('/saveStaff/:id', (req, res) => {
-    let {type, fname, lname, gender, dob, hp, address} = req.body;
+router.put('/saveStaff/:id', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+    let {type, fname, lname, gender, dob, hp, address, resetpw} = req.body;
+    console.log(resetpw);
+    if (resetpw == "reset") {
+        pw = bcrypt.hashSync("23456789", 10);
+    } else {
+        User.findOne({
+            where: {
+                id: req.params.id
+            }
+        }).then((user) => {
+            pw = user.password
+        }).catch(err => console.log(err))
+    }
     User.update({
-        type,
-        fname,
-        lname,
-        gender,
-        dob,
-        hp,
-        address
+        type: type,
+        fname: fname,
+        lname: lname,
+        gender: gender,
+        dob: dob,
+        hp: hp,
+        address: address,
+        password: pw
     }, {
         where: {
             id: req.params.id
@@ -251,7 +264,7 @@ router.put('/saveStaff/:id', (req, res) => {
     }).catch(err => console.log(err));
 });
 
-router.get('/deleteStaff/:id', (req, res) => {
+router.get('/deleteStaff/:id', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
     User.findOne({
         where: {
             id: req.params.id

@@ -27,39 +27,44 @@
             <input class="form-control" type="text" id="lname" name="lname" value="{{user.lname}}">
         </div>
 
-        <div class="col-12 col-sm-12 col-md-6 col-lg-6">
-            <label class="font-italic">Gender</label>
-            <br>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" id="sFemale" value="Female" name="gender" {{radioCheck user.gender "Female"}}>
-                <label class="form-check-label" for="sFemale">Female</label>
+        <div class="row">
+            <div class="col-6 col-sm-12 col-md-6 col-lg-6">
+                <label class="font-italic">Gender</label>
+                <br>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" id="sFemale" value="Female" name="gender" {{radioCheck user.gender "Female"}}>
+                    <label class="form-check-label" for="sFemale">Female</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" id="sMale" value="Male" name="gender" {{radioCheck user.gender "Male"}}>
+                    <label class="form-check-label" for="sMale">Male</label>
+                </div>
             </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" id="sMale" value="Male" name="gender" {{radioCheck user.gender "Male"}}>
-                <label class="form-check-label" for="sMale">Male</label>
-            </div>
-        </div>
 
-        <div class="form-group">
-            <label for="sDOB">Date of Birth</label>
-			<input type="date" class="form-control" id="sDOB" name="dob" value="{{user.dob}}">
+            <div class="col-6 col-sm-12 col-md-6 col-lg-6">
+                <div class="form-group">
+                    <label class="font-italic" for="sDOB">Date of Birth</label>
+                    <input type="date" class="form-control" id="sDOB" name="dob" value="{{user.dob}}">
+                </div>
+            </div>
         </div>
+        
+        
         <div class="form-group">
-            <label for="sHP">HP</label>
+            <label class="font-italic" for="sHP">HP</label>
 			<input type="text" class="form-control" id="sHP" name="hp" value="{{user.hp}}" placeholder="6550 9999">
         </div>
         <div class="form-group">
             <label class="font-italic" for="sAddr">Address</label>
 			<textarea class="form-control" id="sAddr" name="address" rows="3">{{user.address}}</textarea>
         </div>
-        {{!-- <div class="form-group halfField">
-            <label for="pw1">Password</label>
-			<input type="password" class="form-control" id="pw1" name="password" value="" placeholder="">
+        <div class="row">
+            <div class="form-group">
+                <input type="checkbox" class="" id="resetpw" name="resetpw" value="reset">
+                <label class="" for="resetpw">Reset Password</label>
+            </div>
         </div>
-        <div class="form-group halfFieldPass">
-            <label for="pw2">Confirm Password</label>
-			<input type="password" class="form-control" id="pw2" name="pw2" value="" placeholder="">
-        </div> --}}
+        
         <input type="submit" value="Submit" class="btn btn-primary"/>
     </form>
 </div>

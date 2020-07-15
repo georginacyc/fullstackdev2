@@ -18,6 +18,8 @@ const staffAuth = require('../helpers/staffAuth'); // to verify that user logged
 const adminAuth = require('../helpers/adminAuth'); // to verify that user logged in is an Admin
 let num = "000001";
 console.log("1", num);
+const pdf = require('pdf-creator-node');
+const fs = require('fs');
 
 // var Handlebars = require("handlebars");
 // var MomentHandler = require("handlebars.moment");
@@ -323,6 +325,51 @@ router.get('/deleteStaff/:id', ensureAuthenticated, staffAuth, adminAuth, (req, 
                 res.redirect("/staff/accounts");
             }).catch(err => console.log(err));
         };
+    }).catch(err => console.log(err))
+});
+
+router.get('/staffPDF/:id', (req, res) => {
+    User.findOne({
+        where: {
+            id: req.params.id
+        }
+    }).then((user) => {
+        var html = fs.readFileSync('./views/staff/staffPDF.handlebars', 'utf-8')
+        var options = {
+            format: "A4",
+            orientation: "portrait",
+            border: "10mm",
+            header: {
+                height: "10mm",
+                contents: 'Monoqlo Staff Summary'
+            },
+            "footer": {
+                "height": "14mm",
+                "contents": {
+                    default: 'Copyright © 2019 Monoqlo Inc. All rights reserved.'
+                }
+            }
+        }
+        var x = {'fname': user.fname, 'lname': user.lname, 'type': user.type, 'email': user.email, 'dob': user.dob, 'hp': user.hp, 'address': user.address}
+        var document = {
+            html: html,
+            data: {
+                staff: x
+            },
+            path: "./public/pdf/output.pdf"
+        };
+        pdf.create(document, options)
+            .then(ress => {
+                console.log(ress);
+                fs.readFile(ress['filename'], function (err,data){
+                    if (err) throw err;
+                    res.contentType("application/pdf");
+                    res.send(data);
+                });
+            })
+            .catch(error => {
+                console.error(error)
+            });
     }).catch(err => console.log(err))
 });
 

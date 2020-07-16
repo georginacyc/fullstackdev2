@@ -4,9 +4,9 @@
 	}
 </style>
 
-<nav class="navbar navbar-expand-sm navbar-dark bg-primary mb-3">
+<nav class="navbar navbar-expand-sm navbar-dark bg-dark mb-3">
 	<div class="container">
-		<a class="navbar-brand" href="/">Monoqlo</a>
+		<a class="navbar-brand" href="/staff/home">Monoqlo</a>
 		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav"
 				  aria-expanded="false"
 				  aria-label="Toggle navigation">
@@ -41,13 +41,20 @@
 					<li class="nav-item dropdown">
 						<a href="#" class="nav-link" data-toggle="dropdown" id="navbarDropdownMenuLink">{{staffName}} <i class="fas fa-caret-down"></i></a>
 						<div class="dropdown-menu">
+<<<<<<< HEAD
 							<a href="/staff/accounts" class="dropdown-item">Manage Accounts</a>
 							<a href="/staff/yourAccount" class="dropdown-item">Your Account</a>
 							<a href="/staff/" class="dropdown-item">Manage Store Announcements</a>
                             <a href="/staff/" class="dropdown-item">View Staff Announcements</a>
 							{{!-- <a href="/user/Accounts" class="dropdown-item">View User accounts</a> --}}
+=======
+>>>>>>> 5683bd2cdd185f0c2c4b412650d11b4bb59d324a
                             <a href="/staff/createStaffAccount" class="dropdown-item">Create Staff Account</a>
                             <a href="/staff/createAnnouncement" class="dropdown-item">Create Announcement</a>
+							<a href="/staff/accounts" class="dropdown-item">Manage Accounts</a>
+							<a href="/staff/announcements" class="dropdown-item">All Announcements</a>
+							<a href="/user/Accounts" class="dropdown-item">View User accounts</a>
+							<a href="/staff/yourAccount" class="dropdown-item">Your Account</a>
                             <div class="dropdown-divider"></div>
                             <a href="/staff/logout" class="dropdown-item">Logout</a>
 						</div>
@@ -73,6 +80,7 @@
 					<li class="nav-item dropdown">
 						<a href="#" class="nav-link" data-toggle="dropdown" id="navUser">{{staffName}} <i class="fas fa-caret-down"></i></a>
 						<div class="dropdown-menu">
+							<a href="/staff/announcements" class="dropdown-item">All Announcements</a>
 							<!--allows normal staff to see their own account details-->
 							<a class="dropdown-item" href="/staff/yourAccount">Your Details</a>
 							<div class="dropdown-divider"></div>

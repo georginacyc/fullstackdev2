@@ -1,0 +1,53 @@
+<div class="card card-body">
+    <h1 class="display-4" style="text-align: center">{{custName}} Profile</h1>
+    <hr class="">
+
+    <table style="margin-left: auto; margin-right:auto">
+        <tr>
+            <td>
+                First Name:
+            </td>
+            <td>
+                {{user.fname}}
+            </td>
+            
+        </tr>
+        <tr>
+            <td>
+                Last Name:
+            </td>
+            <td>
+                {{user.lname}}
+            </td>
+            <td>
+                Email:
+            </td>
+            <td>
+                {{user.email}}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Date of Birth:
+            </td>
+            <td>
+                {{user.dob}}
+            </td>
+            <td>
+                H/P:
+            </td>
+            <td>
+                {{user.hp}}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Address:
+            </td>
+            <td colspan="3">
+                {{user.address}}
+            </td>
+        </tr>
+        <tr></tr>
+    </table>
+</div>

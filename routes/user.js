@@ -105,9 +105,15 @@ router.get('/', (req, res) =>{
 } );
 
 // User Profile
-router.get('/user/editUserAccount', (req,res)=>{
-    req.user
-})
+router.get('/editUserAccount', (req,res)=>{
+    User.findOne({
+        where: {
+            id: req.user.id
+        }
+    }).then((user) => {
+        res.render('user/editUserAccount', {user:user});
+    }) 
+});
 
 // Logout User
 router.get('/logout', (req, res) => {

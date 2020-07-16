@@ -40,26 +40,31 @@ const { allowedNodeEnvironmentFlags } = require('process');
 const app = express();
 app.use(mysqlAdmin(app));
 
+// function to constantly supply recent announcements (i.e. latest 3) to the navbar
 app.use(function(req, res, next) {
 	let announcements = []
-	var con = mysql.createConnection({
+	var con = mysql.createConnection({ // creating a connection to access data in database
 		host: "localhost",
 		user: "monoqlo",
 		password: "monoqlo",
 		database: "monoqlo"
 	});
-	con.query('SELECT * FROM monoqlo.snotifs AS notifs ORDER BY id DESC LIMIT 3', function(err, results, fields) {
-		if (err) throw err;
-		let count = 0;
-		while (count < results.length) {
-			let a = {};
-			a['date'] = results[count].date;
+	con.query('SELECT * FROM monoqlo.snotifs AS notifs ORDER BY id DESC LIMIT 3', function(err, results, fields) { // querying database to retrieve last 3 announcements, which are the latest
+		if (err) throw err; 
+		let count = 0; // to assist in iterating through the announcements list
+
+		// results is what the query returns to the program which, in this case, is a list of dictionaries. each item in the list is a row from the db.
+		while (count < results.length) { // ensures that the count never exceeds the number of rows returned. 
+			let a = {}; // a dictionary to hold what we need
+
+			// getting the corresponding data from the row
+			a['date'] = results[count].date; 
 			a['title'] = results[count].title;
 
-			announcements.push(a);
+			announcements.push(a); // adding what we retrieved to the announcements list
 			count += 1
 		}
-		res.locals.announcements = announcements;
+		res.locals.announcements = announcements; // global variable so that when announcement is referenced by navbar, announcements are passed in and used accordingly.
 		next();
 	})
 }); 
@@ -120,7 +125,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// to constantly pass in variables, if available, for the staff navbar
+// to constantly pass in variables, if available, for the navbars
 app.use(function(req, res, next) {
 	try {
 		// checks if the logged in user is a customer
@@ -139,10 +144,10 @@ app.use(function(req, res, next) {
 		
 	}
 	catch (err) {
-		console.log("No user logged in")
+		
 	}
 	finally {
-		next();
+		next(); // regardless of the above try/catch, the program continues on
 	}
 		
 })

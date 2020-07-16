@@ -142,7 +142,7 @@ app.use(function(req, res, next) {
 		
 	}
 	catch (err) {
-		console.log("No user logged in")
+		
 	}
 	finally {
 		next(); // regardless of the above try/catch, the program continues on
@@ -153,13 +153,13 @@ app.use(function(req, res, next) {
 
 app.use(flash());
 app.use(FlashMessenger.middleware);
-// app.use(function(req, res, next){
-// 	res.locals.success_msg = req.flash('success_msg');
-// 	res.locals.error_msg = req.flash('error_msg');
-// 	res.locals.error = req.flash('error');
-// 	res.locals.user = req.user || null;
-// 	next();
-// });
+app.use(function(req, res, next){
+	res.locals.success_msg = req.flash('success_msg');
+	res.locals.error_msg = req.flash('error_msg');
+	res.locals.error = req.flash('error');
+	res.locals.user = req.user || null;
+	next();
+});
 
 // Place to define global variables - not used in practical 1
 app.use(function (req, res, next) {

@@ -8,7 +8,6 @@ const alertMessage = require('../helpers/messenger');
 const bcrypt = require('bcryptjs');
 const mysql = require('mysql');
 const passport = require('passport');
-// const staff = require('../views/layouts/staff');
 const staffMain = "../layouts/staff";
 const Item = require('../models/Item');
 const moment = require('moment');
@@ -25,7 +24,7 @@ const fs = require('fs');
 
 let domain = "@monoqlo.com";
 
-var con = mysql.createConnection({
+var con = mysql.createConnection({ // creating a connection to query database below.
     host: "localhost",
     user: "monoqlo",
     password: "monoqlo",
@@ -50,16 +49,10 @@ router.get('/logout', (req, res) => {
 });
 
 router.get('/home', ensureAuthenticated, staffAuth, (req, res) => {
-    admin = req.user.type;
-    name = req.user.fname;
-    if (admin == "Admin") {
         res.render('staff/staffhome', {layout: staffMain});
-    } else {
-        res.render('staff/staffhome', {layout: staffMain});
-    }
-    
 });
 
+// to retrieve ALL accounts, regardless of whether it's a staff or customer account.
 router.get('/accounts', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
     User.findAll({
         raw: true
@@ -70,22 +63,20 @@ router.get('/accounts', ensureAuthenticated, staffAuth, adminAuth, (req, res) =>
             layout: staffMain
         });
     })
-    // res.render('staff/accountList');
 });
 
+// retrieves all announcements
 router.get('/announcements', ensureAuthenticated, staffAuth, (req, res) => {
     let allannouncements = []
     con.query('SELECT * FROM monoqlo.snotifs AS notifs ORDER BY id DESC;', function(err, results, fields) {
         if (err) throw err;
-        console.log(results);
         let count = 0;
-        while (count < results.length) {
+        while (count < results.length) { // ensures that count never exceeds number of rows returned, to prevent an Index-Out-of-Range error.
             let a = {};
             a['date'] = results[count].date;
             a['title'] = results[count].title;
             a['description'] = results[count].description;
             
-            console.log(a);
             allannouncements.push(a);
             count += 1;
         }
@@ -103,7 +94,7 @@ router.post('/createAnnouncement', ensureAuthenticated, staffAuth, adminAuth, (r
     let {title, description} = req.body;
 
     let date = new Date();
-    console.log(date.toISOString().slice(0, 10));
+    date = date.toISOString().slice(0, 10);
 
     if (title.length == 0) {
         errors.push({text: "Please enter a title"});
@@ -121,7 +112,7 @@ router.post('/createAnnouncement', ensureAuthenticated, staffAuth, adminAuth, (r
         .then(snotif => {
             console.log(date);
             alertMessage(res, 'success', 'Annoucement successfully added.', 'fas fa-sign-in-alt', true);
-            res.redirect('/staff/createAnnouncement');
+            res.redirect('/staff/announcements');
         })
         .catch(err => console.log(err));
     }

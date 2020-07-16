@@ -1,3 +1,5 @@
+// codes below checks that the user is logged in
+
 const alertMessage = require('./messenger');
 
 const ensureAuthenticated = (req, res, next) => {

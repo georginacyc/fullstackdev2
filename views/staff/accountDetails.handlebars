@@ -64,6 +64,7 @@
         
         <hr>
 
+        {{!-- password change form; staff can change their password, provided that they know their old password --}}
         <form method="POST" action="/staff/changePassword/{{user.id}}?_method=PUT">
         <input type="hidden" name="_method" value="PUT">
             <p style="font-weight:bold">Update Password</p>

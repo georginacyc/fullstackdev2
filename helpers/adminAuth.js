@@ -1,7 +1,6 @@
 const alertMessage = require('./messenger');
 
 const adminAuth = (req, res, next) => {
-    console.log('adminAuth');
     if (req.user.type == "Admin") {
         return next();
     }

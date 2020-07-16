@@ -140,7 +140,7 @@ app.use(function(req, res, next) {
 		console.log("No user logged in")
 	}
 	finally {
-		next();
+		next(); // regardless of the above try/catch, the program continues on
 	}
 		
 })

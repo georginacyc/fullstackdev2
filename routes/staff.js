@@ -16,8 +16,6 @@ const StockOrder = require('../models/StockOrder');
 const ensureAuthenticated = require('../helpers/auth'); // to verify that a user is logged in
 const staffAuth = require('../helpers/staffAuth'); // to verify that user logged in is a Staff
 const adminAuth = require('../helpers/adminAuth'); // to verify that user logged in is an Admin
-let num = "000001";
-console.log("1", num);
 const pdf = require('pdf-creator-node');
 const fs = require('fs');
 
@@ -53,12 +51,11 @@ router.get('/logout', (req, res) => {
 
 router.get('/home', ensureAuthenticated, staffAuth, (req, res) => {
     admin = req.user.type;
-    console.log(admin);
     name = req.user.fname;
     if (admin == "Admin") {
-        res.render('staff/staffhome', {layout: staffMain, admin, name: name});
+        res.render('staff/staffhome', {layout: staffMain});
     } else {
-        res.render('staff/staffhome', {layout: staffMain, name: name});
+        res.render('staff/staffhome', {layout: staffMain});
     }
     
 });
@@ -90,7 +87,6 @@ router.get('/announcements', ensureAuthenticated, staffAuth, (req, res) => {
             
             console.log(a);
             allannouncements.push(a);
-            console.log(allannouncements);
             count += 1;
         }
         res.render('staff/allAnnouncements', {layout:staffMain, allannouncements: allannouncements})
@@ -169,54 +165,37 @@ router.post('/createStaffAccount', ensureAuthenticated, staffAuth, adminAuth, (r
             layout: staffMain
         });
     } else {
-        console.log("4", num);
+        let num = ""
         password = bcrypt.hashSync(password, 10);
 
-        console.log("fcheck1");
-        console.log("fcheck2");
-        console.log("fcheck3");
         con.query("SELECT COUNT(*) AS tableCheck FROM users WHERE type='Admin' OR type='Staff'", function(err, result, fields) {
             
             let email = ""
-            
-            console.log("fcheck4");
+    
             if (err) throw err;
-            console.log(result);
-            console.log("fchec5");
-            console.log(result[0].tableCheck);
             if (result[0].tableCheck > 0) {
                 con.query("SELECT MAX(id) AS count FROM users WHERE type='Admin' or type='Staff'", function(err, result, fields) {
                     if (err) throw err;
-                    console.log(result);
                     num = result[0].count + 1;
                     num = num.toString().padStart(6, "0");
-                    console.log(num)
                     email = num.toString() + domain;
                     User.create({type, email, fname, lname, gender, dob, hp, address, password})
                     .then(user => {
-                        console.log(dob);
                         res.redirect('/staff/accounts');
                         alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
                     }).catch(err => console.log(err));
                 });
             } else {
                 num = "000001";
-                console.log("fcheck7");
-                console.log("2b", num);
                 email = num.toString() + domain;
-                console.log(num);
                 User.create({type, email, fname, lname, gender, dob, hp, address, password})
                 .then(user => {
-                    console.log(dob);
                     res.redirect('/staff/accounts');
                     alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
                 })
                 .catch(err => console.log(err));
             };
-            console.log("fcheck8");
         });
-        console.log("fcheck9");
-        console.log("fcheck10");
     };
 });
 

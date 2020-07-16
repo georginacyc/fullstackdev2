@@ -40,7 +40,6 @@ const { allowedNodeEnvironmentFlags } = require('process');
 const app = express();
 app.use(mysqlAdmin(app));
 
-
 app.use(function(req, res, next) {
 	let announcements = []
 	var con = mysql.createConnection({
@@ -121,6 +120,30 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// to constantly pass in variables, if available, for the staff navbar
+app.use(function(req, res, next) {
+	try {
+		// checks if the logged in user is a customer
+		if (req.user.type == "User") {
+			next();
+		} else {
+			// setting the global variables
+			res.locals.staffAdmin = null; // null first so that it does not pass the if condition in the staff navbar by default
+			res.locals.staffName = req.user.fname; // retreiving the name to pass into staff navbar
+			if (req.user.type == "Admin") {
+				res.locals.staffAdmin = "Admin"; // when staffAdmin is passed in, the if condition will be passed
+			}
+		}
+		
+	}
+	catch (err) {
+		console.log("No user logged in")
+	}
+	finally {
+		next();
+	}
+		
+})
 
 
 app.use(flash());

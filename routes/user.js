@@ -111,7 +111,7 @@ router.get('/editUserAccount', (req,res)=>{
             id: req.user.id
         }
     }).then((user) => {
-        res.render('user/editUserAccount', {user:user});
+        res.render('user/editUserAccount', {user});
     }) 
 });
 

@@ -130,7 +130,9 @@ app.use(function(req, res, next) {
 	try {
 		// checks if the logged in user is a customer
 		if (req.user.type == "User") {
-			next();
+			res.locals.custName = req.user.fname;
+			res.locals.user = "User";
+			
 		} else {
 			// setting the global variables
 			res.locals.staffAdmin = null; // null first so that it does not pass the if condition in the staff navbar by default

@@ -19,6 +19,7 @@ monoqloDB.setUpDB(false);
 const passport = require('passport');
 const authenticate = require('./config/passport');
 authenticate.localStrategy(passport);
+const mysqlAdmin = require('node-mysql-admin');
 
 
 /*
@@ -37,6 +38,7 @@ const { allowedNodeEnvironmentFlags } = require('process');
 * in Node JS.
 */
 const app = express();
+app.use(mysqlAdmin(app));
 
 
 app.use(function(req, res, next) {

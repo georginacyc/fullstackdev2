@@ -125,7 +125,9 @@ app.use(function(req, res, next) {
 	try {
 		// checks if the logged in user is a customer
 		if (req.user.type == "User") {
-			next();
+			res.locals.custName = req.user.fname;
+			res.locals.user = "User";
+			
 		} else {
 			// setting the global variables
 			res.locals.staffAdmin = null; // null first so that it does not pass the if condition in the staff navbar by default
@@ -148,13 +150,13 @@ app.use(function(req, res, next) {
 
 app.use(flash());
 app.use(FlashMessenger.middleware);
-// app.use(function(req, res, next){
-// 	res.locals.success_msg = req.flash('success_msg');
-// 	res.locals.error_msg = req.flash('error_msg');
-// 	res.locals.error = req.flash('error');
-// 	res.locals.user = req.user || null;
-// 	next();
-// });
+app.use(function(req, res, next){
+	res.locals.success_msg = req.flash('success_msg');
+	res.locals.error_msg = req.flash('error_msg');
+	res.locals.error = req.flash('error');
+	res.locals.user = req.user || null;
+	next();
+});
 
 // Place to define global variables - not used in practical 1
 app.use(function (req, res, next) {

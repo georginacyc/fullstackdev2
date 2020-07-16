@@ -11,6 +11,7 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const flash = require('connect-flash');
 const FlashMessenger = require('flash-messenger');
+const mysql = require('mysql');
 const MySQLStore = require('express-mysql-session');
 const db = require('./config/db');
 const monoqloDB = require('./config/DBConnection');
@@ -18,6 +19,7 @@ monoqloDB.setUpDB(false);
 const passport = require('passport');
 const authenticate = require('./config/passport');
 authenticate.localStrategy(passport);
+const mysqlAdmin = require('node-mysql-admin');
 
 
 /*
@@ -29,13 +31,39 @@ const userRoute = require('./routes/user');
 const staffRoute = require('./routes/staff');
 const formatDate = require('./helpers/hbs');
 const radioCheck = require('./helpers/radioCheck');
+const { allowedNodeEnvironmentFlags } = require('process');
 
 /*
 * Creates an Express server - Express is a web application framework for creating web applications
 * in Node JS.
 */
 const app = express();
+app.use(mysqlAdmin(app));
 
+
+app.use(function(req, res, next) {
+	let announcements = []
+	var con = mysql.createConnection({
+		host: "localhost",
+		user: "monoqlo",
+		password: "monoqlo",
+		database: "monoqlo"
+	});
+	con.query('SELECT * FROM monoqlo.snotifs AS notifs ORDER BY id DESC LIMIT 3', function(err, results, fields) {
+		if (err) throw err;
+		let count = 0;
+		while (count < results.length) {
+			let a = {};
+			a['date'] = results[count].date;
+			a['title'] = results[count].title;
+
+			announcements.push(a);
+			count += 1
+		}
+		res.locals.announcements = announcements;
+		next();
+	})
+}); 
 // Handlebars Middleware
 /*
 * 1. Handlebars is a front-end web templating engine that helps to create dynamic web pages using variables
@@ -109,6 +137,7 @@ app.use(FlashMessenger.middleware);
 app.use(function (req, res, next) {
 	next();
 });
+
 
 // Use Routes
 /*

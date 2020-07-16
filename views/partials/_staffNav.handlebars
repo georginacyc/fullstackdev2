@@ -1,3 +1,9 @@
+<style>
+	.staffAnn {
+		width: 15vw;
+	}
+</style>
+
 <nav class="navbar navbar-expand-sm navbar-dark bg-primary mb-3">
 	<div class="container">
 		<a class="navbar-brand" href="/">Monoqlo</a>
@@ -19,8 +25,17 @@
 				{{#if admin}} {{!-- Admin View--}}
 					<li class="nav-item dropdown">
 						<a href="#" class="nav-link" data-toggle="dropdown" id="navAnnouncements"><i class="fas fa-bell"></i></a>
-						<div class="dropdown-menu">
-							<a class="dropdown-item" href="/staff/retrieveNormalAnnouncements">All Announcements</a>
+						<div class="dropdown-menu staffAnn">
+							<a class="dropdown-item" href="/staff/announcements">All Announcements</a>
+							<div class="dropdown-divider"></div>
+							<p class="dropdown-item-text">Recent Announcements</p>
+							{{#if announcements}}
+								{{#each announcements}}
+									<p class="dropdown-item-text"> <span style="font-weight:bold">{{formatDate this.date 'DD MMM YYYY'}}: </span>{{this.title}}</p>
+								{{/each}}
+							{{else}}
+								<p class="dropdown-item-text">There are no recent announcements.</p>
+							{{/if}}
 						</div>
 					</li>
 					<li class="nav-item dropdown">
@@ -41,8 +56,16 @@
 				<!--directs to a page to show ALL announcements-->
 					<li class="nav-item dropdown">
 						<a href="#" class="nav-link" data-toggle="dropdown" id="navAnnouncements"><i class="fas fa-bell"></i></a>
-						<div class="dropdown-menu">
-							<a class="dropdown-item" href="/staff/retrieveNormalAnnouncements">All Announcements</a>
+						<div class="dropdown-menu staffAnn">
+							<a class="dropdown-item" href="/staff/announcements">All Announcements</a>
+							<div class="dropdown-divider"></div>
+							{{#if announcements}}
+								{{#each announcements}}
+									<p class="dropdown-item-text"> <span style="font-weight:bold">{{this.date}}: </span>{{this.title}}</p>
+								{{/each}}
+							{{else}}
+								<p class="dropdown-item-text">There are no announcements.</p>
+							{{/if}}
 						</div>
 					</li>
 

@@ -18,6 +18,8 @@ const staffAuth = require('../helpers/staffAuth'); // to verify that user logged
 const adminAuth = require('../helpers/adminAuth'); // to verify that user logged in is an Admin
 let num = "000001";
 console.log("1", num);
+const pdf = require('pdf-creator-node');
+const fs = require('fs');
 
 // var Handlebars = require("handlebars");
 // var MomentHandler = require("handlebars.moment");
@@ -74,6 +76,27 @@ router.get('/accounts', ensureAuthenticated, staffAuth, adminAuth, (req, res) =>
     // res.render('staff/accountList');
 });
 
+router.get('/announcements', ensureAuthenticated, staffAuth, (req, res) => {
+    let allannouncements = []
+    con.query('SELECT * FROM monoqlo.snotifs AS notifs ORDER BY id DESC;', function(err, results, fields) {
+        if (err) throw err;
+        console.log(results);
+        let count = 0;
+        while (count < results.length) {
+            let a = {};
+            a['date'] = results[count].date;
+            a['title'] = results[count].title;
+            a['description'] = results[count].description;
+            
+            console.log(a);
+            allannouncements.push(a);
+            console.log(allannouncements);
+            count += 1;
+        }
+        res.render('staff/allAnnouncements', {layout:staffMain, allannouncements: allannouncements})
+    })
+})
+
 router.get('/createAnnouncement', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
     res.render('staff/createAnnouncements', {layout: staffMain});
 })
@@ -81,7 +104,10 @@ router.get('/createAnnouncement', ensureAuthenticated, staffAuth, adminAuth, (re
 router.post('/createAnnouncement', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
     let errors = [];
 
-    let {date, title, description} = req.body;
+    let {title, description} = req.body;
+
+    let date = new Date();
+    console.log(date.toISOString().slice(0, 10));
 
     if (title.length == 0) {
         errors.push({text: "Please enter a title"});
@@ -91,15 +117,15 @@ router.post('/createAnnouncement', ensureAuthenticated, staffAuth, adminAuth, (r
         res.render("staff/createAnnouncements", {
             errors,
             date,
-            title,
             description,
             layout: staffMain
         });
     } else {
         sNotif.create({date, title, description})
         .then(snotif => {
-            res.redirect('/staff/createAnnouncement');
+            console.log(date);
             alertMessage(res, 'success', 'Annoucement successfully added.', 'fas fa-sign-in-alt', true);
+            res.redirect('/staff/createAnnouncement');
         })
         .catch(err => console.log(err));
     }
@@ -168,6 +194,7 @@ router.post('/createStaffAccount', ensureAuthenticated, staffAuth, adminAuth, (r
                     email = num.toString() + domain;
                     User.create({type, email, fname, lname, gender, dob, hp, address, password})
                     .then(user => {
+                        console.log(dob);
                         res.redirect('/staff/accounts');
                         alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
                     }).catch(err => console.log(err));
@@ -180,6 +207,7 @@ router.post('/createStaffAccount', ensureAuthenticated, staffAuth, adminAuth, (r
                 console.log(num);
                 User.create({type, email, fname, lname, gender, dob, hp, address, password})
                 .then(user => {
+                    console.log(dob);
                     res.redirect('/staff/accounts');
                     alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
                 })
@@ -297,6 +325,51 @@ router.get('/deleteStaff/:id', ensureAuthenticated, staffAuth, adminAuth, (req, 
                 res.redirect("/staff/accounts");
             }).catch(err => console.log(err));
         };
+    }).catch(err => console.log(err))
+});
+
+router.get('/staffPDF/:id', (req, res) => {
+    User.findOne({
+        where: {
+            id: req.params.id
+        }
+    }).then((user) => {
+        var html = fs.readFileSync('./views/staff/staffPDF.handlebars', 'utf-8')
+        var options = {
+            format: "A4",
+            orientation: "portrait",
+            border: "10mm",
+            header: {
+                height: "10mm",
+                contents: 'Monoqlo Staff Summary'
+            },
+            "footer": {
+                "height": "14mm",
+                "contents": {
+                    default: 'Copyright © 2019 Monoqlo Inc. All rights reserved.'
+                }
+            }
+        }
+        var x = {'fname': user.fname, 'lname': user.lname, 'type': user.type, 'email': user.email, 'dob': user.dob, 'hp': user.hp, 'address': user.address}
+        var document = {
+            html: html,
+            data: {
+                staff: x
+            },
+            path: "./public/pdf/output.pdf"
+        };
+        pdf.create(document, options)
+            .then(ress => {
+                console.log(ress);
+                fs.readFile(ress['filename'], function (err,data){
+                    if (err) throw err;
+                    res.contentType("application/pdf");
+                    res.send(data);
+                });
+            })
+            .catch(error => {
+                console.error(error)
+            });
     }).catch(err => console.log(err))
 });
 

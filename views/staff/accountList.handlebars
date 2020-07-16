@@ -1,8 +1,15 @@
 
 <!--.col-	.col-sm-	.col-md-	.col-lg-	.col-xl- -->
 {{!-- to show ALL accounts in the database --}}
+<style>
+    .table td.fit, 
+    .table th.fit {
+    white-space: nowrap;
+    width: 1%;
+}
+</style>
 
-<div class="container">
+<div class="" style="">
 {{#if accounts}}
 	<div class="card card-body">
 		<h3 class="text-primary">Accounts</h3>
@@ -17,8 +24,9 @@
                             <th>Gender</th>
                             <th>Email</th>
                             <th>HP</th>
-                            <th>DOB</th>
+                            <th class="fit">DOB</th>
                             <th>Address</th>
+                            <th></th>
                             <th></th>
                             <th></th>
                         </tr>
@@ -33,7 +41,7 @@
                                 <td>{{gender}}</td>
                                 <td>{{email}}</td>
                                 <td>{{hp}}</td>
-                                <td>{{formatDate dob 'DD MMM YYYY'}}</td>
+                                <td class="fit">{{formatDate dob 'DD MMM YYYY'}}</td>
                                 <td>{{address}}</td>
                                 <td><a href="/staff/manageAccount/{{id}}" class="btn btn-warning">Update</a></td>
                                 <td>
@@ -41,6 +49,9 @@
                                     {{!-- <form action="" method="POST">
                                         <input type="submit" value="Delete" class="btn btn-danger">
                                     </form> --}}
+                                </td>
+                                <td>
+                                    <a href="/staff/staffPDF/{{id}}" class="btn" target="_blank"><i class="fas fa-print"></i></a>
                                 </td>
                             </tr>
                         {{/each}}

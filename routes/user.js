@@ -96,6 +96,27 @@ router.post('/login', (req, res, next) => {
     }) (req, res, next);
 });
 
+// User entering homepage after login
+router.get('/', (req, res) =>{
+    name = req.user.fname;
+    if (user == "User") {
+        res.render('/');
+    } else{
+        res.render('/');
+    }
+} );
+
+// User Profile
+router.get('/editUserAccount', (req,res)=>{
+    User.findOne({
+        where: {
+            id: req.user.id
+        }
+    }).then((user) => {
+        res.render('user/editUserAccount', {user});
+    }) 
+});
+
 // Logout User
 router.get('/logout', (req, res) => {
 	req.logout();

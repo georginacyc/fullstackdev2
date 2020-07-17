@@ -18,16 +18,16 @@
 			<ul class="navbar-nav ml-auto">
 				{{#if user}}
 					<li class="nav-item dropdown">
-						<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" id="navbarDropdownMenuLink">{{name}}Video
-							Jots</a>
+						<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" id="navbarDropdownMenuLink">{{custName}}
+							</a>
 						<div class="dropdown-menu">
-							<a href="" class="dropdown-item">Videos</a>
-							<a href="" class="dropdown-item">Add Video</a>
+							<a href="/user/editUserAccount" class="dropdown-item">View profile</a>
+							<a href="/user/logout" class="dropdown-item">Logout</a>
 						</div>
 					</li>
-					<li class="nav-item">
-						<a href="/logout" class="nav-link">Logout</a>
-					</li>
+					<li class="nav-link">
+						<a href="" i style = "color : white" class = "fa fa-shopping-cart"></a>
+					</li> 
 				{{else}}
 					<li class="nav-item">
 						<a href="/user/cart" class="nav-link">Cart</a>

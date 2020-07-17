@@ -19,7 +19,6 @@ monoqloDB.setUpDB(false);
 const passport = require('passport');
 const authenticate = require('./config/passport');
 authenticate.localStrategy(passport);
-const mysqlAdmin = require('node-mysql-admin');
 
 
 /*
@@ -38,7 +37,6 @@ const { allowedNodeEnvironmentFlags } = require('process');
 * in Node JS.
 */
 const app = express();
-app.use(mysqlAdmin(app));
 
 // function to constantly supply recent announcements (i.e. latest 3) to the navbar
 app.use(function(req, res, next) {
@@ -130,7 +128,9 @@ app.use(function(req, res, next) {
 	try {
 		// checks if the logged in user is a customer
 		if (req.user.type == "User") {
-			next();
+			res.locals.custName = req.user.fname;
+			res.locals.user = "User";
+			
 		} else {
 			// setting the global variables
 			res.locals.staffAdmin = null; // null first so that it does not pass the if condition in the staff navbar by default

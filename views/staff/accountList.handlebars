@@ -1,54 +1,63 @@
 
 <!--.col-	.col-sm-	.col-md-	.col-lg-	.col-xl- -->
 {{!-- to show ALL accounts in the database --}}
+<style>
+    .table td.fit, 
+    .table th.fit {
+    white-space: nowrap;
+    width: 1%;
+    }
+</style>
 
-<div class="container">
+
 {{#if accounts}}
 	<div class="card card-body">
 		<h3 class="text-primary">Accounts</h3>
-			<div>
-                <table class="table table-hover">
-                    <thead>
+        <div>
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Type</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Gender</th>
+                        <th>Email</th>
+                        <th>HP</th>
+                        <th class="fit">DOB</th>
+                        <th>Address</th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each accounts}}
                         <tr>
-                            <th>No.</th>
-                            <th>Type</th>
-                            <th>First Name</th>
-                            <th>Last Name</th>
-                            <th>Gender</th>
-                            <th>Email</th>
-                            <th>HP</th>
-                            <th>DOB</th>
-                            <th>Address</th>
-                            <th></th>
-                            <th></th>
+                            <td>{{id}}</td>
+                            <td>{{type}}</td>
+                            <td>{{fname}}</td>
+                            <td>{{lname}}</td>
+                            <td>{{gender}}</td>
+                            <td>{{email}}</td>
+                            <td>{{hp}}</td>
+                            <td class="fit">{{formatDate dob 'DD MMM YYYY'}}</td>
+                            <td>{{address}}</td>
+                            <td><a href="/staff/manageAccount/{{id}}" class="btn btn-warning">Update</a></td>
+                            <td>
+                                <a href="/staff/deleteStaff/{{id}}" class="btn btn-danger">Delete</a></td>
+                            </td>
+                            <td>
+                                <a href="/staff/staffPDF/{{id}}" class="btn" target="_blank"><i class="fas fa-print"></i></a>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        {{#each accounts}}
-                            <tr>
-                                <td>{{id}}</td>
-                                <td>{{type}}</td>
-                                <td>{{fname}}</td>
-                                <td>{{lname}}</td>
-                                <td>{{gender}}</td>
-                                <td>{{email}}</td>
-                                <td>{{hp}}</td>
-                                <td>{{formatDate dob 'DD MMM YYYY'}}</td>
-                                <td>{{address}}</td>
-                                <td><a href=""class="btn btn-warning">Update</a></td>
-                                <td>
-                                    <form action="" method="POST">
-                                        <input type="submit" value="Delete" class="btn btn-danger">
-                                    </form>
-                                </td>
-                            </tr>
-                        {{/each}}
-                    </tbody>
-                </table>
-            </div>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
 	</div>
 
-</div>
+
 {{else}}
 	<h3>No accounts registered.</h3>
 {{/if}}

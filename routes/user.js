@@ -5,6 +5,8 @@ const passport = require('passport');
 const User = require('../models/User');
 const alertMessage = require('../helpers/messenger');
 const bcrypt = require('bcryptjs');
+const Custorder = require('../models/CustOrders');
+const CustOrders = require('../models/CustOrders');
 
 
 // routing goes in between !!!!
@@ -17,7 +19,7 @@ router.get('/register', (req, res) => {
 router.post('/register', (req, res) => {
 	let errors = [];
     // Retrieves fields from register page from request body
-    let {name, email, password, password2} = req.body;
+    let {type,fname,lname,gender,dob,hp,address, email, password, password2} = req.body;
 
     // Checks if both passwords entered are the same
     if(password !== password2) {
@@ -32,7 +34,13 @@ router.post('/register', (req, res) => {
     if (errors.length > 0) {
         res.render('user/register', {
             errors,
-            name,
+            type,
+            fname,
+            lname,
+            gender,
+            dob,
+            hp,
+            address,
             email,
             password,
             password2
@@ -46,7 +54,13 @@ router.post('/register', (req, res) => {
                     // registered
                 res.render('user/register', {
                     error: user.email + ' already registered',
-                    name,
+                    type,
+                    fname,
+                    lname,
+                    gender,
+                    dob,
+                    hp,
+                    address,
                     email,
                     password,
                     password2
@@ -55,7 +69,7 @@ router.post('/register', (req, res) => {
         
         password = bcrypt.hashSync(password, 10);
         // Create new user record
-        User.create({ name, email, password })
+        User.create({ type,fname,lname,gender,dob,hp,address, email, password })
             .then(user => {
             alertMessage(res, 'success', user.name + ' added.Please login', 'fas fa-sign-in-alt', true);
             res.redirect('/');
@@ -78,7 +92,7 @@ router.post('/login', (req, res, next) => {
     passport.authenticate('local', {
     successRedirect: '/', 
     failureRedirect: '/user/login', 
-    failureFlash: true
+    failureFlash: true,
     }) (req, res, next);
 });
 
@@ -109,6 +123,41 @@ router.get('/cart', (req, res) => {
 //user checkout
 router.get('/checkout', (req, res) => {
 	res.render('user/checkout') // renders views/checkout.handlebars
+});
+
+router.get('/orders', (req, res) => {
+    CustOrders.findAll()
+    .then((custorder) => {
+    // pass object to orders.handlebar
+        res.render('user/orders', {
+            orders : orders,});
+    })
+    .catch(err => console.log(err));
+});
+
+router.post('/checkout', (req, res) => {
+    let userId = 1001;
+    let itemSerial = "2222TF";
+    let itemCategory = "hoddie";
+    let itemGender = "men";
+    let quantity = 1;
+    let status = "pending";
+    let couponCode= "FIRST100";
+    let total_Amt = 17.99;
+
+    CustOrders.create({
+        userId,
+        itemSerial,
+        itemCategory,
+        itemGender,
+        quantity,
+        status,
+        couponCode,
+        total_Amt
+    }) 
+    .then(custorder => {
+        res.redirect('/user/orders');})
+    .catch(err => console.log(err))
 });
 
 

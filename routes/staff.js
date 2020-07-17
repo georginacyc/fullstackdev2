@@ -2,27 +2,29 @@
 
 const express = require('express');
 const router = express.Router();
-const Staff = require('../models/Staff');
+const User = require('../models/User');
 const sNotif = require('../models/StaffNotifs');
 const alertMessage = require('../helpers/messenger');
 const bcrypt = require('bcryptjs');
 const mysql = require('mysql');
 const passport = require('passport');
-// const staff = require('../views/layouts/staff');
 const staffMain = "../layouts/staff";
 const Item = require('../models/Item');
 const moment = require('moment');
-const StockOrder = require('../models/StockOrder')
-let num = "000001";
-console.log("1", num);
+const StockOrder = require('../models/StockOrder');
+const ensureAuthenticated = require('../helpers/auth'); // to verify that a user is logged in
+const staffAuth = require('../helpers/staffAuth'); // to verify that user logged in is a Staff
+const adminAuth = require('../helpers/adminAuth'); // to verify that user logged in is an Admin
+const pdf = require('pdf-creator-node');
+const fs = require('fs');
 
-var Handlebars = require("handlebars");
-var MomentHandler = require("handlebars.moment");
-MomentHandler.registerHelpers(Handlebars);
+// var Handlebars = require("handlebars");
+// var MomentHandler = require("handlebars.moment");
+// MomentHandler.registerHelpers(Handlebars);
 
 let domain = "@monoqlo.com";
 
-var con = mysql.createConnection({
+var con = mysql.createConnection({ // creating a connection to query database below.
     host: "localhost",
     user: "monoqlo",
     password: "monoqlo",
@@ -30,7 +32,7 @@ var con = mysql.createConnection({
 });
 
 router.get('/login', (req, res) => {
-    res.render('staff/login', {layout: staffMain});
+    res.render('staff/login');
 });
 
 router.post('/login', (req, res, next) => {
@@ -46,31 +48,53 @@ router.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-router.get('/home', (req, res) => {
-    res.render('staff/staffhome', {layout: staffMain});
+router.get('/home', ensureAuthenticated, staffAuth, (req, res) => {
+        res.render('staff/staffhome', {layout: staffMain});
 });
 
-router.get('/accounts', (req, res) => {
-    Staff.findAll({
+// to retrieve ALL accounts, regardless of whether it's a staff or customer account.
+router.get('/accounts', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+    User.findAll({
         raw: true
     })
-    .then((staffs) => {
+    .then((users) => {
         res.render('staff/accountList', {
-            accounts: staffs,
+            accounts: users,
             layout: staffMain
         });
     })
-    // res.render('staff/accountList');
 });
 
-router.get('/createAnnouncement', (req, res) => {
+// retrieves all announcements
+router.get('/announcements', ensureAuthenticated, staffAuth, (req, res) => {
+    let allannouncements = []
+    con.query('SELECT * FROM monoqlo.snotifs AS notifs ORDER BY id DESC;', function(err, results, fields) {
+        if (err) throw err;
+        let count = 0;
+        while (count < results.length) { // ensures that count never exceeds number of rows returned, to prevent an Index-Out-of-Range error.
+            let a = {};
+            a['date'] = results[count].date;
+            a['title'] = results[count].title;
+            a['description'] = results[count].description;
+            
+            allannouncements.push(a);
+            count += 1;
+        }
+        res.render('staff/allAnnouncements', {layout:staffMain, allannouncements: allannouncements})
+    })
+})
+
+router.get('/createAnnouncement', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
     res.render('staff/createAnnouncements', {layout: staffMain});
 })
 
-router.post('/createAnnouncement', (req, res) => {
+router.post('/createAnnouncement', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
     let errors = [];
 
-    let {date, title, description} = req.body;
+    let {title, description} = req.body;
+
+    let date = new Date();
+    date = date.toISOString().slice(0, 10);
 
     if (title.length == 0) {
         errors.push({text: "Please enter a title"});
@@ -80,35 +104,41 @@ router.post('/createAnnouncement', (req, res) => {
         res.render("staff/createAnnouncements", {
             errors,
             date,
-            title,
             description,
             layout: staffMain
         });
     } else {
         sNotif.create({date, title, description})
         .then(snotif => {
-            res.redirect('/staff/createAnnouncement');
+            console.log(date);
             alertMessage(res, 'success', 'Annoucement successfully added.', 'fas fa-sign-in-alt', true);
+            res.redirect('/staff/announcements');
         })
         .catch(err => console.log(err));
     }
 });
 
-router.get('/createStaffAccount', (req, res) => {
+router.get('/createStaffAccount', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
     res.render('staff/createStaff', {layout: staffMain});
 });
 
-router.post('/createStaffAccount', (req, res) => {
+router.post('/createStaffAccount', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
     let errors = [];
 
     let {type, fname, lname, gender, dob, hp, address, password, pw2} = req.body;
+
+    let isnum = /^\d+$/.test(hp);
     
     if (password !== pw2) {
         errors.push({text: 'Password must match'});
     }
 
-    if  (password.length < 8 || pw2.length < 8 ) {
+    if (password.length < 8 || pw2.length < 8 ) {
         errors.push({text: 'Password must be at least 8 characters'});
+    }
+
+    if (hp.length != 8 || isnum == false) {
+        errors.push({text: 'Please enter a valid contact number.'});
     }
 
     if (errors.length > 0) {
@@ -126,65 +156,191 @@ router.post('/createStaffAccount', (req, res) => {
             layout: staffMain
         });
     } else {
-        console.log("4", num);
+        let num = ""
         password = bcrypt.hashSync(password, 10);
 
-        console.log("fcheck1");
-        console.log("fcheck2");
-        console.log("fcheck3");
-        con.query("SELECT COUNT(*) AS tableCheck FROM information_schema.tables WHERE table_schema = 'monoqlo' AND table_name = 'staffs'", function(err, result, fields) {
+        con.query("SELECT COUNT(*) AS tableCheck FROM users WHERE type='Admin' OR type='Staff'", function(err, result, fields) {
             
             let email = ""
-            
-            console.log("fcheck4");
+    
             if (err) throw err;
-            console.log(result);
-            console.log("fchec5");
-            console.log(result[0].tableCheck);
             if (result[0].tableCheck > 0) {
-                console.log("fcheck6");
-                console.log(result[0].tableCheck)
-                con.query("SELECT COUNT(type) AS count FROM staffs", function(err, result, fields) {
-                if (err) throw err;
-                num = result[0].count + 1;
-                num = num.toString();
-                num = num.padStart(6, "0");
-                console.log("2a", num);
-                email = num.toString() + domain;
-                Staff.create({type, email, fname, lname, gender, dob, hp, address, password})
-                .then(staff => {
-                    res.redirect('/staff/accounts');
-                    alertMessage(res, 'success', staff.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
-                })
-                .catch(err => console.log(err));
+                con.query("SELECT MAX(id) AS count FROM users WHERE type='Admin' or type='Staff'", function(err, result, fields) {
+                    if (err) throw err;
+                    num = result[0].count + 1;
+                    num = num.toString().padStart(6, "0");
+                    email = num.toString() + domain;
+                    User.create({type, email, fname, lname, gender, dob, hp, address, password})
+                    .then(user => {
+                        res.redirect('/staff/accounts');
+                        alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
+                    }).catch(err => console.log(err));
                 });
             } else {
                 num = "000001";
-                console.log("fcheck7");
-                console.log("2b", num);
                 email = num.toString() + domain;
-                console.log(num);
-                Staff.create({type, email, fname, lname, gender, dob, hp, address, password})
-                .then(staff => {
-                    res.redirect('/staff/accounts', {layout: staffMain});
-                    alertMessage(res, 'success', staff.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
+                User.create({type, email, fname, lname, gender, dob, hp, address, password})
+                .then(user => {
+                    res.redirect('/staff/accounts');
+                    alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
                 })
                 .catch(err => console.log(err));
             };
-            console.log("fcheck8");
         });
-        console.log("fcheck9");
-        console.log("fcheck10");
     };
 });
 
 
-router.get('/yourAccount', (req, res) => {
-    res.render('staff/accountDetails', {layout: staffMain})
+router.get('/yourAccount', ensureAuthenticated, staffAuth, (req, res) => {
+    User.findOne({
+        where: {
+            id: req.user.id
+        }
+    }).then((user) => {
+        res.render('staff/accountDetails', {layout: staffMain, user})
+    })
 });
 
-router.get('/manageAccount', (req, res) => {
-    res.render('staff/updateAccount', {layout: staffMain})
+router.put('/changePassword/:id', ensureAuthenticated, staffAuth, (req, res) => {
+    let {oldpw, newpw, newpw2} = req.body;
+    User.findOne({
+        where: {
+            id: req.user.id
+        }
+    }).then((user) => {
+        check = bcrypt.compareSync(oldpw, user.password)
+        console.log(check);
+        if (check) {
+            if (newpw == newpw2) {
+                pw = bcrypt.hashSync(newpw, 10);
+                User.update({
+                    password: pw
+                }, {
+                    where: {
+                        id: req.user.id
+                    }
+                })
+                alertMessage(res, 'success', 'Successfully changed password!', true);
+                req.logout()
+                res.redirect('/staff/login');
+            } else {
+                alertMessage(res, 'danger', 'New passwords must match.', true);
+                res.redirect('/staff/yourAccount');
+            }
+        } else {
+            alertMessage(res, 'danger', 'Old password is incorrect.', true);
+            res.redirect('/staff/yourAccount');
+        }
+    }).catch(err => console.log(err))
+});
+
+router.get('/manageAccount/:id', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+    User.findOne({
+        where: {
+            id: req.params.id
+        }
+    }).then((user)=> {
+        res.render("staff/updateStaff", {layout: staffMain, user});
+    }).catch(err => console.log(err));
+});
+
+router.put('/saveStaff/:id', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+    let {type, fname, lname, gender, dob, hp, address, resetpw} = req.body;
+    console.log(resetpw);
+    if (resetpw == "reset") {
+        pw = bcrypt.hashSync("23456789", 10);
+    } else {
+        User.findOne({
+            where: {
+                id: req.params.id
+            }
+        }).then((user) => {
+            pw = user.password
+        }).catch(err => console.log(err))
+    }
+    User.update({
+        type: type,
+        fname: fname,
+        lname: lname,
+        gender: gender,
+        dob: dob,
+        hp: hp,
+        address: address,
+        password: pw
+    }, {
+        where: {
+            id: req.params.id
+        }
+    }).then(() => {
+        res.redirect("/staff/accounts");
+    }).catch(err => console.log(err));
+});
+
+router.get('/deleteStaff/:id', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+    User.findOne({
+        where: {
+            id: req.params.id
+        }
+    }).then((user) => {
+        if (user == null) {
+            alertMessage(res, "danger", "User does not exist", 'fas fa-exclamation-circle', true);
+            res.redirect('/staff/accounts');
+        } else {
+            User.destroy({
+                where: {
+                    id: req.params.id
+                }
+            }).then((user) => {
+                alertMessage(res, "info", "Staff deleted", 'fas fa-exclamation-circle', true);
+                res.redirect("/staff/accounts");
+            }).catch(err => console.log(err));
+        };
+    }).catch(err => console.log(err))
+});
+
+router.get('/staffPDF/:id', (req, res) => {
+    User.findOne({
+        where: {
+            id: req.params.id
+        }
+    }).then((user) => {
+        var html = fs.readFileSync('./views/staff/staffPDF.handlebars', 'utf-8')
+        var options = {
+            format: "A4",
+            orientation: "portrait",
+            border: "10mm",
+            header: {
+                height: "10mm",
+                contents: 'Monoqlo Staff Summary'
+            },
+            "footer": {
+                "height": "14mm",
+                "contents": {
+                    default: 'Copyright © 2019 Monoqlo Inc. All rights reserved.'
+                }
+            }
+        }
+        var x = {'fname': user.fname, 'lname': user.lname, 'type': user.type, 'email': user.email, 'dob': user.dob, 'hp': user.hp, 'address': user.address}
+        var document = {
+            html: html,
+            data: {
+                staff: x
+            },
+            path: "./public/pdf/output.pdf"
+        };
+        pdf.create(document, options)
+            .then(ress => {
+                console.log(ress);
+                fs.readFile(ress['filename'], function (err,data){
+                    if (err) throw err;
+                    res.contentType("application/pdf");
+                    res.send(data);
+                });
+            })
+            .catch(error => {
+                console.error(error)
+            });
+    }).catch(err => console.log(err))
 });
 
 //item routes
@@ -226,8 +382,7 @@ router.post('/createItem', (req, res) => {
         itemPrice,
         itemDescription
     }).then(item => {
-        res.redirect('/staff/item', {layout: staffMain}
-        );
+        res.redirect('/staff/item');
     })
     .catc(err => console.log(err))
 
@@ -265,9 +420,7 @@ router.post('/createStockOrder', (req, res) => {
         stockorderQuantity,
         receivedDate
         }).then(stockorder => {
-            res.redirect('/staff/inventory', {
-                layout: staffMain
-            });
+            res.redirect('/staff/inventory');
         })
         .catc(err => console.log(err))
 

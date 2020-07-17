@@ -1,7 +1,7 @@
 const mySQLDB = require('./DBConfig');
-const staff = require('../models/Staff');
 const staffNotif = require('../models/StaffNotifs');
 const user = require('../models/User');
+const Custorder = require('../models/CustOrders');
 
 const setUpDB = (drop) => {
     mySQLDB.authenticate()

@@ -1,6 +1,12 @@
+<style>
+	.staffAnn {
+		width: 15vw;
+	}
+</style>
+
 <nav class="navbar navbar-expand-sm navbar-dark bg-primary mb-3">
 	<div class="container">
-		<a class="navbar-brand" href="/">VidJot</a>
+		<a class="navbar-brand" href="/">Monoqlo</a>
 		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav"
 				  aria-expanded="false"
 				  aria-label="Toggle navigation">
@@ -16,9 +22,24 @@
 				</li>
 			</ul>
 			<ul class="navbar-nav ml-auto">
-				{{!-- {{#if user}} --}}
+				{{#if staffAdmin}} {{!-- Admin View--}}
 					<li class="nav-item dropdown">
-						<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" id="navbarDropdownMenuLink">username</a>
+						<a href="#" class="nav-link" data-toggle="dropdown" id="navAnnouncements"><i class="fas fa-bell"></i></a>
+						<div class="dropdown-menu staffAnn">
+							<a class="dropdown-item" href="/staff/announcements">All Announcements</a>
+							<div class="dropdown-divider"></div>
+							<p class="dropdown-item-text">Recent Announcements</p>
+							{{#if announcements}}
+								{{#each announcements}}
+									<p class="dropdown-item-text"> <span style="font-weight:bold">{{formatDate this.date 'DD MMM YYYY'}}: </span>{{this.title}}</p>
+								{{/each}}
+							{{else}}
+								<p class="dropdown-item-text">There are no recent announcements.</p>
+							{{/if}}
+						</div>
+					</li>
+					<li class="nav-item dropdown">
+						<a href="#" class="nav-link" data-toggle="dropdown" id="navbarDropdownMenuLink">{{staffName}} <i class="fas fa-caret-down"></i></a>
 						<div class="dropdown-menu">
 							<a href="/staff/accounts" class="dropdown-item">Manage Accounts</a>
 							<a href="/staff/yourAccount" class="dropdown-item">Your Account</a>
@@ -31,17 +52,36 @@
                             <a href="/staff/logout" class="dropdown-item">Logout</a>
 						</div>
 					</li>
-					<li class="nav-item">
-						<a href="/staff/logout" class="nav-link">logout</a>
-					</li>
-				{{!-- {{else}}
+				{{else}} {{!-- Staff View--}}
 				<!--directs to a page to show ALL announcements-->
-                    <a class="dropdown-item" href="/retrieveNormalAnnouncements">All Announcements</a>
-                <!--allows normal staff to see their own account details-->
-                    <a class="dropdown-item" href="/staffAccountDetails">Your Details</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="/logout">Log Out</a>
-				{{/if}} --}}
+					<li class="nav-item dropdown">
+						<a href="#" class="nav-link" data-toggle="dropdown" id="navAnnouncements"><i class="fas fa-bell"></i></a>
+						<div class="dropdown-menu staffAnn">
+							<a class="dropdown-item" href="/staff/announcements">All Announcements</a>
+							<div class="dropdown-divider"></div>
+							<p class="dropdown-item-text">Recent Announcements</p>
+							{{#if announcements}}
+								{{#each announcements}}
+									<p class="dropdown-item-text"> <span style="font-weight:bold">{{formatDate this.date 'DD MMM YYYY'}}: </span>{{this.title}}</p>
+								{{/each}}
+							{{else}}
+								<p class="dropdown-item-text">There are no recent announcements.</p>
+							{{/if}}
+						</div>
+					</li>
+
+					<li class="nav-item dropdown">
+						<a href="#" class="nav-link" data-toggle="dropdown" id="navUser">{{staffName}} <i class="fas fa-caret-down"></i></a>
+						<div class="dropdown-menu">
+							<!--allows normal staff to see their own account details-->
+							<a class="dropdown-item" href="/staff/yourAccount">Your Details</a>
+							<div class="dropdown-divider"></div>
+							<a class="dropdown-item" href="/staff/logout">Log Out</a>
+						</div>
+					</li>
+					
+                	
+				{{/if}}
 			</ul>
 		</div>
 	</div>

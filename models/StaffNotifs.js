@@ -10,7 +10,7 @@ const StaffNotifs = db.define('snotif', {
     },
     description: {
         type: Sequelize.STRING
-    },
+    }
 });
 
 module.exports = StaffNotifs;

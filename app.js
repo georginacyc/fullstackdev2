@@ -129,7 +129,7 @@ app.use(function(req, res, next) {
 		// checks if the logged in user is a customer
 		if (req.user.type == "User") {
 			res.locals.custName = req.user.fname;
-			res.locals.user = "User";
+			res.locals.customer = "customer";
 			
 		} else {
 			// setting the global variables

@@ -15,9 +15,10 @@ router.get('/register', (req, res) => {
 });
 
 router.post('/register', (req, res) => {
+    let type = "User";
 	let errors = [];
     // Retrieves fields from register page from request body
-    let {type,fname,lname,gender,dob,hp,address, email, password, password2} = req.body;
+    let {fname,lname,gender,dob,hp,address, email, password, password2} = req.body;
 
     // Checks if both passwords entered are the same
     if(password !== password2) {
@@ -29,10 +30,13 @@ router.post('/register', (req, res) => {
         errors.push({text: 'Password must be at least 4 characters'});
     }
 
+    if (hp.length < 8) {
+        errors.push({text: 'Mobile Number has to b at least 8 digits'})
+    }
+
     if (errors.length > 0) {
         res.render('user/register', {
             errors,
-            type,
             fname,
             lname,
             gender,
@@ -42,6 +46,7 @@ router.post('/register', (req, res) => {
             email,
             password,
             password2
+   
     });
     } else {
         // If all is well, checks if user is already registered
@@ -52,7 +57,6 @@ router.post('/register', (req, res) => {
                     // registered
                 res.render('user/register', {
                     error: user.email + ' already registered',
-                    type,
                     fname,
                     lname,
                     gender,

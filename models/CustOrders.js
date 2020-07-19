@@ -14,15 +14,6 @@ const CustOrders = db.define('custorder', {
     itemSerial: {
         type: Sequelize.STRING
     },
-    itemCategory: {
-        type: Sequelize.STRING
-    },
-    itemGender: {
-        type: Sequelize.STRING
-    },
-    itemDescription: {
-        type: Sequelize.STRING
-    },
     quantity: {
         type: Sequelize.INTEGER(3)
     },
@@ -35,6 +26,19 @@ const CustOrders = db.define('custorder', {
     status: {
         type: Sequelize.STRING
     },
+    order_Date: {
+        type: Sequelize.DATE
+    },
+    ship_Date: {
+        type: Sequelize.DATE
+    },
+    paid_Date: {
+        type: Sequelize.DATE
+    },
+    completion_Date: {
+        type: Sequelize.DATE
+    },
+
 });
 
 module.exports = CustOrders;

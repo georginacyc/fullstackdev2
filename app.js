@@ -11,6 +11,7 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const flash = require('connect-flash');
 const FlashMessenger = require('flash-messenger');
+const mysql = require('mysql');
 const MySQLStore = require('express-mysql-session');
 const db = require('./config/db');
 const monoqloDB = require('./config/DBConnection');
@@ -18,8 +19,6 @@ monoqloDB.setUpDB(false);
 const passport = require('passport');
 const authenticate = require('./config/passport');
 authenticate.localStrategy(passport);
-const authenticate2 = require('./config/passport2');
-authenticate2.localStrategy(passport);
 
 
 /*
@@ -30,6 +29,8 @@ const mainRoute = require('./routes/main');
 const userRoute = require('./routes/user');
 const staffRoute = require('./routes/staff');
 const formatDate = require('./helpers/hbs');
+const radioCheck = require('./helpers/radioCheck');
+const { allowedNodeEnvironmentFlags } = require('process');
 
 /*
 * Creates an Express server - Express is a web application framework for creating web applications
@@ -37,6 +38,34 @@ const formatDate = require('./helpers/hbs');
 */
 const app = express();
 
+// function to constantly supply recent announcements (i.e. latest 3) to the navbar
+app.use(function(req, res, next) {
+	let announcements = []
+	var con = mysql.createConnection({ // creating a connection to access data in database
+		host: "localhost",
+		user: "monoqlo",
+		password: "monoqlo",
+		database: "monoqlo"
+	});
+	con.query('SELECT * FROM monoqlo.snotifs AS notifs ORDER BY id DESC LIMIT 3', function(err, results, fields) { // querying database to retrieve last 3 announcements, which are the latest
+		if (err) throw err; 
+		let count = 0; // to assist in iterating through the announcements list
+
+		// results is what the query returns to the program which, in this case, is a list of dictionaries. each item in the list is a row from the db.
+		while (count < results.length) { // ensures that the count never exceeds the number of rows returned. 
+			let a = {}; // a dictionary to hold what we need
+
+			// getting the corresponding data from the row
+			a['date'] = results[count].date; 
+			a['title'] = results[count].title;
+
+			announcements.push(a); // adding what we retrieved to the announcements list
+			count += 1
+		}
+		res.locals.announcements = announcements; // global variable so that when announcement is referenced by navbar, announcements are passed in and used accordingly.
+		next();
+	})
+}); 
 // Handlebars Middleware
 /*
 * 1. Handlebars is a front-end web templating engine that helps to create dynamic web pages using variables
@@ -51,7 +80,8 @@ const app = express();
 
 app.engine('handlebars', exphbs({
 	helpers: {
-		"formatDate": formatDate
+		"formatDate": formatDate,
+		"radioCheck": radioCheck
 	},
 	defaultLayout: 'main' // Specify default template views/layout/main.handlebar 
 }));
@@ -93,22 +123,49 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// to constantly pass in variables, if available, for the navbars
+app.use(function(req, res, next) {
+	try {
+		// checks if the logged in user is a customer
+		if (req.user.type == "User") {
+			res.locals.custName = req.user.fname;
+			res.locals.user = "User";
+			
+		} else {
+			// setting the global variables
+			res.locals.staffAdmin = null; // null first so that it does not pass the if condition in the staff navbar by default
+			res.locals.staffName = req.user.fname; // retreiving the name to pass into staff navbar
+			if (req.user.type == "Admin") {
+				res.locals.staffAdmin = "Admin"; // when staffAdmin is passed in, the if condition will be passed
+			}
+		}
+		
+	}
+	catch (err) {
+		
+	}
+	finally {
+		next(); // regardless of the above try/catch, the program continues on
+	}
+		
+})
 
 
 app.use(flash());
 app.use(FlashMessenger.middleware);
-// app.use(function(req, res, next){
-// 	res.locals.success_msg = req.flash('success_msg');
-// 	res.locals.error_msg = req.flash('error_msg');
-// 	res.locals.error = req.flash('error');
-// 	res.locals.user = req.user || null;
-// 	next();
-// });
+app.use(function(req, res, next){
+	res.locals.success_msg = req.flash('success_msg');
+	res.locals.error_msg = req.flash('error_msg');
+	res.locals.error = req.flash('error');
+	res.locals.user = req.user || null;
+	next();
+});
 
 // Place to define global variables - not used in practical 1
 app.use(function (req, res, next) {
 	next();
 });
+
 
 // Use Routes
 /*

@@ -1,8 +1,8 @@
 <div class="row">
 	<div class="col-md-6 mx-auto">
 		<div class="card card-body">
-			<h3 class="text-center">New Announcement</h3>
-			<form action="" method="post"><div class="form-group">
+			<h3 class="text-muted text-center">New Announcement</h3>
+			<form action="/staff/createAnnouncement" method="POST"><div class="form-group">
 				<label for="aDate">Date</label>
 					<input type="date" class="form-control" name="aDate" value="{{formatDate content.aDate 'YYYY-MM-DD'}}" readonly>
 				</div>
@@ -12,7 +12,7 @@
 				</div>
 				<div class="form-group">
 					<label for="aDesc">Description (Optional)</label>
-				    <textarea class="form-control" id="aDesc" name="description" rows="7"></textarea>
+				    <textarea class="form-control" id="aDesc" name="description" rows="4"></textarea>
 				</div>
 				<button type="submit" class="btn btn-primary">Submit</button>
 			</form>

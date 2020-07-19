@@ -17,7 +17,7 @@ router.get('/register', (req, res) => {
 router.post('/register', (req, res) => {
 	let errors = [];
     // Retrieves fields from register page from request body
-    let {name, email, password, password2} = req.body;
+    let {type,fname,lname,gender,dob,hp,address, email, password, password2} = req.body;
 
     // Checks if both passwords entered are the same
     if(password !== password2) {
@@ -32,7 +32,13 @@ router.post('/register', (req, res) => {
     if (errors.length > 0) {
         res.render('user/register', {
             errors,
-            name,
+            type,
+            fname,
+            lname,
+            gender,
+            dob,
+            hp,
+            address,
             email,
             password,
             password2
@@ -46,7 +52,13 @@ router.post('/register', (req, res) => {
                     // registered
                 res.render('user/register', {
                     error: user.email + ' already registered',
-                    name,
+                    type,
+                    fname,
+                    lname,
+                    gender,
+                    dob,
+                    hp,
+                    address,
                     email,
                     password,
                     password2
@@ -55,7 +67,7 @@ router.post('/register', (req, res) => {
         
         password = bcrypt.hashSync(password, 10);
         // Create new user record
-        User.create({ name, email, password })
+        User.create({ type,fname,lname,gender,dob,hp,address, email, password })
             .then(user => {
             alertMessage(res, 'success', user.name + ' added.Please login', 'fas fa-sign-in-alt', true);
             res.redirect('/');
@@ -78,8 +90,29 @@ router.post('/login', (req, res, next) => {
     passport.authenticate('local', {
     successRedirect: '/', 
     failureRedirect: '/user/login', 
-    failureFlash: true
+    failureFlash: true,
     }) (req, res, next);
+});
+
+// User entering homepage after login
+router.get('/', (req, res) =>{
+    name = req.user.fname;
+    if (user == "User") {
+        res.render('/');
+    } else{
+        res.render('/');
+    }
+} );
+
+// User Profile
+router.get('/editUserAccount', (req,res)=>{
+    User.findOne({
+        where: {
+            id: req.user.id
+        }
+    }).then((user) => {
+        res.render('user/editUserAccount', {user});
+    }) 
 });
 
 // Logout User

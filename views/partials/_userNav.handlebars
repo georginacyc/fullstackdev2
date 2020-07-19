@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-sm navbar-dark bg-primary mb-3">
 	<div class="container">
-		<a class="navbar-brand" href="/">VidJot</a>
+		<a class="navbar-brand" href="/">Monoqlo</a>
 		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav"
 				  aria-expanded="false"
 				  aria-label="Toggle navigation">
@@ -18,17 +18,20 @@
 			<ul class="navbar-nav ml-auto">
 				{{#if user}}
 					<li class="nav-item dropdown">
-						<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" id="navbarDropdownMenuLink">Video
-							Jots</a>
+						<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" id="navbarDropdownMenuLink">{{custName}}
+							</a>
 						<div class="dropdown-menu">
-							<a href="" class="dropdown-item">Videos</a>
-							<a href="" class="dropdown-item">Add Video</a>
+							<a href="/user/editUserAccount" class="dropdown-item">View profile</a>
+							<a href="/user/logout" class="dropdown-item">Logout</a>
 						</div>
 					</li>
-					<li class="nav-item">
-						<a href="/logout" class="nav-link">Logout</a>
-					</li>
+					<li class="nav-link">
+						<a href="" i style = "color : white" class = "fa fa-shopping-cart"></a>
+					</li> 
 				{{else}}
+					<li class="nav-item">
+						<a href="/staff/login" class="nav-link">Staff Login</a>
+					</li>
 					<li class="nav-item">
 						<a href="/user/login" class="nav-link">Login</a>
 					</li>

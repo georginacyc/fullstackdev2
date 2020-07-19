@@ -351,7 +351,8 @@ router.get('/itempage', (req, res) => {
     })
         .then((item) => {
             res.render('staff/itempage', {
-            layout:staffMain
+                item : item,
+                layout:staffMain
         })
     })
     

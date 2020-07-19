@@ -201,37 +201,48 @@ router.get('/itempage', (req, res) => {
     
 });
 
-router.get('/createItem', (req, res) => {
-    res.render('staff/createItem', { layout: staffMain })
-});
-
 router.post('/createItem', (req, res) => {
     let errors = [];
 
     //Adds new item
+
+    console.log(req);
+
     let itemName = req.body.itemName;
     let itemSerial = req.body.itemSerial;
-    let itemCategory = req.body.itemCategory;
-    let itemGender = req.body.itemGender;
+    let itemCategory = req.body.itemCategory === undefined ? '' : req.body.itemCategory.toString();
+    let itemGender = req.body.itemGender === undefined ? '' : req.body.itemGender.toString();
     let itemCost = req.body.itemCost;
     let itemPrice = req.body.itemPrice;
     let itemDescription = req.body.itemDescription;
 
-    Item.create({
-        itemName,
-        itemSerial,
-        itemCategory,
-        itemGender,
-        itemCost,
-        itemPrice,
-        itemDescription
-    }).then(item => {
-        res.redirect('/staff/item', {layout: staffMain}
-        );
-    })
-    .catc(err => console.log(err))
+    console.log(itemName);
 
-})
+    if (errors.length > 0) {
+        res.render("/staff/createItem", {
+            errors, itemName, itemSerial, itemCategory, itemGender, itemCost, itemPrice, itemDescription, layout: staffMain
+        });
+    } else {
+        Item.create({
+            itemName,
+            itemSerial,
+            itemCategory,
+            itemGender,
+            itemCost,
+            itemPrice,
+            itemDescription
+        }).then(item => {
+            res.redirect('/staff/itempage');
+            alertMessage(res, 'success', 'Item successfully added', true);
+        })
+            .catch(err => console.log(err));
+    }
+});
+    
+
+router.get('/createItem', (req, res) => {
+    res.render('staff/createItem', { layout: staffMain })
+});
 
 //Inventory Routes
 router.get('/inventory', (req, res) => {

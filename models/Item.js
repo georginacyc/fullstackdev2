@@ -4,7 +4,7 @@ const db = require('../config/DBConfig');
 
 const Item = db.define('item', {
     itemName: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING, primaryKey: true
     },
     itemSerial: {
         type: Sequelize.STRING

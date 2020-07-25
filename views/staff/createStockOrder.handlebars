@@ -3,7 +3,7 @@
 <form method="POST" action="" enctype=multipart/form-data>
     <div class="form-group">
         <label for "stockorderDate">Order Date</label>
-        <input type="date" id="stockorderDate"class="form-control" name="stockorderDate" value="{{moment}}" required disabled>
+        <input id="stockorderDate" class="form-control" name="stockorderDate" width="200" name="dateRelease" readonly />
     </div>
 
     <div class="form-group">
@@ -31,3 +31,10 @@
 
 </form>
 
+<script>
+    $('#stockorderDate').datepicker({
+        format: 'dd/mm/yyyy',
+        value: new Date().toLocaleDateString('en-SG'),
+        uiLibrary: 'bootstrap4',
+    });
+</script>

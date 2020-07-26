@@ -53,7 +53,66 @@ router.get('/home', ensureAuthenticated, staffAuth, (req, res) => {
 });
 
 // to retrieve ALL accounts, regardless of whether it's a staff or customer account.
-router.get('/accounts', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+// router.get('/accounts', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+//     User.findAll({
+//         raw: true
+//     })
+//     .then((users) => {
+//         res.render('staff/accountList', {
+//             accounts: users,
+//             layout: staffMain
+//         });
+//     })
+// });
+
+async function accountsData(req, res) {
+    var sortBy = 'title';
+	var order  = 'asc';
+	var offset = 0;
+    var limit  = 25;
+    
+    console.log("Incoming Query:");
+	console.log(req.query);
+
+    try {
+		sortBy = (req.query.sort)?   req.query.sort   : sortBy;
+		order  = (req.query.order)?  req.query.order  : order;
+		offset = (req.query.offset)? parseInt(req.query.offset, 10) : offset;
+		limit  = (req.query.limit)?  parseInt(req.query.limit, 10)  : limit;
+	
+	}
+	catch(error) {
+		console.error("Malformed Get request:");
+		console.error(req.query);
+		console.error(error);
+		return res.status(400);
+    }
+
+    try {
+        const total = await User.count();
+        const accsList = await User.findAll({
+            offset: offset,
+            limit: limit,
+            order: [
+                [sortBy, order.toUpperCase()]
+            ]
+        }).map((it) => {
+            console.log(it.uuid);
+            return it.toJSON();
+        });
+        return res.status(200).json({
+            "total": total,
+            "rows": accsList
+        });
+    }
+    catch (error) {
+        console.log("Accounts Listing Error");
+        return res.status(500);
+    }
+
+}
+
+router.get('/accounts', (req, res) => {
     User.findAll({
         raw: true
     })
@@ -63,7 +122,9 @@ router.get('/accounts', ensureAuthenticated, staffAuth, adminAuth, (req, res) =>
             layout: staffMain
         });
     })
-});
+})
+
+router.get('/accounts-data', accountsData);
 
 // retrieves all announcements
 router.get('/announcements', ensureAuthenticated, staffAuth, (req, res) => {

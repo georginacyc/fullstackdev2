@@ -118,7 +118,7 @@ router.post('/createAnnouncement', ensureAuthenticated, staffAuth, adminAuth, (r
     }
 });
 
-router.get('/createStaffAccount', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+router.get('/createStaffAccount', (req, res) => {
     res.render('staff/createStaff', {layout: staffMain});
 });
 
@@ -395,6 +395,24 @@ router.post('/createItem', (req, res) => {
             .catch(err => console.log(err));
     }
 });
+
+router.get('/editItem/:itemSerial', (req, res) => {
+    Item.findOne({
+        where: {
+            itemSerial:req.params.itemSerial
+        },raw: true
+    }).then((item) => {
+        // calls views/staff/editItem.handlebar to render the edit item
+        
+        res.render('staff/editItem', {
+            layout: staffMain,
+            item // passes the item object to handlebars
+            
+        });
+    }).catch(err => console.log(err)); // To catch no item serial
+});
+
+
     
 
 router.get('/createItem', (req, res) => {

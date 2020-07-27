@@ -24,6 +24,12 @@ const Item = db.define('item', {
     itemDescription: {
         type: Sequelize.STRING
     },
+    stockLevel: {
+        type: Sequelize.INTEGER
+    },
+    status: {
+        type: Sequelize.STRING
+    }
 });
 
 module.exports = Item;

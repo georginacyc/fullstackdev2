@@ -3,6 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const userRoute = require('./user');
+const passport = require('passport');
 const staffRoute = require('./staff');
 const ensureAuthenticated = require('../helpers/auth'); // to verify that a user is logged in
 const staffAuth = require('../helpers/staffAuth'); // to verify that user logged in is a Staff

@@ -11,6 +11,18 @@ router.get('/', (req, res) => {
     res.render('home')
 });
 
+router.get('/staffLogin', (req, res) => {
+    res.render('staff/login');
+});
+
+router.post('/staffLogin', (req, res, next) => {
+    passport.authenticate('local', {
+        successRedirect: '/staff/home',
+        failureRedirect: '/staffLogin',
+        failureFlash: true,
+    }) (req, res, next);
+});
+
 // router.use('/user', ensureAuthenticated, userRoute);
 router.use('/user', userRoute);
 router.use('/staff', ensureAuthenticated, staffAuth, staffRoute);

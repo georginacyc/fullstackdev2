@@ -31,18 +31,6 @@ var con = mysql.createConnection({ // creating a connection to query database be
     database: "monoqlo"
 });
 
-router.get('/login', (req, res) => {
-    res.render('staff/login');
-});
-
-router.post('/login', (req, res, next) => {
-    passport.authenticate('local', {
-        successRedirect: '/staff/home',
-        failureRedirect: '/staff/login',
-        failureFlash: true,
-    }) (req, res, next);
-});
-
 router.get('/logout', (req, res) => {
     req.logout();
     res.redirect('/');
@@ -283,7 +271,7 @@ router.put('/changePassword/:id', (req, res) => {
                 })
                 alertMessage(res, 'success', 'Successfully changed password!', true);
                 req.logout()
-                res.redirect('/staff/login');
+                res.redirect('/staffLogin');
             } else {
                 alertMessage(res, 'danger', 'New passwords must match.', true);
                 res.redirect('/staff/yourAccount');

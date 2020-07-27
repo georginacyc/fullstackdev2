@@ -31,29 +31,76 @@ var con = mysql.createConnection({ // creating a connection to query database be
     database: "monoqlo"
 });
 
-router.get('/login', (req, res) => {
-    res.render('staff/login');
-});
-
-router.post('/login', (req, res, next) => {
-    passport.authenticate('local', {
-        successRedirect: '/staff/home',
-        failureRedirect: '/staff/login',
-        failureFlash: true,
-    }) (req, res, next);
-});
-
 router.get('/logout', (req, res) => {
     req.logout();
     res.redirect('/');
 });
 
-router.get('/home', ensureAuthenticated, staffAuth, (req, res) => {
+router.get('/home', (req, res) => {
         res.render('staff/staffhome', {layout: staffMain});
 });
 
 // to retrieve ALL accounts, regardless of whether it's a staff or customer account.
-router.get('/accounts', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+// router.get('/accounts', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+//     User.findAll({
+//         raw: true
+//     })
+//     .then((users) => {
+//         res.render('staff/accountList', {
+//             accounts: users,
+//             layout: staffMain
+//         });
+//     })
+// });
+
+async function accountsData(req, res) {
+    var sortBy = 'title';
+	var order  = 'asc';
+	var offset = 0;
+    var limit  = 25;
+    
+    console.log("Incoming Query:");
+	console.log(req.query);
+
+    try {
+		sortBy = (req.query.sort)?   req.query.sort   : sortBy;
+		order  = (req.query.order)?  req.query.order  : order;
+		offset = (req.query.offset)? parseInt(req.query.offset, 10) : offset;
+		limit  = (req.query.limit)?  parseInt(req.query.limit, 10)  : limit;
+	
+	}
+	catch(error) {
+		console.error("Malformed Get request:");
+		console.error(req.query);
+		console.error(error);
+		return res.status(400);
+    }
+
+    try {
+        const total = await User.count();
+        const accsList = await User.findAll({
+            offset: offset,
+            limit: limit,
+            order: [
+                [sortBy, order.toUpperCase()]
+            ]
+        }).map((it) => {
+            console.log(it.uuid);
+            return it.toJSON();
+        });
+        return res.status(200).json({
+            "total": total,
+            "rows": accsList
+        });
+    }
+    catch (error) {
+        console.log("Accounts Listing Error");
+        return res.status(500);
+    }
+
+}
+
+router.get('/accounts', (req, res) => {
     User.findAll({
         raw: true
     })
@@ -63,10 +110,12 @@ router.get('/accounts', ensureAuthenticated, staffAuth, adminAuth, (req, res) =>
             layout: staffMain
         });
     })
-});
+})
+
+router.get('/accounts-data', accountsData);
 
 // retrieves all announcements
-router.get('/announcements', ensureAuthenticated, staffAuth, (req, res) => {
+router.get('/announcements', (req, res) => {
     let allannouncements = []
     con.query('SELECT * FROM monoqlo.snotifs AS notifs ORDER BY id DESC;', function(err, results, fields) {
         if (err) throw err;
@@ -84,11 +133,11 @@ router.get('/announcements', ensureAuthenticated, staffAuth, (req, res) => {
     })
 })
 
-router.get('/createAnnouncement', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+router.get('/createAnnouncement', adminAuth, (req, res) => {
     res.render('staff/createAnnouncements', {layout: staffMain});
 })
 
-router.post('/createAnnouncement', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+router.post('/createAnnouncement', adminAuth, (req, res) => {
     let errors = [];
 
     let {title, description} = req.body;
@@ -118,11 +167,11 @@ router.post('/createAnnouncement', ensureAuthenticated, staffAuth, adminAuth, (r
     }
 });
 
-router.get('/createStaffAccount', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+router.get('/createStaffAccount', adminAuth, (req, res) => {
     res.render('staff/createStaff', {layout: staffMain});
 });
 
-router.post('/createStaffAccount', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+router.post('/createStaffAccount', adminAuth, (req, res) => {
     let errors = [];
 
     let {type, fname, lname, gender, dob, hp, address, password, pw2} = req.body;
@@ -191,7 +240,7 @@ router.post('/createStaffAccount', ensureAuthenticated, staffAuth, adminAuth, (r
 });
 
 
-router.get('/yourAccount', ensureAuthenticated, staffAuth, (req, res) => {
+router.get('/yourAccount', (req, res) => {
     User.findOne({
         where: {
             id: req.user.id
@@ -201,7 +250,7 @@ router.get('/yourAccount', ensureAuthenticated, staffAuth, (req, res) => {
     })
 });
 
-router.put('/changePassword/:id', ensureAuthenticated, staffAuth, (req, res) => {
+router.put('/changePassword/:id', (req, res) => {
     let {oldpw, newpw, newpw2} = req.body;
     User.findOne({
         where: {
@@ -222,7 +271,7 @@ router.put('/changePassword/:id', ensureAuthenticated, staffAuth, (req, res) => 
                 })
                 alertMessage(res, 'success', 'Successfully changed password!', true);
                 req.logout()
-                res.redirect('/staff/login');
+                res.redirect('/staffLogin');
             } else {
                 alertMessage(res, 'danger', 'New passwords must match.', true);
                 res.redirect('/staff/yourAccount');
@@ -234,7 +283,7 @@ router.put('/changePassword/:id', ensureAuthenticated, staffAuth, (req, res) => 
     }).catch(err => console.log(err))
 });
 
-router.get('/manageAccount/:id', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+router.get('/manageAccount/:id', adminAuth, (req, res) => {
     User.findOne({
         where: {
             id: req.params.id
@@ -244,7 +293,7 @@ router.get('/manageAccount/:id', ensureAuthenticated, staffAuth, adminAuth, (req
     }).catch(err => console.log(err));
 });
 
-router.put('/saveStaff/:id', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+router.put('/saveStaff/:id', adminAuth, (req, res) => {
     let {type, fname, lname, gender, dob, hp, address, resetpw} = req.body;
     console.log(resetpw);
     if (resetpw == "reset") {
@@ -276,7 +325,7 @@ router.put('/saveStaff/:id', ensureAuthenticated, staffAuth, adminAuth, (req, re
     }).catch(err => console.log(err));
 });
 
-router.get('/deleteStaff/:id', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+router.get('/deleteStaff/:id', adminAuth, (req, res) => {
     User.findOne({
         where: {
             id: req.params.id

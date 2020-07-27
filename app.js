@@ -26,8 +26,6 @@ authenticate.localStrategy(passport);
 * will be called based on the HTTP request and URL.
 */
 const mainRoute = require('./routes/main');
-const userRoute = require('./routes/user');
-const staffRoute = require('./routes/staff');
 const formatDate = require('./helpers/hbs');
 const radioCheck = require('./helpers/radioCheck');
 const { allowedNodeEnvironmentFlags } = require('process');
@@ -173,8 +171,7 @@ app.use(function (req, res, next) {
 * mainRoute which was defined earlier to point to routes/main.js
 * */
 app.use('/', mainRoute); // mainRoute is declared to point to routes/main.js
-app.use('/user', userRoute);
-app.use('/staff', staffRoute);
+
 // This route maps the root URL to any path defined in main.js
 
 /*

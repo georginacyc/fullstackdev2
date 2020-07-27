@@ -118,7 +118,7 @@ router.post('/createAnnouncement', ensureAuthenticated, staffAuth, adminAuth, (r
     }
 });
 
-router.get('/createStaffAccount', (req, res) => {
+router.get('/createStaffAccount', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
     res.render('staff/createStaff', {layout: staffMain});
 });
 
@@ -364,7 +364,7 @@ router.post('/createItem', (req, res) => {
     //Adds new item
 
     console.log(req);
-
+    // form data and variables
     let itemName = req.body.itemName;
     let itemSerial = req.body.itemSerial;
     let itemCategory = req.body.itemCategory === undefined ? '' : req.body.itemCategory.toString();
@@ -372,9 +372,7 @@ router.post('/createItem', (req, res) => {
     let itemCost = req.body.itemCost;
     let itemPrice = req.body.itemPrice;
     let itemDescription = req.body.itemDescription;
-
-    console.log(itemName);
-
+    // check for errors if not will add to db
     if (errors.length > 0) {
         res.render("/staff/createItem", {
             errors, itemName, itemSerial, itemCategory, itemGender, itemCost, itemPrice, itemDescription, layout: staffMain
@@ -396,24 +394,30 @@ router.post('/createItem', (req, res) => {
     }
 });
 
-router.get('/editItem/:itemSerial', (req, res) => {
+router.put('/editItem/:itemSerial', (req, res) => {
+    let {itemCost, itemPrice, itemDescription} = req.body
     Item.findOne({
         where: {
             itemSerial:req.params.itemSerial
         },raw: true
     }).then((item) => {
-        // calls views/staff/editItem.handlebar to render the edit item
-        
-        res.render('staff/editItem', {
-            layout: staffMain,
-            item // passes the item object to handlebars
-            
-        });
+        // variables to be updated
+        // only select variables can be edited
+        Item.update({
+            itemCost: itemCost,
+            itemPrice: itemPrice,
+            itemDescription: itemDescription
+        }, {
+            where: {
+                itemSerial: req.params.itemSerial
+            }
+        })
+        // redirects back to the main item page
+        res.redirect('/staff/itemPage'); 
     }).catch(err => console.log(err)); // To catch no item serial
 });
 
 
-    
 
 router.get('/createItem', (req, res) => {
     res.render('staff/createItem', { layout: staffMain })

@@ -1,5 +1,6 @@
 {{!-- edit item form --}}
-<form method="POST" id="createItem" action="/staff/createItem">
+<form method="POST" action="/staff/editItem/{{item.itemSerial}}?_method=PUT">
+    <input type="hidden" name="_method" value="PUT">
     <h3>Edit Item</h3>
     <div class="form-group">
         <label for "itemName">Item Name</label>
@@ -14,11 +15,11 @@
     <div class="form-group">
         <label>Item Category</label>
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="itemCategory" id="Tops" value="{{radioCheck item.itemCategory "Tops"}}" readonly>
+            <input class="form-check-input" type="radio" name="itemCategory" id="Tops" value="Tops" {{radioCheck item.itemCategory "Tops"}} disabled>
             <label class="form-check-label" id="Tops" for="Tops">Tops</label>
         </div>
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="itemCategory" id="Bottoms" value="{{radioCheck item.itemCategory "Bottoms"}}" readonly>
+            <input class="form-check-input" type="radio" name="itemCategory" id="Bottoms" value="Bottoms"{{radioCheck item.itemCategory "Bottoms"}} disabled>
             <label class="form-check-label" id="Bottoms" for="Bottoms">Bottoms</label>
         </div>
     </div>
@@ -26,11 +27,11 @@
     <div class="form-group">
         <label>Item Gender</label>
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="itemGender" id="F" value="{{radioCheck item.itemGender "F"}}" readonly>
+            <input class="form-check-input" type="radio" name="itemGender" id="F" value="F" {{radioCheck item.itemGender "F"}} disabled>
             <label class="form-check-label" id="F" for="F">F</label>
         </div>
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="itemGender" id="M" value="{{radioCheck item.itemGender "M"}}" readonly>
+            <input class="form-check-input" type="radio" name="itemGender" id="M" value="M" {{radioCheck item.itemGender "M"}} disabled>
             <label class="form-check-label" id="M" for="M">M</label>
         </div>
     </div>

@@ -5,6 +5,8 @@ const passport = require('passport');
 const User = require('../models/User');
 const alertMessage = require('../helpers/messenger');
 const bcrypt = require('bcryptjs');
+const Custorder = require('../models/CustOrders');
+const CustOrders = require('../models/CustOrders');
 
 
 // routing goes in between !!!!
@@ -134,7 +136,60 @@ router.get('/accounts', (req, res) => {
      //res.render('user/userAccount');
 });
     
+//user shopping cart
+router.get('/cart', (req, res) => {
+	res.render('user/cart') // renders views/cart.handlebars
+});
 
+//user checkout
+router.get('/checkout', (req, res) => {
+	res.render('user/checkout') // renders views/checkout.handlebars
+});
 
+// user orders
+router.get('/orders', (req, res) => {
+	res.render('user/orders') // renders views/checkout.handlebars
+});
+
+/*
+router.get('/orders', (req, res) => {
+    CustOrders.findAll()
+    .then((custorder) => {
+    // pass object to orders.handlebar
+        res.render('user/orders', {
+            orders : orders,});
+    })
+    .catch(err => console.log(err));
+});
+*/
+router.post('/checkout', (req, res) => {
+    let userId = 1001;
+    let itemSerial = "2222TF";
+    let quantity = 1;
+    let status = "pending";
+    let couponCode= "FIRST100";
+    let total_Amt = 27.99;
+    let order_Date = "2020-07-20";
+    let ship_Date = null;
+    let paid_Date = null;
+    let completion_Date = null;
+
+    CustOrders.create({
+        userId,
+        itemSerial,
+        quantity,
+        status,
+        couponCode,
+        total_Amt,
+        order_Date, 
+        ship_Date,
+        paid_Date, 
+        completion_Date
+    }) 
+    .then(custorder => {
+        res.redirect('/user/orders');})
+    .catch(err => console.log(err))
+
+});
 
 module.exports = router;

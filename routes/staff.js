@@ -24,15 +24,6 @@ const Op = sequelize.Op;
 // var MomentHandler = require("handlebars.moment");
 // MomentHandler.registerHelpers(Handlebars);
 
-let domain = "@monoqlo.com";
-
-var con = mysql.createConnection({ // creating a connection to query database below.
-    host: "localhost",
-    user: "monoqlo",
-    password: "monoqlo",
-    database: "monoqlo"
-});
-
 router.get('/logout', (req, res) => {
     req.logout();
     res.redirect('/');
@@ -118,20 +109,10 @@ router.get('/accounts-data', accountsData);
 
 // retrieves all announcements
 router.get('/announcements', (req, res) => {
-    let allannouncements = []
-    con.query('SELECT * FROM monoqlo.snotifs AS notifs ORDER BY id DESC;', function(err, results, fields) {
-        if (err) throw err;
-        let count = 0;
-        while (count < results.length) { // ensures that count never exceeds number of rows returned, to prevent an Index-Out-of-Range error.
-            let a = {};
-            a['date'] = results[count].date;
-            a['title'] = results[count].title;
-            a['description'] = results[count].description;
-            
-            allannouncements.push(a);
-            count += 1;
-        }
-        res.render('staff/allAnnouncements', {layout:staffMain, allannouncements: allannouncements})
+    sNotif.findAll({
+        order: [['date', 'DESC']]
+    }).then((announcements) => {
+        res.render('staff/allAnnouncements', {layout: staffMain, allannouncements: announcements})
     })
 })
 
@@ -209,10 +190,11 @@ router.post('/createStaffAccount', (req, res) => {
     } else {
         User.max('staffId')
         .then(c => {
-            console.log('staff and admin count is', c)
             password = bcrypt.hashSync(password, 10);
             let staffId = (1 + parseInt(c)).toString().padStart(6, '0');
+            let domain = "@monoqlo.com";
             email = staffId + domain;
+
             User.create({type, staffId, email, fname, lname, gender, dob, hp, address, password})
             .then(user => {
                 res.redirect('/staff/accounts');

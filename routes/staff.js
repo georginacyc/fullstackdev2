@@ -387,7 +387,8 @@ router.get('/itempage', (req, res) => {
     })
         .then((item) => {
             res.render('staff/itempage', {
-            layout:staffMain
+                item : item,
+                layout:staffMain
         })
     })
     
@@ -399,7 +400,7 @@ router.post('/createItem', (req, res) => {
     //Adds new item
 
     console.log(req);
-
+    // form data and variables
     let itemName = req.body.itemName;
     let itemSerial = req.body.itemSerial;
     let itemCategory = req.body.itemCategory === undefined ? '' : req.body.itemCategory.toString();
@@ -407,12 +408,12 @@ router.post('/createItem', (req, res) => {
     let itemCost = req.body.itemCost;
     let itemPrice = req.body.itemPrice;
     let itemDescription = req.body.itemDescription;
-
-    console.log(itemName);
-
+    let stockLevel = 0;
+    let status = "In Production"
+    // check for errors if not will add to db
     if (errors.length > 0) {
         res.render("/staff/createItem", {
-            errors, itemName, itemSerial, itemCategory, itemGender, itemCost, itemPrice, itemDescription, layout: staffMain
+            errors, itemName, itemSerial, itemCategory, itemGender, itemCost, itemPrice, itemDescription, stockLevel, status, layout: staffMain
         });
     } else {
         Item.create({
@@ -422,7 +423,9 @@ router.post('/createItem', (req, res) => {
             itemGender,
             itemCost,
             itemPrice,
-            itemDescription
+            itemDescription,
+            stockLevel,
+            status
         }).then(item => {
             res.redirect('/staff/itempage');
             alertMessage(res, 'success', 'Item successfully added', true);
@@ -430,7 +433,47 @@ router.post('/createItem', (req, res) => {
             .catch(err => console.log(err));
     }
 });
-    
+
+router.get('/editItem/:itemSerial', (req, res) => {
+    Item.findOne({
+        where: {
+            itemSerial: req.params.itemSerial
+        }, raw: true
+    }).then((item) => {
+        // calls views/staff/editItem.handlebar to render the edit item
+
+        res.render('staff/editItem', {
+            layout: staffMain,
+            item // passes the item object to handlebars
+
+        });
+    }).catch(err => console.log(err)); // To catch no item serial
+});
+
+router.put('/saveEditedItem/:itemSerial', (req, res) => {
+    let {itemCost, itemPrice, itemDescription} = req.body
+    Item.findOne({
+        where: {
+            itemSerial:req.params.itemSerial
+        },raw: true
+    }).then((item) => {
+        // variables to be updated
+        // only select variables can be edited
+        Item.update({
+            itemCost: itemCost,
+            itemPrice: itemPrice,
+            itemDescription: itemDescription
+        }, {
+            where: {
+                itemSerial: req.params.itemSerial
+            }
+        })
+        // redirects back to the main item page
+        res.redirect('/staff/itemPage'); 
+    }).catch(err => console.log(err)); // To catch no item serial
+});
+
+
 
 router.get('/createItem', (req, res) => {
     res.render('staff/createItem', { layout: staffMain })

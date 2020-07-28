@@ -207,17 +207,13 @@ router.post('/createStaffAccount', (req, res) => {
             layout: staffMain
         });
     } else {
-        let total = 1;
         User.max('staffId')
         .then(c => {
-            if (isNaN(c)) {
-                c = 0;
-            }
             console.log('staff and admin count is', c)
             password = bcrypt.hashSync(password, 10);
-            total += c;
-            email = total.toString().padStart(6, "0") + domain;
-            User.create({type, total, email, fname, lname, gender, dob, hp, address, password})
+            let staffId = (1 + parseInt(c)).toString().padStart(6, '0');
+            email = staffId + domain;
+            User.create({type, staffId, email, fname, lname, gender, dob, hp, address, password})
             .then(user => {
                 res.redirect('/staff/accounts');
                 alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
@@ -244,7 +240,7 @@ router.put('/changePassword/:id', (req, res) => {
             id: req.user.id
         }
     }).then((user) => {
-        check = bcrypt.compareSync(oldpw, user.password)
+        let check = bcrypt.compareSync(oldpw, user.password)
         console.log(check);
         if (check) {
             if (newpw == newpw2) {

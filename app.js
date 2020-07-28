@@ -152,9 +152,11 @@ app.use(function(req, res, next) {
 app.use(function(req, res, next) {
 	User.max('staffId')
 	.then(c => {
-		if (isNaN(c)) {
+		if (c == 0) { // if select max(staffId) returns NaN | i.e. if there are no records of staff/admin
 			let password = bcrypt.hashSync("12345678", 10);
-			User.create({'type': "Admin", 'staffId': 1, 'email': "000001@monoqlo.com", 'fname': "Admin", 'lname': "Account", 'gender': "Male", 'dob': "1991-03-02", 'hp': '65500999', 'address':"31 Charlton Road", 'password': password})
+
+			// create an admin account with default details
+			User.create({'type': "Admin", 'staffId': '000001', 'email': "000001@monoqlo.com", 'fname': "Admin", 'lname': "Account", 'gender': "Male", 'dob': "1991-03-02", 'hp': '65500999', 'address':"31 Charlton Road", 'password': password})
 			.then(() => {
 				console.log("Staple Admin account created! Email: 000001@monoqlo.com Password: 12345678")
 			})

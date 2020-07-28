@@ -7,7 +7,7 @@ const User = db.define('user', {
         type: Sequelize.STRING
     },
     staffId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING
     },
     email: {
         type: Sequelize.STRING

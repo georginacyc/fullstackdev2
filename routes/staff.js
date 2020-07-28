@@ -108,17 +108,58 @@ router.get('/accounts', (req, res) => {
 router.get('/accounts-data', accountsData);
 
 // retrieves all announcements
+async function announcementsData(req, res) {
+    var sortBy = 'data';
+    var order = 'desc';
+    var offset = 0;
+    var limit = 25;
+
+    try {
+		sortBy = (req.query.sort)?   req.query.sort   : sortBy;
+		order  = (req.query.order)?  req.query.order  : order;
+		offset = (req.query.offset)? parseInt(req.query.offset, 10) : offset;
+		limit  = (req.query.limit)?  parseInt(req.query.limit, 10)  : limit;
+	
+	}
+	catch(error) {
+		console.error("Malformed Get request:");
+		console.error(req.query);
+		console.error(error);
+		return res.status(400);
+    }
+
+    try {
+        const total = await sNotif.count();
+        const annList = await sNotif.findAll({
+            offset: offset,
+            limit: limit,
+            order: [
+                [sortBy, order.toUpperCase()]
+            ]
+        }).map((it) => {
+            console.log(it.uuid);
+            return it.toJSON();
+        });
+        return res.status(200).json({
+            "total": total,
+            "rows": annList
+        });
+    }
+    catch (error) {
+        console.log("Announcement Listing Error");
+        return res.status(500);
+    }
+}
+
 router.get('/announcements', (req, res) => {
-    sNotif.findAll({
-        order: [['date', 'DESC']]
-    }).then((announcements) => {
-        res.render('staff/allAnnouncements', {layout: staffMain, allannouncements: announcements})
-    })
-})
+    res.render('staff/allAnnouncements', {layout: staffMain});
+});
+
+router.get('/announcements-data', announcementsData);
 
 router.get('/createAnnouncement', adminAuth, (req, res) => {
     res.render('staff/createAnnouncements', {layout: staffMain});
-})
+});
 
 router.post('/createAnnouncement', adminAuth, (req, res) => {
     let errors = [];

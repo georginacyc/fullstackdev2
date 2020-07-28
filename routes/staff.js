@@ -17,6 +17,8 @@ const staffAuth = require('../helpers/staffAuth'); // to verify that user logged
 const adminAuth = require('../helpers/adminAuth'); // to verify that user logged in is an Admin
 const pdf = require('pdf-creator-node');
 const fs = require('fs');
+const sequelize = require('sequelize');
+const Op = sequelize.Op;
 
 // var Handlebars = require("handlebars");
 // var MomentHandler = require("handlebars.moment");
@@ -167,11 +169,11 @@ router.post('/createAnnouncement', adminAuth, (req, res) => {
     }
 });
 
-router.get('/createStaffAccount', adminAuth, (req, res) => {
+router.get('/createStaffAccount', (req, res) => {
     res.render('staff/createStaff', {layout: staffMain});
 });
 
-router.post('/createStaffAccount', adminAuth, (req, res) => {
+router.post('/createStaffAccount', (req, res) => {
     let errors = [];
 
     let {type, fname, lname, gender, dob, hp, address, password, pw2} = req.body;
@@ -205,40 +207,25 @@ router.post('/createStaffAccount', adminAuth, (req, res) => {
             layout: staffMain
         });
     } else {
-        let num = ""
-        password = bcrypt.hashSync(password, 10);
-
-        con.query("SELECT COUNT(*) AS tableCheck FROM users WHERE type='Admin' OR type='Staff'", function(err, result, fields) {
-            
-            let email = ""
-    
-            if (err) throw err;
-            if (result[0].tableCheck > 0) {
-                con.query("SELECT MAX(id) AS count FROM users WHERE type='Admin' or type='Staff'", function(err, result, fields) {
-                    if (err) throw err;
-                    num = result[0].count + 1;
-                    num = num.toString().padStart(6, "0");
-                    email = num.toString() + domain;
-                    User.create({type, email, fname, lname, gender, dob, hp, address, password})
-                    .then(user => {
-                        res.redirect('/staff/accounts');
-                        alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
-                    }).catch(err => console.log(err));
-                });
-            } else {
-                num = "000001";
-                email = num.toString() + domain;
-                User.create({type, email, fname, lname, gender, dob, hp, address, password})
-                .then(user => {
-                    res.redirect('/staff/accounts');
-                    alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
-                })
-                .catch(err => console.log(err));
-            };
-        });
-    };
+        let total = 1;
+        User.max('staffId')
+        .then(c => {
+            if (isNaN(c)) {
+                c = 0;
+            }
+            console.log('staff and admin count is', c)
+            password = bcrypt.hashSync(password, 10);
+            total += c;
+            email = total.toString().padStart(6, "0") + domain;
+            User.create({type, total, email, fname, lname, gender, dob, hp, address, password})
+            .then(user => {
+                res.redirect('/staff/accounts');
+                alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
+            })
+        })
+        .catch(err => console.log(err));
+    }
 });
-
 
 router.get('/yourAccount', (req, res) => {
     User.findOne({

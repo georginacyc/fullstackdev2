@@ -66,7 +66,7 @@ async function accountsData(req, res) {
 		console.error("Malformed Get request:");
 		console.error(req.query);
 		console.error(error);
-		return res.status(400);
+		return res.status(400).end();
     }
 
     try {
@@ -76,11 +76,9 @@ async function accountsData(req, res) {
             limit: limit,
             order: [
                 [sortBy, order.toUpperCase()]
-            ]
-        }).map((it) => {
-            console.log(it.uuid);
-            return it.toJSON();
-        });
+            ], 
+            raw: true
+        })
         return res.status(200).json({
             "total": total,
             "rows": accsList

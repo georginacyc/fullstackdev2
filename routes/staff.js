@@ -440,8 +440,8 @@ router.post('/createItem', (req, res) => {
             stockLevel,
             status
         }).then(item => {
-            res.redirect('/staff/itempage');
             alertMessage(res, 'success', 'Item successfully added', true);
+            res.redirect('/staff/itempage');
         })
             .catch(err => console.log(err));
     }

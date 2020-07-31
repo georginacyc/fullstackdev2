@@ -17,19 +17,12 @@ const staffAuth = require('../helpers/staffAuth'); // to verify that user logged
 const adminAuth = require('../helpers/adminAuth'); // to verify that user logged in is an Admin
 const pdf = require('pdf-creator-node');
 const fs = require('fs');
+const sequelize = require('sequelize');
+const Op = sequelize.Op;
 
 // var Handlebars = require("handlebars");
 // var MomentHandler = require("handlebars.moment");
 // MomentHandler.registerHelpers(Handlebars);
-
-let domain = "@monoqlo.com";
-
-var con = mysql.createConnection({ // creating a connection to query database below.
-    host: "localhost",
-    user: "monoqlo",
-    password: "monoqlo",
-    database: "monoqlo"
-});
 
 router.get('/logout', (req, res) => {
     req.logout();
@@ -115,27 +108,58 @@ router.get('/accounts', (req, res) => {
 router.get('/accounts-data', accountsData);
 
 // retrieves all announcements
+async function announcementsData(req, res) {
+    var sortBy = 'data';
+    var order = 'desc';
+    var offset = 0;
+    var limit = 25;
+
+    try {
+		sortBy = (req.query.sort)?   req.query.sort   : sortBy;
+		order  = (req.query.order)?  req.query.order  : order;
+		offset = (req.query.offset)? parseInt(req.query.offset, 10) : offset;
+		limit  = (req.query.limit)?  parseInt(req.query.limit, 10)  : limit;
+	
+	}
+	catch(error) {
+		console.error("Malformed Get request:");
+		console.error(req.query);
+		console.error(error);
+		return res.status(400);
+    }
+
+    try {
+        const total = await sNotif.count();
+        const annList = await sNotif.findAll({
+            offset: offset,
+            limit: limit,
+            order: [
+                [sortBy, order.toUpperCase()]
+            ]
+        }).map((it) => {
+            console.log(it.uuid);
+            return it.toJSON();
+        });
+        return res.status(200).json({
+            "total": total,
+            "rows": annList
+        });
+    }
+    catch (error) {
+        console.log("Announcement Listing Error");
+        return res.status(500);
+    }
+}
+
 router.get('/announcements', (req, res) => {
-    let allannouncements = []
-    con.query('SELECT * FROM monoqlo.snotifs AS notifs ORDER BY id DESC;', function(err, results, fields) {
-        if (err) throw err;
-        let count = 0;
-        while (count < results.length) { // ensures that count never exceeds number of rows returned, to prevent an Index-Out-of-Range error.
-            let a = {};
-            a['date'] = results[count].date;
-            a['title'] = results[count].title;
-            a['description'] = results[count].description;
-            
-            allannouncements.push(a);
-            count += 1;
-        }
-        res.render('staff/allAnnouncements', {layout:staffMain, allannouncements: allannouncements})
-    })
-})
+    res.render('staff/allAnnouncements', {layout: staffMain});
+});
+
+router.get('/announcements-data', announcementsData);
 
 router.get('/createAnnouncement', adminAuth, (req, res) => {
     res.render('staff/createAnnouncements', {layout: staffMain});
-})
+});
 
 router.post('/createAnnouncement', adminAuth, (req, res) => {
     let errors = [];
@@ -167,11 +191,11 @@ router.post('/createAnnouncement', adminAuth, (req, res) => {
     }
 });
 
-router.get('/createStaffAccount', adminAuth, (req, res) => {
+router.get('/createStaffAccount', (req, res) => {
     res.render('staff/createStaff', {layout: staffMain});
 });
 
-router.post('/createStaffAccount', adminAuth, (req, res) => {
+router.post('/createStaffAccount', (req, res) => {
     let errors = [];
 
     let {type, fname, lname, gender, dob, hp, address, password, pw2} = req.body;
@@ -205,40 +229,22 @@ router.post('/createStaffAccount', adminAuth, (req, res) => {
             layout: staffMain
         });
     } else {
-        let num = ""
-        password = bcrypt.hashSync(password, 10);
+        User.max('staffId')
+        .then(c => {
+            password = bcrypt.hashSync(password, 10);
+            let staffId = (1 + parseInt(c)).toString().padStart(6, '0');
+            let domain = "@monoqlo.com";
+            email = staffId + domain;
 
-        con.query("SELECT COUNT(*) AS tableCheck FROM users WHERE type='Admin' OR type='Staff'", function(err, result, fields) {
-            
-            let email = ""
-    
-            if (err) throw err;
-            if (result[0].tableCheck > 0) {
-                con.query("SELECT MAX(id) AS count FROM users WHERE type='Admin' or type='Staff'", function(err, result, fields) {
-                    if (err) throw err;
-                    num = result[0].count + 1;
-                    num = num.toString().padStart(6, "0");
-                    email = num.toString() + domain;
-                    User.create({type, email, fname, lname, gender, dob, hp, address, password})
-                    .then(user => {
-                        res.redirect('/staff/accounts');
-                        alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
-                    }).catch(err => console.log(err));
-                });
-            } else {
-                num = "000001";
-                email = num.toString() + domain;
-                User.create({type, email, fname, lname, gender, dob, hp, address, password})
-                .then(user => {
-                    res.redirect('/staff/accounts');
-                    alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
-                })
-                .catch(err => console.log(err));
-            };
-        });
-    };
+            User.create({type, staffId, email, fname, lname, gender, dob, hp, address, password})
+            .then(user => {
+                res.redirect('/staff/accounts');
+                alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
+            })
+        })
+        .catch(err => console.log(err));
+    }
 });
-
 
 router.get('/yourAccount', (req, res) => {
     User.findOne({
@@ -257,7 +263,7 @@ router.put('/changePassword/:id', (req, res) => {
             id: req.user.id
         }
     }).then((user) => {
-        check = bcrypt.compareSync(oldpw, user.password)
+        let check = bcrypt.compareSync(oldpw, user.password)
         console.log(check);
         if (check) {
             if (newpw == newpw2) {

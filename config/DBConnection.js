@@ -1,5 +1,4 @@
 const mySQLDB = require('./DBConfig');
-const staffNotif = require('../models/StaffNotifs');
 const user = require('../models/User');
 const Custorder = require('../models/CustOrders');
 

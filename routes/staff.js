@@ -500,18 +500,26 @@ router.get('/item/create', (req, res) => {
 
 //Inventory Routes
 router.get('/inventory', (req, res) => {
-    res.render('staff/inventory', { layout: staffMain })
+    Item.findAll({
+        raw: true
+    })
+        .then((item) => {
+            res.render('staff/inventory', {
+                item: item,
+                layout: staffMain
+            })
+        })
 });
 
 //Stock Order Routes
 
-router.get('/createStockOrder', (req, res) => {
+router.get('/inventory/order-stock', (req, res) => {
     res.render('staff/createStockOrder', {
         layout: staffMain
     })
 });
 
-router.post('/createStockOrder', (req, res) => {
+router.post('/inventory/order-stock', (req, res) => {
     let errors = [];
 
     //Adds new item

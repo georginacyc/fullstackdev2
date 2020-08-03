@@ -398,7 +398,7 @@ router.get('/staffPDF/:id', (req, res) => {
 
 //item routes
 
-router.get('/itempage', (req, res) => {
+router.get('/item/view-all', (req, res) => {
     Item.findAll({
         raw: true
     })
@@ -411,7 +411,7 @@ router.get('/itempage', (req, res) => {
     
 });
 
-router.post('/createItem', (req, res) => {
+router.post('/item/create', (req, res) => {
     let errors = [];
 
     //Adds new item
@@ -444,14 +444,14 @@ router.post('/createItem', (req, res) => {
             stockLevel,
             status
         }).then(item => {
-            res.redirect('/staff/itempage');
             alertMessage(res, 'success', 'Item successfully added', true);
+            res.redirect('/staff/item/view-all');
         })
             .catch(err => console.log(err));
     }
 });
 
-router.get('/editItem/:itemSerial', (req, res) => {
+router.get('/item/edit/:itemSerial', (req, res) => {
     Item.findOne({
         where: {
             itemSerial: req.params.itemSerial
@@ -467,7 +467,7 @@ router.get('/editItem/:itemSerial', (req, res) => {
     }).catch(err => console.log(err)); // To catch no item serial
 });
 
-router.put('/saveEditedItem/:itemSerial', (req, res) => {
+router.put('/item/save-edited/:itemSerial', (req, res) => {
     let {itemCost, itemPrice, itemDescription} = req.body
     Item.findOne({
         where: {
@@ -486,30 +486,38 @@ router.put('/saveEditedItem/:itemSerial', (req, res) => {
             }
         })
         // redirects back to the main item page
-        res.redirect('/staff/itemPage'); 
+        res.redirect('/staff/item/view-all'); 
     }).catch(err => console.log(err)); // To catch no item serial
 });
 
 
 
-router.get('/createItem', (req, res) => {
+router.get('/item/create', (req, res) => {
     res.render('staff/createItem', { layout: staffMain })
 });
 
 //Inventory Routes
 router.get('/inventory', (req, res) => {
-    res.render('staff/inventory', { layout: staffMain })
+    Item.findAll({
+        raw: true
+    })
+        .then((item) => {
+            res.render('staff/inventory', {
+                item: item,
+                layout: staffMain
+            })
+        })
 });
 
 //Stock Order Routes
 
-router.get('/createStockOrder', (req, res) => {
+router.get('/inventory/order-stock', (req, res) => {
     res.render('staff/createStockOrder', {
         layout: staffMain
     })
 });
 
-router.post('/createStockOrder', (req, res) => {
+router.post('/inventory/order-stock', (req, res) => {
     let errors = [];
 
     //Adds new item

@@ -1,0 +1,131 @@
+
+<div class="card card-body">
+  <form action="" method="post">
+    <div class="row py-5 p-4 bg-white rounded shadow-sm">
+            <div class="col-lg-6">
+              <div class="bg-light rounded-pill px-4 py-3 text-uppercase font-weight-bold">Coupon code</div>
+              <div class="p-4">
+                <p class="font-italic mb-4">If you have a coupon code, please enter it in the box below</p>
+                <div class="input-group mb-4 border rounded-pill p-2">
+                  <input type="text" placeholder="Apply coupon" aria-describedby="button-addon3" class="form-control border-0" name="coupon">
+                  <div class="input-group-append border-0">
+                    <button id="button-addon3" type="button" class="btn btn-dark px-4 rounded-pill"><i class="fa fa-gift mr-2"></i>Apply coupon</button>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-light rounded-pill px-4 py-3 text-uppercase font-weight-bold">Instructions for seller</div>
+              <div class="p-4">
+                <p class="font-italic mb-4">If you have some information for the seller you can leave them in the box below</p>
+                <textarea name="" cols="30" rows="2" class="form-control" ></textarea>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div class="bg-light rounded-pill px-4 py-3 text-uppercase font-weight-bold">Order summary </div>
+              <div class="p-4">
+                <p class="font-italic mb-4">Shipping and additional costs are calculated based on values you have entered.</p>
+                <ul class="list-unstyled mb-4">
+                  <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Order Subtotal </strong><strong>$17.99</strong></li>
+                  <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Shipping and handling</strong><strong>$10.00</strong></li>
+                  <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">GST inc.</strong><strong>$1.17</strong></li>
+                  <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Total</strong>
+                    <h5 class="font-weight-bold">$27.99</h5>
+                  </li>
+                </ul><button id="buyButton" typ="submit" class="btn btn-dark rounded-pill py-2 btn-block" ><i class="fa fa-credit-card mr-2"></i>Procceed to Payment</button>
+                <script>
+                  function initPaymentRequest() {
+                    let networks = ['mastercard', 'unionpay','visa'];
+                    let types = ['debit', 'credit'];
+                    let supportedInstruments = [{
+                      supportedMethods: 'basic-card',
+                      data: {supportedNetworks: networks, supportedTypes: types},
+                    }];
+                  
+                    let details = {
+                      total: {label: 'Payment', amount: {currency: 'SGD', value: 27.99}},
+                      displayItems: [
+                        {
+                          label: 'Total Payment',
+                          amount: {currency: 'SGD', value: 17.99},
+                        },
+                        {
+                          label: 'Shipping Fees',
+                          amount: {currency: 'SGD', value: 10.00},
+                        },
+                      ],
+                    };
+                  
+                    return new PaymentRequest(supportedInstruments, details);
+                  }
+                  
+                  /**
+                  * Invokes PaymentRequest for credit cards.
+                  *
+                  * @param {PaymentRequest} request The PaymentRequest object.
+                  */
+                  function onBuyClicked(request) {
+                    request.show().then(function(instrumentResponse) {
+                      sendPaymentToServer(instrumentResponse);
+                    })
+                    .catch(function(err) {
+                      ChromeSamples.setStatus(err);
+                    });
+                  }
+                  
+                  /**
+                  * Simulates processing the payment data on the server.
+                  *
+                  * @param {PaymentResponse} instrumentResponse The payment information to
+                  * process.
+                  */
+                  function sendPaymentToServer(instrumentResponse) {
+                    // There's no server-side component of these samples. No transactions are
+                    // processed and no money exchanged hands. Instantaneous transactions are not
+                    // realistic. Add a 2 second delay to make it seem more real.
+                    window.setTimeout(function() {
+                      instrumentResponse.complete('success')
+                          .then(function() {
+                            document.getElementById('result').innerHTML =
+                                instrumentToJsonString(instrumentResponse);
+                          })
+                          .catch(function(err) {
+                            ChromeSamples.setStatus(err);
+                          });
+                    }, 2000);
+                  }
+                  
+                  /**
+                  * Converts the payment instrument into a JSON string.
+                  *
+                  * @private
+                  * @param {PaymentResponse} instrument The instrument to convert.
+                  * @return {string} The JSON string representation of the instrument.
+                  */
+                  function instrumentToJsonString(instrument) {
+                    let details = instrument.details;
+                    details.cardNumber = 'XXXX-XXXX-XXXX-' + details.cardNumber.substr(12);
+                    details.cardSecurityCode = '***';
+                  
+                    return JSON.stringify({
+                      methodName: instrument.methodName,
+                      details: details,
+                    }, undefined, 2);
+                  }
+                  
+                  const payButton = document.getElementById('buyButton');
+                  payButton.setAttribute('style', 'display: none;');
+                  if (window.PaymentRequest) {
+                    let request = initPaymentRequest();
+                    payButton.setAttribute('style', 'display: inline;');
+                    payButton.addEventListener('click', function() {
+                      onBuyClicked(request);
+                      request = initPaymentRequest();
+                    });
+                } else {
+                  ChromeSamples.setStatus('This browser does not support web payments');
+                }
+                </script>
+            </div>
+        </div>
+    </div>
+  </form>
+</div>

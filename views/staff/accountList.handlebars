@@ -10,21 +10,33 @@
 </style>
 
 <div class="">
-    {{#if accounts}}
+    <table id="accountsList" data-toggle="table" data-pagination="true" data-url="/staff/accounts-data" data-search="true" data-sort-name="type" data-show-refresh="true" data-show-columns="true" data-search-on-enter-key="true" data-show-search-button="true">
+        <thead>
+            <th data-field="type" data-sortable="true">Type</th>
+            <th data-field="fname" data-sortable="true">First Name</th>
+            <th data-field="lname" data-sortable="true">Last Name</th>
+            <th data-field="email">Email</th>
+            <th data-field="hp">H/P</th>
+            <th></th>
+            <th></th>
+            <th></th>
+        </thead>
+    </table>
+
+
+
+    {{!-- {{#if accounts}}
     <h1 class="text-muted">Accounts</h1>
     <hr>
     <div>
-        <table id="accountsList" class="table">
+        <table id="accountsList" data-toggle="table" data-pagination="true" data-search="true">
             <thead>
                 <tr>
-                    <th class="th-sm">Type</th>
-                    <th class="th-sm">First Name</th>
-                    <th class="th-sm">Last Name</th>
-                    <th class="th-sm">Gender</th>
+                    <th data-sortable="true">Type</th>
+                    <th data-sortable="true">First Name</th>
+                    <th data-sortable="true">Last Name</th>
                     <th class="th-sm">Email</th>
                     <th class="th-sm">HP</th>
-                    <th class="th-sm">DOB</th>
-                    <th class="th-sm">Address</th>
                     <th class="th-sm"></th>
                     <th class="th-sm"></th>
                     <th class="th-sm"></th>
@@ -36,14 +48,11 @@
                         <td>{{type}}</td>
                         <td>{{fname}}</td>
                         <td>{{lname}}</td>
-                        <td>{{gender}}</td>
                         <td>{{email}}</td>
                         <td>{{hp}}</td>
-                        <td class="fit">{{formatDate dob 'DD MMM YYYY'}}</td>
-                        <td>{{address}}</td>
-                        <td><button type="button" href="/staff/manageAccount/{{id}}" class="btn btn-warning">Update</button></td>
+                        <td><a href="/staff/manageAccount/{{id}}" class="btn"><i class="fas fa-pencil-square-o"></i></a></td>
                         <td>
-                            <a href="/staff/deleteStaff/{{id}}" class="btn btn-danger">Delete</a></td>
+                            <a href="/staff/deleteStaff/{{id}}" class="btn"><i class="fas fa-trash"></i></a></td>
                         </td>
                         <td>
                             <a href="/staff/staffPDF/{{id}}" class="btn" target="_blank"><i class="fas fa-print"></i></a>
@@ -56,7 +65,7 @@
 
     {{else}}
         <h3>No accounts registered.</h3>
-    {{/if}}
+    {{/if}} --}}
 
 </div>
 
@@ -65,17 +74,4 @@
         format: 'yyyy-mm-dd',
         uiLibrary: 'bootstrap4',
         defaultDate: "{{formatDate content.dob 'YYYY-MM-DD'}}"
-    });
-    $(document).ready(function () {
-        $('#accountsList').DataTable({
-            "pagingType": "first_last_numbers",
-            "aaSorting": [],
-            columnDefs: [{
-                orderable: false,
-                targets: [8, 9, 10]
-            }],
-            "order": [[0, "asc"]]
-        });
-        $('.dataTables_length').addClass('bs-select');
-    });
 </script>

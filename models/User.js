@@ -1,8 +1,12 @@
 const Sequelize = require('sequelize');
 const db = require('../config/DBConfig');
+const sequelize = require('../config/DBConfig');
 
 const User = db.define('user', {
     type: {
+        type: Sequelize.STRING
+    },
+    staffId: {
         type: Sequelize.STRING
     },
     email: {

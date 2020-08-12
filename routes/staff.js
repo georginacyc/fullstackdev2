@@ -17,43 +17,83 @@ const staffAuth = require('../helpers/staffAuth'); // to verify that user logged
 const adminAuth = require('../helpers/adminAuth'); // to verify that user logged in is an Admin
 const pdf = require('pdf-creator-node');
 const fs = require('fs');
+const sequelize = require('sequelize');
+const Op = sequelize.Op;
 
 // var Handlebars = require("handlebars");
 // var MomentHandler = require("handlebars.moment");
 // MomentHandler.registerHelpers(Handlebars);
-
-let domain = "@monoqlo.com";
-
-var con = mysql.createConnection({ // creating a connection to query database below.
-    host: "localhost",
-    user: "monoqlo",
-    password: "monoqlo",
-    database: "monoqlo"
-});
-
-router.get('/login', (req, res) => {
-    res.render('staff/login');
-});
-
-router.post('/login', (req, res, next) => {
-    passport.authenticate('local', {
-        successRedirect: '/staff/home',
-        failureRedirect: '/staff/login',
-        failureFlash: true,
-    }) (req, res, next);
-});
 
 router.get('/logout', (req, res) => {
     req.logout();
     res.redirect('/');
 });
 
-router.get('/home', ensureAuthenticated, staffAuth, (req, res) => {
+router.get('/home', (req, res) => {
         res.render('staff/staffhome', {layout: staffMain});
 });
 
 // to retrieve ALL accounts, regardless of whether it's a staff or customer account.
-router.get('/accounts', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+// router.get('/accounts', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+//     User.findAll({
+//         raw: true
+//     })
+//     .then((users) => {
+//         res.render('staff/accountList', {
+//             accounts: users,
+//             layout: staffMain
+//         });
+//     })
+// });
+
+async function accountsData(req, res) {
+    var sortBy = 'title';
+	var order  = 'asc';
+	var offset = 0;
+    var limit  = 25;
+    
+    console.log("Incoming Query:");
+	console.log(req.query);
+
+    try {
+		sortBy = (req.query.sort)?   req.query.sort   : sortBy;
+		order  = (req.query.order)?  req.query.order  : order;
+		offset = (req.query.offset)? parseInt(req.query.offset, 10) : offset;
+		limit  = (req.query.limit)?  parseInt(req.query.limit, 10)  : limit;
+	
+	}
+	catch(error) {
+		console.error("Malformed Get request:");
+		console.error(req.query);
+		console.error(error);
+		return res.status(400);
+    }
+
+    try {
+        const total = await User.count();
+        const accsList = await User.findAll({
+            offset: offset,
+            limit: limit,
+            order: [
+                [sortBy, order.toUpperCase()]
+            ]
+        }).map((it) => {
+            console.log(it.uuid);
+            return it.toJSON();
+        });
+        return res.status(200).json({
+            "total": total,
+            "rows": accsList
+        });
+    }
+    catch (error) {
+        console.log("Accounts Listing Error");
+        return res.status(500);
+    }
+
+}
+
+router.get('/accounts', (req, res) => {
     User.findAll({
         raw: true
     })
@@ -63,32 +103,65 @@ router.get('/accounts', ensureAuthenticated, staffAuth, adminAuth, (req, res) =>
             layout: staffMain
         });
     })
-});
+})
+
+router.get('/accounts-data', accountsData);
 
 // retrieves all announcements
-router.get('/announcements', ensureAuthenticated, staffAuth, (req, res) => {
-    let allannouncements = []
-    con.query('SELECT * FROM monoqlo.snotifs AS notifs ORDER BY id DESC;', function(err, results, fields) {
-        if (err) throw err;
-        let count = 0;
-        while (count < results.length) { // ensures that count never exceeds number of rows returned, to prevent an Index-Out-of-Range error.
-            let a = {};
-            a['date'] = results[count].date;
-            a['title'] = results[count].title;
-            a['description'] = results[count].description;
-            
-            allannouncements.push(a);
-            count += 1;
-        }
-        res.render('staff/allAnnouncements', {layout:staffMain, allannouncements: allannouncements})
-    })
-})
+async function announcementsData(req, res) {
+    var sortBy = 'data';
+    var order = 'desc';
+    var offset = 0;
+    var limit = 25;
 
-router.get('/createAnnouncement', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+    try {
+		sortBy = (req.query.sort)?   req.query.sort   : sortBy;
+		order  = (req.query.order)?  req.query.order  : order;
+		offset = (req.query.offset)? parseInt(req.query.offset, 10) : offset;
+		limit  = (req.query.limit)?  parseInt(req.query.limit, 10)  : limit;
+	
+	}
+	catch(error) {
+		console.error("Malformed Get request:");
+		console.error(req.query);
+		console.error(error);
+		return res.status(400);
+    }
+
+    try {
+        const total = await sNotif.count();
+        const annList = await sNotif.findAll({
+            offset: offset,
+            limit: limit,
+            order: [
+                [sortBy, order.toUpperCase()]
+            ]
+        }).map((it) => {
+            console.log(it.uuid);
+            return it.toJSON();
+        });
+        return res.status(200).json({
+            "total": total,
+            "rows": annList
+        });
+    }
+    catch (error) {
+        console.log("Announcement Listing Error");
+        return res.status(500);
+    }
+}
+
+router.get('/announcements', (req, res) => {
+    res.render('staff/allAnnouncements', {layout: staffMain});
+});
+
+router.get('/announcements-data', announcementsData);
+
+router.get('/createAnnouncement', adminAuth, (req, res) => {
     res.render('staff/createAnnouncements', {layout: staffMain});
-})
+});
 
-router.post('/createAnnouncement', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+router.post('/createAnnouncement', adminAuth, (req, res) => {
     let errors = [];
 
     let {title, description} = req.body;
@@ -118,11 +191,11 @@ router.post('/createAnnouncement', ensureAuthenticated, staffAuth, adminAuth, (r
     }
 });
 
-router.get('/createStaffAccount', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+router.get('/createStaffAccount', (req, res) => {
     res.render('staff/createStaff', {layout: staffMain});
 });
 
-router.post('/createStaffAccount', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+router.post('/createStaffAccount', (req, res) => {
     let errors = [];
 
     let {type, fname, lname, gender, dob, hp, address, password, pw2} = req.body;
@@ -156,42 +229,24 @@ router.post('/createStaffAccount', ensureAuthenticated, staffAuth, adminAuth, (r
             layout: staffMain
         });
     } else {
-        let num = ""
-        password = bcrypt.hashSync(password, 10);
+        User.max('staffId')
+        .then(c => {
+            password = bcrypt.hashSync(password, 10);
+            let staffId = (1 + parseInt(c)).toString().padStart(6, '0');
+            let domain = "@monoqlo.com";
+            email = staffId + domain;
 
-        con.query("SELECT COUNT(*) AS tableCheck FROM users WHERE type='Admin' OR type='Staff'", function(err, result, fields) {
-            
-            let email = ""
-    
-            if (err) throw err;
-            if (result[0].tableCheck > 0) {
-                con.query("SELECT MAX(id) AS count FROM users WHERE type='Admin' or type='Staff'", function(err, result, fields) {
-                    if (err) throw err;
-                    num = result[0].count + 1;
-                    num = num.toString().padStart(6, "0");
-                    email = num.toString() + domain;
-                    User.create({type, email, fname, lname, gender, dob, hp, address, password})
-                    .then(user => {
-                        res.redirect('/staff/accounts');
-                        alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
-                    }).catch(err => console.log(err));
-                });
-            } else {
-                num = "000001";
-                email = num.toString() + domain;
-                User.create({type, email, fname, lname, gender, dob, hp, address, password})
-                .then(user => {
-                    res.redirect('/staff/accounts');
-                    alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
-                })
-                .catch(err => console.log(err));
-            };
-        });
-    };
+            User.create({type, staffId, email, fname, lname, gender, dob, hp, address, password})
+            .then(user => {
+                res.redirect('/staff/accounts');
+                alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
+            })
+        })
+        .catch(err => console.log(err));
+    }
 });
 
-
-router.get('/yourAccount', ensureAuthenticated, staffAuth, (req, res) => {
+router.get('/yourAccount', (req, res) => {
     User.findOne({
         where: {
             id: req.user.id
@@ -201,14 +256,14 @@ router.get('/yourAccount', ensureAuthenticated, staffAuth, (req, res) => {
     })
 });
 
-router.put('/changePassword/:id', ensureAuthenticated, staffAuth, (req, res) => {
+router.put('/changePassword/:id', (req, res) => {
     let {oldpw, newpw, newpw2} = req.body;
     User.findOne({
         where: {
             id: req.user.id
         }
     }).then((user) => {
-        check = bcrypt.compareSync(oldpw, user.password)
+        let check = bcrypt.compareSync(oldpw, user.password)
         console.log(check);
         if (check) {
             if (newpw == newpw2) {
@@ -222,7 +277,7 @@ router.put('/changePassword/:id', ensureAuthenticated, staffAuth, (req, res) => 
                 })
                 alertMessage(res, 'success', 'Successfully changed password!', true);
                 req.logout()
-                res.redirect('/staff/login');
+                res.redirect('/staffLogin');
             } else {
                 alertMessage(res, 'danger', 'New passwords must match.', true);
                 res.redirect('/staff/yourAccount');
@@ -234,7 +289,7 @@ router.put('/changePassword/:id', ensureAuthenticated, staffAuth, (req, res) => 
     }).catch(err => console.log(err))
 });
 
-router.get('/manageAccount/:id', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+router.get('/manageAccount/:id', adminAuth, (req, res) => {
     User.findOne({
         where: {
             id: req.params.id
@@ -244,7 +299,7 @@ router.get('/manageAccount/:id', ensureAuthenticated, staffAuth, adminAuth, (req
     }).catch(err => console.log(err));
 });
 
-router.put('/saveStaff/:id', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+router.put('/saveStaff/:id', adminAuth, (req, res) => {
     let {type, fname, lname, gender, dob, hp, address, resetpw} = req.body;
     console.log(resetpw);
     if (resetpw == "reset") {
@@ -276,7 +331,7 @@ router.put('/saveStaff/:id', ensureAuthenticated, staffAuth, adminAuth, (req, re
     }).catch(err => console.log(err));
 });
 
-router.get('/deleteStaff/:id', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+router.get('/deleteStaff/:id', adminAuth, (req, res) => {
     User.findOne({
         where: {
             id: req.params.id
@@ -345,63 +400,126 @@ router.get('/staffPDF/:id', (req, res) => {
 
 //item routes
 
-router.get('/itempage', (req, res) => {
+router.get('/item/view-all', (req, res) => {
     Item.findAll({
         raw: true
     })
         .then((item) => {
             res.render('staff/itempage', {
-            layout:staffMain
+                item : item,
+                layout:staffMain
         })
     })
     
 });
 
-router.get('/createItem', (req, res) => {
-    res.render('staff/createItem', { layout: staffMain })
-});
-
-router.post('/createItem', (req, res) => {
+router.post('/item/create', (req, res) => {
     let errors = [];
 
     //Adds new item
+
+    console.log(req);
+    // form data and variables
     let itemName = req.body.itemName;
     let itemSerial = req.body.itemSerial;
-    let itemCategory = req.body.itemCategory;
-    let itemGender = req.body.itemGender;
+    let itemCategory = req.body.itemCategory === undefined ? '' : req.body.itemCategory.toString();
+    let itemGender = req.body.itemGender === undefined ? '' : req.body.itemGender.toString();
     let itemCost = req.body.itemCost;
     let itemPrice = req.body.itemPrice;
     let itemDescription = req.body.itemDescription;
+    let stockLevel = 0;
+    let status = "In Production"
+    // check for errors if not will add to db
+    if (errors.length > 0) {
+        res.render("/staff/createItem", {
+            errors, itemName, itemSerial, itemCategory, itemGender, itemCost, itemPrice, itemDescription, stockLevel, status, layout: staffMain
+        });
+    } else {
+        Item.create({
+            itemName,
+            itemSerial,
+            itemCategory,
+            itemGender,
+            itemCost,
+            itemPrice,
+            itemDescription,
+            stockLevel,
+            status
+        }).then(item => {
+            alertMessage(res, 'success', 'Item successfully added', true);
+            res.redirect('/staff/item/view-all');
+        })
+            .catch(err => console.log(err));
+    }
+});
 
-    Item.create({
-        itemName,
-        itemSerial,
-        itemCategory,
-        itemGender,
-        itemCost,
-        itemPrice,
-        itemDescription
-    }).then(item => {
-        res.redirect('/staff/item');
-    })
-    .catc(err => console.log(err))
+router.get('/item/edit/:itemSerial', (req, res) => {
+    Item.findOne({
+        where: {
+            itemSerial: req.params.itemSerial
+        }, raw: true
+    }).then((item) => {
+        // calls views/staff/editItem.handlebar to render the edit item
 
-})
+        res.render('staff/editItem', {
+            layout: staffMain,
+            item // passes the item object to handlebars
+
+        });
+    }).catch(err => console.log(err)); // To catch no item serial
+});
+
+router.put('/item/save-edited/:itemSerial', (req, res) => {
+    let {itemCost, itemPrice, itemDescription} = req.body
+    Item.findOne({
+        where: {
+            itemSerial:req.params.itemSerial
+        },raw: true
+    }).then((item) => {
+        // variables to be updated
+        // only select variables can be edited
+        Item.update({
+            itemCost: itemCost,
+            itemPrice: itemPrice,
+            itemDescription: itemDescription
+        }, {
+            where: {
+                itemSerial: req.params.itemSerial
+            }
+        })
+        // redirects back to the main item page
+        res.redirect('/staff/item/view-all'); 
+    }).catch(err => console.log(err)); // To catch no item serial
+});
+
+
+
+router.get('/item/create', (req, res) => {
+    res.render('staff/createItem', { layout: staffMain })
+});
 
 //Inventory Routes
 router.get('/inventory', (req, res) => {
-    res.render('staff/inventory', { layout: staffMain })
+    Item.findAll({
+        raw: true
+    })
+        .then((item) => {
+            res.render('staff/inventory', {
+                item: item,
+                layout: staffMain
+            })
+        })
 });
 
 //Stock Order Routes
 
-router.get('/createStockOrder', (req, res) => {
+router.get('/inventory/order-stock', (req, res) => {
     res.render('staff/createStockOrder', {
         layout: staffMain
     })
 });
 
-router.post('/createStockOrder', (req, res) => {
+router.post('/inventory/order-stock', (req, res) => {
     let errors = [];
 
     //Adds new item

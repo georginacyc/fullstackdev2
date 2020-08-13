@@ -551,13 +551,25 @@ router.get('/inventory', (req, res) => {
 
 //Stock Order Routes
 
-router.get('/inventory/order-stock', (req, res) => {
-    res.render('staff/createStockOrder', {
-        layout: staffMain
-    })
-});
+router.get('/inventory/order-stock/:itemSerial', (req, res) => {
+    Item.findOne({
+        where: {
+            itemSerial: req.params.itemSerial
+        }, raw: true
+    }).then((item) => {
+        // calls views/staff/editItem.handlebar to render the edit item
 
-router.post('/inventory/order-stock', (req, res) => {
+        res.render('staff/createStockOrder', {
+            layout: staffMain,
+            item // passes the item object to handlebars
+
+        });
+    }).catch(err => console.log(err)); // To catch no item serial
+});
+    
+
+
+router.post('/inventory/order-stock/:itemSerial', (req, res) => {
     let errors = [];
 
     //Adds new item
@@ -566,7 +578,7 @@ router.post('/inventory/order-stock', (req, res) => {
     let shipmentDate = moment(req.body.shipmentDate, 'DD-MM-YYY');
     let itemSerial = req.body.itemSerial;
     let stockorderQuantity = req.body.stockorderQuantity;
-    let receivedDate = "";
+    let receivedDate = undefined;
 
     StockOrder.create({
         stockorderDate,
@@ -578,7 +590,7 @@ router.post('/inventory/order-stock', (req, res) => {
         }).then(stockorder => {
             res.redirect('/staff/inventory');
         })
-        .catc(err => console.log(err))
+        .catch(err => console.log(err))
 
 })
 

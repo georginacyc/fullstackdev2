@@ -1,0 +1,15 @@
+{{!-- discontinue item form --}}
+
+<h3>Discontinue Item</h3>
+<p>Item Serial: {{item.itemSerial}}</p>
+<p>Item Name: {{item.itemName}}</p>
+<p>Item Category: {{item.itemCategory}}</p>
+<p>Item Gender: {{item.itemGender}}</p>
+<p>Item Description: {{item.itemDescription}}</p>
+<hr>
+<p>** Note that discontinuing an item will prevent new stock orders. Existing stock will remain in inventory</p>
+
+<form method="POST" action="/staff/item/save-discontinue/{{item.itemSerial}}?_method=PUT">
+    <input type="hidden" name="_method" value="PUT">
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>

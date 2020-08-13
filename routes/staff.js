@@ -155,11 +155,11 @@ router.get('/announcements', (req, res) => {
 
 router.get('/announcements-data', announcementsData);
 
-router.get('/createAnnouncement', adminAuth, (req, res) => {
+router.get('/create-announcement', adminAuth, (req, res) => {
     res.render('staff/createAnnouncements', {layout: staffMain});
 });
 
-router.post('/createAnnouncement', adminAuth, (req, res) => {
+router.post('/create-announcement', adminAuth, (req, res) => {
     let errors = [];
 
     let {title, description} = req.body;
@@ -189,11 +189,11 @@ router.post('/createAnnouncement', adminAuth, (req, res) => {
     }
 });
 
-router.get('/createStaffAccount', (req, res) => {
+router.get('/create-staff', (req, res) => {
     res.render('staff/createStaff', {layout: staffMain});
 });
 
-router.post('/createStaffAccount', (req, res) => {
+router.post('/create-staff', (req, res) => {
     let errors = [];
 
     let {type, fname, lname, gender, dob, hp, address, password, pw2} = req.body;
@@ -244,7 +244,7 @@ router.post('/createStaffAccount', (req, res) => {
     }
 });
 
-router.get('/yourAccount', (req, res) => {
+router.get('/your-account', (req, res) => {
     User.findOne({
         where: {
             id: req.user.id
@@ -254,7 +254,7 @@ router.get('/yourAccount', (req, res) => {
     })
 });
 
-router.put('/changePassword/:id', (req, res) => {
+router.put('/change-password/:id', (req, res) => {
     let {oldpw, newpw, newpw2} = req.body;
     User.findOne({
         where: {
@@ -275,19 +275,19 @@ router.put('/changePassword/:id', (req, res) => {
                 })
                 alertMessage(res, 'success', 'Successfully changed password!', true);
                 req.logout()
-                res.redirect('/staffLogin');
+                res.redirect('/staff-login');
             } else {
                 alertMessage(res, 'danger', 'New passwords must match.', true);
-                res.redirect('/staff/yourAccount');
+                res.redirect('/staff/your-account');
             }
         } else {
             alertMessage(res, 'danger', 'Old password is incorrect.', true);
-            res.redirect('/staff/yourAccount');
+            res.redirect('/staff/your-account');
         }
     }).catch(err => console.log(err))
 });
 
-router.get('/manageAccount/:id', adminAuth, (req, res) => {
+router.get('/manage-staff/:id', adminAuth, (req, res) => {
     User.findOne({
         where: {
             id: req.params.id
@@ -297,7 +297,7 @@ router.get('/manageAccount/:id', adminAuth, (req, res) => {
     }).catch(err => console.log(err));
 });
 
-router.put('/saveStaff/:id', adminAuth, (req, res) => {
+router.put('/save-staff/:id', adminAuth, (req, res) => {
     let {type, fname, lname, gender, dob, hp, address, resetpw} = req.body;
     console.log(resetpw);
     if (resetpw == "reset") {
@@ -329,7 +329,7 @@ router.put('/saveStaff/:id', adminAuth, (req, res) => {
     }).catch(err => console.log(err));
 });
 
-router.get('/deleteStaff/:id', adminAuth, (req, res) => {
+router.get('/delete-staff/:id', adminAuth, (req, res) => {
     User.findOne({
         where: {
             id: req.params.id
@@ -351,7 +351,7 @@ router.get('/deleteStaff/:id', adminAuth, (req, res) => {
     }).catch(err => console.log(err))
 });
 
-router.get('/staffPDF/:id', (req, res) => {
+router.get('/staff-pdf/:id', (req, res) => {
     User.findOne({
         where: {
             id: req.params.id

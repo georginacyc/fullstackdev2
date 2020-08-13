@@ -59,13 +59,13 @@
         </div>
 
         <div style="text-align: right">
-            <a href="/staff/staffPDF/{{user.id}}" class="btn btn-light btn-sm" target="_blank"><i class="fas fa-print"><span style="font-family: Arial"> Print</span></span></i></a>
+            <a href="/staff/staff-pdf/{{user.id}}" class="btn btn-light btn-sm" target="_blank"><i class="fas fa-print"><span style="font-family: Arial"> Print</span></span></i></a>
         </div>
         
         <hr>
 
         {{!-- password change form; staff can change their password, provided that they know their old password --}}
-        <form method="POST" action="/staff/changePassword/{{user.id}}?_method=PUT">
+        <form method="POST" action="/staff/change-password/{{user.id}}?_method=PUT">
         <input type="hidden" name="_method" value="PUT">
             <p style="font-weight:bold">Update Password</p>
             <div class="row">

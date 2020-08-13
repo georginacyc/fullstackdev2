@@ -12,11 +12,11 @@ router.get('/', (req, res) => {
     res.render('home')
 });
 
-router.get('/staffLogin', (req, res) => {
+router.get('/staff-login', (req, res) => {
     res.render('staff/login');
 });
 
-router.post('/staffLogin', (req, res, next) => {
+router.post('/staff-login', (req, res, next) => {
     passport.authenticate('local', {
         successRedirect: '/staff/home',
         failureRedirect: '/staffLogin',

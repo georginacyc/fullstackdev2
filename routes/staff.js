@@ -19,6 +19,8 @@ const pdf = require('pdf-creator-node');
 const fs = require('fs');
 const sequelize = require('sequelize');
 const Op = sequelize.Op;
+const upload = require('../helpers/staffUpload');
+const path = require('path')
 
 // var Handlebars = require("handlebars");
 // var MomentHandler = require("handlebars.moment");
@@ -32,6 +34,24 @@ router.get('/logout', (req, res) => {
 router.get('/home', (req, res) => {
         res.render('staff/staffhome', {layout: staffMain});
 });
+
+router.post('/upload', (req, res) => {
+    console.log('post upload')
+    if (!fs.existsSync('./public/uploads/staff_pictures/')) {
+        fs.mkdirSync('./public/uploads/staff_pictures/')
+    }
+    upload(req, res, (err) => {
+        if (err) {
+            res.json({err: err})
+        } else {
+            if (req.file === undefined) {
+                res.json({err: err})
+            } else {
+                res.json({file: `/uploads/staff_pictures/${req.file.filename}`});
+            }
+        }
+    });
+})
 
 // to retrieve ALL accounts, regardless of whether it's a staff or customer account.
 // router.get('/accounts', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
@@ -156,6 +176,7 @@ router.get('/announcements', (req, res) => {
 router.get('/announcements-data', announcementsData);
 
 router.get('/create-announcement', adminAuth, (req, res) => {
+    console.log(req.body.preview);
     res.render('staff/createAnnouncements', {layout: staffMain});
 });
 
@@ -215,26 +236,45 @@ router.post('/create-staff', (req, res) => {
     if (errors.length > 0) {
         res.render('staff/createStaff', {
             errors,
-            type,
             fname,
             lname,
-            gender,
             dob,
             hp,
             address,
-            password,
-            pw2,
             layout: staffMain
         });
     } else {
+        let image;
+        User.max('id')
+        .then((x) => {
+            x = parseInt(x) + 1
+            let p = './public/uploads/staff_pictures/' + x.toString()
+            let type1 = p + '.jpg'
+            let type2 = p + '.jpeg'
+            let type3 = p + '.png'
+            console.log(type1)
+            console.log(type2)
+            console.log(type3)
+            if (fs.existsSync(type1)) {
+                image = path.basename(type1);
+                console.log('type1!')
+            } else if (fs.existsSync(type2)) {
+                image = path.basename(type2);
+                console.log('type2!')
+            } else if (fs.existsSync(type3)) {
+                image = path.basename(type3);
+                console.log('type3!')
+            } else {
+                image = 'staff.png'
+            }
+        })
         User.max('staffId')
         .then(c => {
             password = bcrypt.hashSync(password, 10);
             let staffId = (1 + parseInt(c)).toString().padStart(6, '0');
             let domain = "@monoqlo.com";
             email = staffId + domain;
-
-            User.create({type, staffId, email, fname, lname, gender, dob, hp, address, password})
+            User.create({type, staffId, image, email, fname, lname, gender, dob, hp, address, password})
             .then(user => {
                 res.redirect('/staff/accounts');
                 alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
@@ -250,7 +290,9 @@ router.get('/your-account', (req, res) => {
             id: req.user.id
         }
     }).then((user) => {
-        res.render('staff/accountDetails', {layout: staffMain, user})
+        let src = "/uploads/staff_pictures/" + user.image
+        console.log(src)
+        res.render('staff/accountDetails', {layout: staffMain, user, src})
     })
 });
 

@@ -18,54 +18,8 @@
             <th data-field="email">Email</th>
             <th data-field="hp">H/P</th>
             <th></th>
-            <th></th>
-            <th></th>
         </thead>
     </table>
-
-
-
-    {{!-- {{#if accounts}}
-    <h1 class="text-muted">Accounts</h1>
-    <hr>
-    <div>
-        <table id="accountsList" data-toggle="table" data-pagination="true" data-search="true">
-            <thead>
-                <tr>
-                    <th data-sortable="true">Type</th>
-                    <th data-sortable="true">First Name</th>
-                    <th data-sortable="true">Last Name</th>
-                    <th class="th-sm">Email</th>
-                    <th class="th-sm">HP</th>
-                    <th class="th-sm"></th>
-                    <th class="th-sm"></th>
-                    <th class="th-sm"></th>
-                </tr>
-            </thead>
-            <tbody>
-                {{#each accounts}}
-                    <tr>
-                        <td>{{type}}</td>
-                        <td>{{fname}}</td>
-                        <td>{{lname}}</td>
-                        <td>{{email}}</td>
-                        <td>{{hp}}</td>
-                        <td><a href="/staff/manageAccount/{{id}}" class="btn"><i class="fas fa-pencil-square-o"></i></a></td>
-                        <td>
-                            <a href="/staff/deleteStaff/{{id}}" class="btn"><i class="fas fa-trash"></i></a></td>
-                        </td>
-                        <td>
-                            <a href="/staff/staffPDF/{{id}}" class="btn" target="_blank"><i class="fas fa-print"></i></a>
-                        </td>
-                    </tr>
-                {{/each}}
-            </tbody>
-        </table>
-    </div>
-
-    {{else}}
-        <h3>No accounts registered.</h3>
-    {{/if}} --}}
 
 </div>
 
@@ -74,4 +28,80 @@
         format: 'yyyy-mm-dd',
         uiLibrary: 'bootstrap4',
         defaultDate: "{{formatDate content.dob 'YYYY-MM-DD'}}"
+    
+    var $table = $('#table')
+
+    function operateFormatter(value, row, index) {
+        return [
+            '<a class="edit" href="javascript:void(0)" title="Edit">',
+            '<i class="fa fa-pencil"></i>',
+            '</a>  ',
+            '<a class="delete" href="javascript:void(0)" title="Remove">',
+            '<i class="fa fa-trash"></i>',
+            '</a>',
+            '<a class="print" href="javascript:void(0)" title="Print">',
+            '<i class="fa fa-printer"></i>',
+            '</a>'
+        ].join('')
+    }
+
+    window.operateEvents = {
+        'click .edit': function (e, value, row, index) {
+            $table.bootstrapTable('edit', {
+                field: 'id',
+                values: [row.id]
+            })
+        },
+        'click .delete': function (e, value, row, index) {
+            $table.bootstrapTable('remove', {
+                field: 'id',
+                values: [row.id]
+            })
+        },
+        'click .print': function (e, value, row, index) {
+            $table.bootstrapTable('print', {
+                field: 'id',
+                values: [row.id]
+            })
+        }
+    }
+
+    $table.bootstrapTable({
+        columns: [
+            {
+                title: 'Type',
+                field: 'type',
+                align: 'center',
+                valign: 'middle'
+                sortable: true,
+            }, {
+                title: 'First Name',
+                field: 'fname',
+                align: 'center',
+                valign: 'middle',
+                sortable: true,
+            }, {
+                title: 'Last Name',
+                field: 'lname',
+                align: 'center',
+                valign: 'middle',
+                sortable: true,
+            },
+            {
+                title: 'Email',
+                field: 'email',
+                align: 'center'
+            }, {
+                title: 'H/P',
+                field: 'hp',
+                align: 'center'
+            }, {
+                field: 'id',
+                align: 'center',
+                clickToSelect: false,
+                events: window.operateEvents,
+                formatter: operateFormatter
+            }
+        ]
+    })
 </script>

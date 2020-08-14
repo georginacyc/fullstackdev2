@@ -532,6 +532,44 @@ router.put('/item/save-edited/:itemSerial', (req, res) => {
     }).catch(err => console.log(err)); // To catch no item serial
 });
 
+// discontinue item
+router.get('/item/discontinue/:itemSerial', (req, res) => {
+    Item.findOne({
+        where: {
+            itemSerial: req.params.itemSerial
+        }, raw: true
+    }).then((item) => {
+        // calls views/staff/editItem.handlebar to render the edit item
+
+        res.render('staff/discontinueItem', {
+            layout: staffMain,
+            item // passes the item object to handlebars
+
+        });
+    }).catch(err => console.log(err)); // To catch no item serial
+});
+
+
+router.put('/item/save-discontinue/:itemSerial', (req, res) => {
+    Item.findOne({
+        where: {
+            itemSerial: req.params.itemSerial
+        }, raw: true
+    }).then((item) => {
+        // variables to be updated
+        // only select variables can be edited
+        Item.update({
+            status : "Discontinued"
+        }, {
+            where: {
+                itemSerial: req.params.itemSerial
+            }
+        })
+        // redirects back to the main item page
+        res.redirect('/staff/item/view-all');
+    }).catch(err => console.log(err)); // To catch no item serial
+});
+
 
 
 router.get('/item/create', (req, res) => {
@@ -553,13 +591,25 @@ router.get('/inventory', (req, res) => {
 
 //Stock Order Routes
 
-router.get('/inventory/order-stock', (req, res) => {
-    res.render('staff/createStockOrder', {
-        layout: staffMain
-    })
-});
+router.get('/inventory/order-stock/:itemSerial', (req, res) => {
+    Item.findOne({
+        where: {
+            itemSerial: req.params.itemSerial
+        }, raw: true
+    }).then((item) => {
+        // calls views/staff/editItem.handlebar to render the edit item
 
-router.post('/inventory/order-stock', (req, res) => {
+        res.render('staff/createStockOrder', {
+            layout: staffMain,
+            item // passes the item object to handlebars
+
+        });
+    }).catch(err => console.log(err)); // To catch no item serial
+});
+    
+
+
+router.post('/inventory/order-stock/:itemSerial', (req, res) => {
     let errors = [];
 
     //Adds new item
@@ -568,7 +618,7 @@ router.post('/inventory/order-stock', (req, res) => {
     let shipmentDate = moment(req.body.shipmentDate, 'DD-MM-YYY');
     let itemSerial = req.body.itemSerial;
     let stockorderQuantity = req.body.stockorderQuantity;
-    let receivedDate = "";
+    let receivedDate = undefined;
 
     StockOrder.create({
         stockorderDate,
@@ -580,7 +630,7 @@ router.post('/inventory/order-stock', (req, res) => {
         }).then(stockorder => {
             res.redirect('/staff/inventory');
         })
-        .catc(err => console.log(err))
+        .catch(err => console.log(err))
 
 })
 

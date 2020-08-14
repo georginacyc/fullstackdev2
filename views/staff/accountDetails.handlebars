@@ -6,9 +6,8 @@
         <hr class="titleHR">
         <div class="row">
             <div class="form-group col-6 col-sm-12 col-md-6 col-lg-6">
-                <img src="{{{this.src}}}">
+                <img class="backup_picture border img-thumbnail img-fluid" style="max-height: 360px; max-width: 240px" src="{{{src}}}" >
             </div>
-            {{src}}
             <div class="form-group col-6 col-sm-12 col-md-6 col-lg-6">
                 <div class="short-div">
                     <label class="font-italic" for="fname">First Name</label>
@@ -24,19 +23,6 @@
                     <input class="form-control" type="text" id="gender" value="{{user.gender}}" readonly>
                 </div>
             </div>
-            {{!-- <div class="form-group col-6 col-sm-12 col-md-6 col-lg-6">
-                <label class="font-italic" for="fname">First Name</label>
-                <input class="form-control" type="text" id="fname" name="fname" value="{{user.fname}}" readonly>
-            </div>
-            <div class="form-group mb-4 col-6 col-sm-12 col-md-6 col-lg-6">
-                <label class="font-italic" for="lname">Last Name</label>
-                <input class="form-control" type="text" id="lname" name="lname" value="{{user.lname}}" readonly>
-            </div>
-            <div class="col-6 col-sm-12 col-md-6 col-lg-6">
-                <label class="font-italic">Gender</label>
-                <br>
-                <input class="form-control" type="text" id="gender" value="{{user.gender}}" readonly>
-            </div> --}}
         </div>
 
         <div class="row">
@@ -103,5 +89,13 @@
         </form>
     </div>
 </div>
+<script>
+$(document).ready(function()
+{
+    $(".backup_picture").on("error", function(){
+        $(this).attr('src', '/img/staff.png');
+    });
+});
+</script>
     
 

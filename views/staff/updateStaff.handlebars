@@ -7,7 +7,8 @@
         <input type="hidden" name="_method" value="PUT">
         <div class="row">
             <div class="form-group col-6 col-sm-12 col-md-6 col-lg-6">
-                <img class="backup_picture border img-thumbnail img-fluid" style="max-height: 360px; max-width: 240px" src="/uploads/staff_pictures/{{{user.image}}}" >
+                <img class="backup_picture border img-thumbnail img-fluid" style="max-height: 360px; max-width: 240px" id="preivew" src="/uploads/staff_pictures/{{{user.image}}}" ><br>
+                <input type="file" id="staffUpload2" name="staffUpload2" accept="image/png, image/jpeg, image/jpg" onchange="staffUpload('/staff/update-staff-picture/{{user.id}}')">
             </div>
             <div class="form-group col-6 col-sm-12 col-md-6 col-lg-6">
                 <div class="short-div">
@@ -78,3 +79,26 @@
         <input type="submit" value="Submit" class="btn btn-primary"/>
     </form>
 </div>
+
+<script>
+    $('#staffUpload2').onclick = function () {
+        this.value = null;
+        console.log('nullified')
+    }
+    function staffUpload(url) {
+        console.log('fired');
+        let image = $('#staffUpload2')[0].files[0];
+        let formdata = new FormData();
+        formdata.append('staffUpload2', image);
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: formdata,
+            contentType: false,
+            processData: false,
+            'success': (data) => {
+                $('#preview').attr('src', data.file);
+            }
+        })
+    }
+</script>

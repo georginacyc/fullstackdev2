@@ -37,6 +37,10 @@ const User = db.define('user', {
     password: {
         type: Sequelize.STRING
     },
+    lastLogin: {
+        type: Sequelize.STRING,
+        defaultValue: 'N/A'
+    }
 });
 
 module.exports = User;

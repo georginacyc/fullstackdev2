@@ -32,6 +32,20 @@ router.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
+router.get('/update', (req, res) => {
+    date = new Date();
+    now = ("0" + date.getDate()).slice(-2) + '/' + ("0" + (date.getMonth() + 1)).slice(-2) + '/' + date.getFullYear() + " " + date.getHours()+ ":" + date.getMinutes()
+    User.update({
+        lastLogin: now
+    }, {
+        where: {
+            id: req.user.id
+        }
+    }).then(() => {
+        res.redirect('/staff/home');
+    }).catch(err => console.log(err));
+})
+
 router.get('/home', (req, res) => {
         res.render('staff/staffhome', {layout: staffMain});
 });

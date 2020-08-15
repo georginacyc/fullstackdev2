@@ -1,0 +1,41 @@
+{{!-- view stock orders page --}}
+<h2>Inventory</h2>
+
+<nav class="navbar-light">
+    <a style="font-weight: bold; color:darkslategrey" href="/staff/inventory">Main</a>
+    <a style="color:darkslategrey" href="#">Incoming Orders</a>
+</nav>
+<hr>
+
+<div class="container">
+    <table class="table table-fluid" id="myTable">
+        <thead>
+            <tr class="table-primary">
+                <th>ID</th>
+                <th>Order Date</th>
+                <th>Status</th>
+                <th>Shipment Date</th>
+                <th>Received Date</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each stockorder}}
+            <tr>
+                <td>{{id}}</td>
+                <td>{{stockorderDate}}</td>
+                <td>{{shipmentStatus}}</td>
+                <td>{{shipmentDate}}</td>
+                <td>{{receivedDate}}</td>
+                <td><a href="#" class="btn btn-warning">Receive</a></td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#myTable').DataTable();
+    });
+</script>

@@ -551,6 +551,17 @@ router.get('/inventory', (req, res) => {
 
 //Stock Order Routes
 
+router.get('/inventory/view-stock-orders', (req, res) => {
+    StockOrder.findAll({
+        raw: true
+    }).then((stockorder) => {
+            res.render('staff/stockOrders', {
+                stockorder,
+                layout: staffMain
+            })
+        })
+});
+
 router.get('/inventory/order-stock/:itemSerial', (req, res) => {
     Item.findOne({
         where: {
@@ -566,7 +577,6 @@ router.get('/inventory/order-stock/:itemSerial', (req, res) => {
         });
     }).catch(err => console.log(err)); // To catch no item serial
 });
-    
 
 
 router.post('/inventory/order-stock/:itemSerial', (req, res) => {

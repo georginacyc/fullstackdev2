@@ -19,6 +19,8 @@ const pdf = require('pdf-creator-node');
 const fs = require('fs');
 const sequelize = require('sequelize');
 const Op = sequelize.Op;
+const upload = require('../helpers/staffUpload');
+const path = require('path')
 
 // var Handlebars = require("handlebars");
 // var MomentHandler = require("handlebars.moment");
@@ -32,6 +34,24 @@ router.get('/logout', (req, res) => {
 router.get('/home', (req, res) => {
         res.render('staff/staffhome', {layout: staffMain});
 });
+
+router.post('/upload', (req, res) => {
+    console.log('post upload')
+    if (!fs.existsSync('./public/uploads/staff_pictures/')) {
+        fs.mkdirSync('./public/uploads/staff_pictures/')
+    }
+    upload(req, res, (err) => {
+        if (err) {
+            res.json({err: err})
+        } else {
+            if (req.file === undefined) {
+                res.json({err: err})
+            } else {
+                res.json({file: `/uploads/staff_pictures/${req.file.filename}`});
+            }
+        }
+    });
+})
 
 // to retrieve ALL accounts, regardless of whether it's a staff or customer account.
 // router.get('/accounts', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
@@ -66,7 +86,7 @@ async function accountsData(req, res) {
 		console.error("Malformed Get request:");
 		console.error(req.query);
 		console.error(error);
-		return res.status(400);
+		return res.status(400).end();
     }
 
     try {
@@ -76,11 +96,9 @@ async function accountsData(req, res) {
             limit: limit,
             order: [
                 [sortBy, order.toUpperCase()]
-            ]
-        }).map((it) => {
-            console.log(it.uuid);
-            return it.toJSON();
-        });
+            ], 
+            raw: true
+        })
         return res.status(200).json({
             "total": total,
             "rows": accsList
@@ -157,11 +175,12 @@ router.get('/announcements', (req, res) => {
 
 router.get('/announcements-data', announcementsData);
 
-router.get('/createAnnouncement', adminAuth, (req, res) => {
+router.get('/create-announcement', adminAuth, (req, res) => {
+    console.log(req.body.preview);
     res.render('staff/createAnnouncements', {layout: staffMain});
 });
 
-router.post('/createAnnouncement', adminAuth, (req, res) => {
+router.post('/create-announcement', adminAuth, (req, res) => {
     let errors = [];
 
     let {title, description} = req.body;
@@ -191,11 +210,11 @@ router.post('/createAnnouncement', adminAuth, (req, res) => {
     }
 });
 
-router.get('/createStaffAccount', (req, res) => {
+router.get('/create-staff', (req, res) => {
     res.render('staff/createStaff', {layout: staffMain});
 });
 
-router.post('/createStaffAccount', (req, res) => {
+router.post('/create-staff', (req, res) => {
     let errors = [];
 
     let {type, fname, lname, gender, dob, hp, address, password, pw2} = req.body;
@@ -217,26 +236,45 @@ router.post('/createStaffAccount', (req, res) => {
     if (errors.length > 0) {
         res.render('staff/createStaff', {
             errors,
-            type,
             fname,
             lname,
-            gender,
             dob,
             hp,
             address,
-            password,
-            pw2,
             layout: staffMain
         });
     } else {
+        let image;
+        User.max('id')
+        .then((x) => {
+            x = parseInt(x) + 1
+            let p = './public/uploads/staff_pictures/' + x.toString()
+            let type1 = p + '.jpg'
+            let type2 = p + '.jpeg'
+            let type3 = p + '.png'
+            console.log(type1)
+            console.log(type2)
+            console.log(type3)
+            if (fs.existsSync(type1)) {
+                image = path.basename(type1);
+                console.log('type1!')
+            } else if (fs.existsSync(type2)) {
+                image = path.basename(type2);
+                console.log('type2!')
+            } else if (fs.existsSync(type3)) {
+                image = path.basename(type3);
+                console.log('type3!')
+            } else {
+                image = 'staff.png'
+            }
+        })
         User.max('staffId')
         .then(c => {
             password = bcrypt.hashSync(password, 10);
             let staffId = (1 + parseInt(c)).toString().padStart(6, '0');
             let domain = "@monoqlo.com";
             email = staffId + domain;
-
-            User.create({type, staffId, email, fname, lname, gender, dob, hp, address, password})
+            User.create({type, staffId, image, email, fname, lname, gender, dob, hp, address, password})
             .then(user => {
                 res.redirect('/staff/accounts');
                 alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
@@ -246,17 +284,19 @@ router.post('/createStaffAccount', (req, res) => {
     }
 });
 
-router.get('/yourAccount', (req, res) => {
+router.get('/your-account', (req, res) => {
     User.findOne({
         where: {
             id: req.user.id
         }
     }).then((user) => {
-        res.render('staff/accountDetails', {layout: staffMain, user})
+        let src = "/uploads/staff_pictures/" + user.image
+        console.log(src)
+        res.render('staff/accountDetails', {layout: staffMain, user, src})
     })
 });
 
-router.put('/changePassword/:id', (req, res) => {
+router.put('/change-password/:id', (req, res) => {
     let {oldpw, newpw, newpw2} = req.body;
     User.findOne({
         where: {
@@ -277,19 +317,19 @@ router.put('/changePassword/:id', (req, res) => {
                 })
                 alertMessage(res, 'success', 'Successfully changed password!', true);
                 req.logout()
-                res.redirect('/staffLogin');
+                res.redirect('/staff-login');
             } else {
                 alertMessage(res, 'danger', 'New passwords must match.', true);
-                res.redirect('/staff/yourAccount');
+                res.redirect('/staff/your-account');
             }
         } else {
             alertMessage(res, 'danger', 'Old password is incorrect.', true);
-            res.redirect('/staff/yourAccount');
+            res.redirect('/staff/your-account');
         }
     }).catch(err => console.log(err))
 });
 
-router.get('/manageAccount/:id', adminAuth, (req, res) => {
+router.get('/manage-staff/:id', adminAuth, (req, res) => {
     User.findOne({
         where: {
             id: req.params.id
@@ -299,7 +339,7 @@ router.get('/manageAccount/:id', adminAuth, (req, res) => {
     }).catch(err => console.log(err));
 });
 
-router.put('/saveStaff/:id', adminAuth, (req, res) => {
+router.put('/save-staff/:id', adminAuth, (req, res) => {
     let {type, fname, lname, gender, dob, hp, address, resetpw} = req.body;
     console.log(resetpw);
     if (resetpw == "reset") {
@@ -331,7 +371,7 @@ router.put('/saveStaff/:id', adminAuth, (req, res) => {
     }).catch(err => console.log(err));
 });
 
-router.get('/deleteStaff/:id', adminAuth, (req, res) => {
+router.get('/delete-staff/:id', adminAuth, (req, res) => {
     User.findOne({
         where: {
             id: req.params.id
@@ -353,7 +393,7 @@ router.get('/deleteStaff/:id', adminAuth, (req, res) => {
     }).catch(err => console.log(err))
 });
 
-router.get('/staffPDF/:id', (req, res) => {
+router.get('/staff-pdf/:id', (req, res) => {
     User.findOne({
         where: {
             id: req.params.id

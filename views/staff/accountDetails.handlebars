@@ -6,50 +6,47 @@
         <hr class="titleHR">
         <div class="row">
             <div class="form-group col-6 col-sm-12 col-md-6 col-lg-6">
-                <label class="font-italic" for="fname">First Name</label>
-                <input class="form-control" type="text" id="fname" name="fname" value="{{user.fname}}" readonly>
+                <img class="backup_picture border img-thumbnail img-fluid" style="max-height: 360px; max-width: 240px" src="{{{src}}}" >
             </div>
-            <div class="form-group mb-4 col-6 col-sm-12 col-md-6 col-lg-6">
-                <label class="font-italic" for="lname">Last Name</label>
-                <input class="form-control" type="text" id="lname" name="lname" value="{{user.lname}}" readonly>
+            <div class="form-group col-6 col-sm-12 col-md-6 col-lg-6">
+                <div class="short-div">
+                    <label class="font-italic" for="fname">First Name</label>
+                    <input class="form-control" type="text" id="fname" name="fname" value="{{user.fname}}" readonly>
+                </div>
+                <div class="short-div">
+                    <label class="font-italic" for="lname">Last Name</label>
+                    <input class="form-control" type="text" id="lname" name="lname" value="{{user.lname}}" readonly>
+                </div>
+                <div class="short-div">
+                    <label class="font-italic">Gender</label>
+                    <br>
+                    <input class="form-control" type="text" id="gender" value="{{user.gender}}" readonly>
+                </div>
             </div>
         </div>
 
         <div class="row">
+            <div class="form-group col-6 col-sm-12 col-md-6 col-lg-6">
+                <label class="font-italic">Account Type</label>
+                <br>
+                <input class="form-control" type="text" id="gender" value="{{user.type}}" readonly>
+            </div>
             <div class="form-group col-12 col-sm-12 col-md-6 col-lg-6">
                 <label class="font-italic" for="fname">Staff Email</label>
                 <input class="form-control" type="text" id="email" value="{{user.email}}" readonly>
             </div>
         </div>
-        
-        <div class="row">
-            <div class="col-6 col-sm-12 col-md-6 col-lg-6">
-                <label class="font-italic">Account Type</label>
-                <br>
-                <input class="form-control" type="text" id="gender" value="{{user.type}}" readonly>
-            </div>
-
-            <div class="col-6 col-sm-12 col-md-6 col-lg-6">
-                <label class="font-italic">Gender</label>
-                <br>
-                <input class="form-control" type="text" id="gender" value="{{user.gender}}" readonly>
-            </div>
-        </div>
 
         <div class="row">
-            <div class="form-group col-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="form-group col-6 col-sm-12 col-md-6 col-lg-6">
                 <label class="font-italic" for="sDOB">Date of Birth</label>
                 <input class="form-control" type="text" id="dob" value="{{user.dob}}" readonly>
             </div>
-        </div>
-
-        <div class="row">
-            <div class="form-group col-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="form-group col-6 col-sm-12 col-md-6 col-lg-6">
                 <label class="font-italic" for="sHP">HP</label>
                 <input class="form-control" type="text" id="hp" value="{{user.hp}}" readonly>
             </div>
         </div>
-            
 
         <div class="row">
             <div class="form-group col-12 col-sm-12 col-md-12 col-lg-12">
@@ -59,13 +56,13 @@
         </div>
 
         <div style="text-align: right">
-            <a href="/staff/staffPDF/{{user.id}}" class="btn btn-light btn-sm" target="_blank"><i class="fas fa-print"><span style="font-family: Arial"> Print</span></span></i></a>
+            <a href="/staff/staff-pdf/{{user.id}}" class="btn btn-light btn-sm" target="_blank"><i class="fas fa-print"><span style="font-family: Arial"> Print</span></span></i></a>
         </div>
         
         <hr>
 
         {{!-- password change form; staff can change their password, provided that they know their old password --}}
-        <form method="POST" action="/staff/changePassword/{{user.id}}?_method=PUT">
+        <form method="POST" action="/staff/change-password/{{user.id}}?_method=PUT">
         <input type="hidden" name="_method" value="PUT">
             <p style="font-weight:bold">Update Password</p>
             <div class="row">
@@ -92,5 +89,13 @@
         </form>
     </div>
 </div>
+<script>
+$(document).ready(function()
+{
+    $(".backup_picture").on("error", function(){
+        $(this).attr('src', '/img/staff.png');
+    });
+});
+</script>
     
 

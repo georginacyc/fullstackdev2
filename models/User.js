@@ -9,6 +9,10 @@ const User = db.define('user', {
     staffId: {
         type: Sequelize.STRING
     },
+    image: {
+        type: Sequelize.STRING,
+        defaultValue: 'staff.png'
+    },
     email: {
         type: Sequelize.STRING
     },

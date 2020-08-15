@@ -8,7 +8,6 @@ const staffRoute = require('./staff');
 const ensureAuthenticated = require('../helpers/auth'); // to verify that a user is logged in
 const staffAuth = require('../helpers/staffAuth'); // to verify that user logged in is a Staff
 const Item = require('../models/Item');
-const bootstrap = require('bootstrap')
 
 router.get('/', (req, res) => {
     res.render('home')
@@ -32,9 +31,6 @@ router.use('/staff', ensureAuthenticated, staffAuth, staffRoute);
 
 router.get('/catalogue', (req, res) => {
     Item.findAll({
-        where: {
-            itemGender: "M"
-        },
         raw: true
     })
         .then((item) => {
@@ -45,14 +41,13 @@ router.get('/catalogue', (req, res) => {
     
 });
 
-router.get('/view/:itemSerial', (req, res) => {
+router.get('/view/itemSerial', (req, res) => {
     Item.findOne({
         where: {
             itemSerial: req.params.itemSerial
         }, raw: true
     }).then((item) => {
-        res.render('view/:itemSerial', {
-            layout: staffMain,
+        res.render('viewDetails', {
             item // passes the item object to handlebars
 
         });

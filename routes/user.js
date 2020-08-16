@@ -7,6 +7,7 @@ const alertMessage = require('../helpers/messenger');
 const bcrypt = require('bcryptjs');
 const Custorder = require('../models/CustOrders');
 const CustOrders = require('../models/CustOrders');
+const Item = require('../models/Item');
 
 
 // routing goes in between !!!!
@@ -138,7 +139,15 @@ router.get('/accounts', (req, res) => {
     
 //user shopping cart
 router.get('/cart', (req, res) => {
-	res.render('user/cart') // renders views/cart.handlebars
+    Item.findAll({
+        raw: true
+    })
+        .then((item) => {
+            res.render('user/cart', {
+                item: item
+            })
+        })
+        // renders views/cart.handlebars
 });
 
 //user checkout
@@ -163,7 +172,8 @@ router.get('/orders', (req, res) => {
 });
 */
 router.post('/checkout', (req, res) => {
-    let userId = 1001;
+    let {itemSerial} = req.body
+    /*let userId = 1001;
     let itemSerial = "2222TF";
     let quantity = 1;
     let status = "pending";
@@ -188,7 +198,7 @@ router.post('/checkout', (req, res) => {
     }) 
     .then(custorder => {
         res.redirect('/user/orders');})
-    .catch(err => console.log(err))
+    .catch(err => console.log(err))*/
 
 });
 

@@ -1,4 +1,8 @@
 <style>
+    .image1 {
+            width: 200px;
+            height: 200px;
+        }
     /* The container */
     .container {
     display: block;
@@ -63,7 +67,23 @@
         background: white;
     }
 </style>
-hello
+<div class="container">
+    <h2>Men's</h2>
+    <table class="table table-fluid" id="table_id">
+        <tbody>
+            <tr>
+                <td><img src= "\img\itemPlaceholder.jpg " class="image1"></td>
+                <td><a href="/viewDetails/{{itemSerial}}">{{item.itemName}}</a></td>
+                <td>
+                    <p>Size</p>
+                </td>
+                </tr>
+                <tr>
+                <td>${{item.itemPrice}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 <label class="container">S
     <input type="radio" checked="checked" name="radio">
     <span class="checkmark"></span>

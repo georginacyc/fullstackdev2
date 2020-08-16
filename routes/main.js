@@ -41,13 +41,13 @@ router.get('/catalogue', (req, res) => {
     
 });
 
-router.get('/view/itemSerial', (req, res) => {
+router.get('/viewDetails/:itemSerial', (req, res) => {
     Item.findOne({
         where: {
             itemSerial: req.params.itemSerial
         }, raw: true
     }).then((item) => {
-        res.render('viewDetails', {
+         res.render('viewDetails', {
             item // passes the item object to handlebars
 
         });

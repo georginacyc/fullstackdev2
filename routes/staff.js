@@ -545,7 +545,6 @@ router.post('/item/create', (req, res) => {
     let itemCategory = req.body.itemCategory === undefined ? '' : req.body.itemCategory.toString();
     let itemGender = req.body.itemGender === undefined ? '' : req.body.itemGender.toString();
     let prefix = generateSerial();
-    console.log(prefix+"ahhh");
     let itemSerial = prefix + itemCategory.slice(0,1) + itemGender;
     let itemCost = req.body.itemCost;
     let itemPrice = req.body.itemPrice;

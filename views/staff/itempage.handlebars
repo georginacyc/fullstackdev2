@@ -1,9 +1,28 @@
 {{!-- item list page --}}
 
+<style>
+    .table-primary,
+    .table-primary>td,
+    .table-primary>th {
+        background-color: gray;
+    }
+
+    .table-primary tbody+tbody,
+    .table-primary td,
+    .table-primary th,
+    .table-primary thead th {
+        border-color: black;
+    }
+
+    .table-primary, .table tr{
+        text-align: center;
+    }
+</style>
+
 <div class="container">
     <h2>Item List</h2>
     <table class="table table-fluid" id="myTable">
-        <thead>
+        <thead style="color: white;">
             <tr class="table-primary">
                 <th>Item Name</th>
                 <th>Item Serial</th>

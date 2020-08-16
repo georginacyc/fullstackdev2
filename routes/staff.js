@@ -455,7 +455,7 @@ router.get('/delete-staff/:id', adminAuth, (req, res) => {
     }).catch(err => console.log(err))
 });
 
-router.get('/staff-pdf/:id', (req, res) => {
+router.get('/pdf/:id', (req, res) => {
     User.findOne({
         where: {
             id: req.params.id

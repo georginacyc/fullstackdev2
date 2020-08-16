@@ -28,9 +28,15 @@ var Handlebars = require("handlebars");
 // var MomentHandler = require("handlebars.moment");
 // MomentHandler.registerHelpers(Handlebars);
 
+// item status helper
 Handlebars.registerHelper('isDiscontinued', function(status){
         return status == "Discontinued";
-    })
+})
+    
+// stock order status helper
+Handlebars.registerHelper('isReceived', function (status) {
+    return status == "Received";
+})
 
 router.get('/logout', (req, res) => {
     req.logout();
@@ -675,7 +681,7 @@ router.get('/inventory/order-stock/:itemSerial', (req, res) => {
         }, raw: true
     }).then((item) => {
         // calls views/staff/editItem.handlebar to render the edit item
-
+        
         res.render('staff/createStockOrder', {
             layout: staffMain,
             item // passes the item object to handlebars
@@ -707,10 +713,69 @@ router.post('/inventory/order-stock/:itemSerial', (req, res) => {
         }).then(stockorder => {
             res.redirect('/staff/inventory/view-stock-orders');
         })
-        .catch(err => res.redirect('/staff/error'))
+        .catch(err => res.render('/staff/errorpage', {errors}))
 
 })
 
+router.get('/inventory/stock/receive/:id', (req, res) => {
+    let receivedDate = moment().format('YYYY-MM-DD');
+    StockOrder.findOne({
+        where: {
+            id: req.params.id
+        }, raw: true,
+    }).then((stockorder) => {
+        console.log(stockorder),
+        res.render('staff/receiveOrder', {
+            layout: staffMain,
+            stockorder, receivedDate // passes the item object to handlebars
+
+        });
+    }).catch(err => res.render('staff/errorpage')); // To catch no item serial
+});
+
+router.put('/inventory/stock/save-recieve/:id', (req, res) => {
+    let receivedDate = moment().format('YYYY-MM-DD');
+    
+    StockOrder.findOne({
+        where: {
+            id: req.params.id
+        }, raw: true
+    }).then((stockorder) => {
+        // variables to be updated
+        // only select variables can be edited
+        var stockorderQuantity = stockorder.stockorderQuantity
+        var itemSerial = stockorder.itemSerial
+        // find item to be updated
+        Item.findOne({
+            where: {
+                itemSerial: stockorder.itemSerial
+            }, raw: true
+        }).then((item) => {
+            // set new stock level
+            var newStockLevel = item.stockLevel += stockorderQuantity;
+            Item.update({
+                stockLevel: newStockLevel
+            }, {
+                where: {
+                    itemSerial: itemSerial
+                }
+            }).then(
+        StockOrder.update({
+            shipmentStatus: "Received",
+            receivedDate: receivedDate
+        }, {
+            where: {
+                id: req.params.id
+            }
+        }))
+    })
+        // redirects back to the main item page
+        res.redirect('/staff/inventory/view-stock-orders');
+    }).catch(err => res.render('staff/errorpage')); // To catch no item serial
+});
+
+
+//error page
 router.get('/error', (req, res) => {
     let errors = [];
     res.render('/staff/errorpage', {

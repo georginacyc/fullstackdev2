@@ -19,3 +19,19 @@
 		</div>
 	</div>
 </div>
+
+<script>
+	window.onload = function() {
+            try {
+                var url_string = (window.location.href).toLowerCase();
+                var url = new URL(url_string);
+        		var query_string = url.searchParams.get("delete");
+        		console.log(query_string);
+				if (parseInt(query_string) == 1){
+					alert("User has been deleted");
+				}
+            } catch (err) {
+                console.log("Issues with Parsing URL Parameter's - " + err);
+            }
+}
+</script>

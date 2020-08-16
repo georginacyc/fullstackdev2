@@ -1,0 +1,33 @@
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <style>
+        .image1 {
+            width: 100px;
+            height: 100px;
+        }
+        
+    </style>
+</head>
+<div class="container">
+    <h2>Men's</h2>
+    <table class="table table-fluid" id="myTable">
+        <tbody>
+            {{#each item}}
+            <tr>
+                <td><img src= "\img\itemPlaceholder.jpg " class="image1"></td>
+            </tr>
+            <tr>
+                <td><a href="/view/:{{itemSerial}}">{{itemName}}</a></td>
+                <td>{{itemSizes}}</td>
+                <td>${{itemPrice}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#myTable').DataTable();
+    });
+</script>

@@ -16,6 +16,7 @@
 
     .table-primary, .table tr{
         text-align: center;
+        vertical-align: middle;
     }
 </style>
 
@@ -28,8 +29,8 @@
                 <th>Item Serial</th>
                 <th>Item Category</th>
                 <th>Item Gender</th>
-                <th>Item Cost</th>
                 <th>Item Price</th>
+                <th>Status</th>
                 <th>-</th>
                 <th>-</th>
             </tr>
@@ -41,10 +42,14 @@
                 <td>{{itemSerial}}</td>
                 <td>{{itemCategory}}</td>
                 <td>{{itemGender}}</td>
-                <td>${{itemCost}}</td>
                 <td>${{itemPrice}}</td>
+                <td>{{status}}</td>
                 <td><a href="/staff/item/edit/{{itemSerial}}" class="btn btn-warning">Update</a></td>
-                <td><a href="/staff/item/discontinue/{{itemSerial}}" class="btn btn-danger">Discontinue</a></td>
+                {{#if (isDiscontinued status)}}
+                    <td>Discontinued</td>
+                {{else}}
+                    <td><a type="button" href="/staff/item/discontinue/{{itemSerial}}" class="btn btn-danger" disabled>Discontinue</a></td>
+                {{/if}}
             </tr>
             {{/each}}
         </tbody>

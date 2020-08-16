@@ -20,7 +20,7 @@ router.post('/register', (req, res) => {
     let type = "User";
 	let errors = [];
     // Retrieves fields from register page from request body
-    let {fname,lname,gender,dob,hp,address, email, password, password2} = req.body;
+    let {fname,lname,gender,dob,hp,size,address, email, password, password2} = req.body;
 
     // Checks if both passwords entered are the same
     if(password !== password2) {
@@ -45,6 +45,7 @@ router.post('/register', (req, res) => {
             dob,
             hp,
             address,
+            size,
             email,
             password,
             password2
@@ -65,6 +66,7 @@ router.post('/register', (req, res) => {
                     dob,
                     hp,
                     address,
+                    size,
                     email,
                     password,
                     password2
@@ -73,9 +75,9 @@ router.post('/register', (req, res) => {
         
         password = bcrypt.hashSync(password, 10);
         // Create new user record
-        User.create({ type,fname,lname,gender,dob,hp,address, email, password })
+        User.create({ type,fname,lname,gender,dob,hp,address,size, email, password })
             .then(user => {
-            alertMessage(res, 'success', user.name + ' added.Please login', 'fas fa-sign-in-alt', true);
+            alertMessage(res, 'success',  ' Account created, please login', user.fname + 'fas fa-sign-in-alt', true);
             res.redirect('/');
             })
             .catch(err => console.log(err));
@@ -111,14 +113,106 @@ router.get('/', (req, res) =>{
 } );
 
 // User Profile
-router.get('/editUserAccount', (req,res)=>{
+router.get('/edit-user-account', (req,res)=>{
     User.findOne({
         where: {
             id: req.user.id
         }
     }).then((user) => {
-        res.render('user/editUserAccount', {user});
+        res.render('user/edit-user-account', {user});
     }) 
+});
+
+
+
+
+// Save user profile
+router.put('/saveUser/:id', (req, res) => {
+    // Retrieves edited values from req.body
+    let {fname, lname, hp, address,size,resetpw} = req.body;
+    let {oldpw,newpw,newpw2} = req.body;
+    let pw;
+    if (resetpw == "reset") {
+        
+        
+        console.log(oldpw)
+        
+        User.findOne({
+            where: {
+                id: req.user.id
+            }
+        }).then((user) => {
+            check = bcrypt.compareSync(oldpw, user.password)
+            console.log(check);
+            if (check) {
+                if (newpw == newpw2) {
+                    
+                    pw = bcrypt.hashSync(newpw, 10);
+                    alertMessage(res, 'success', 'Successfully changed password!', true);
+                    User.update({
+        
+                        fname: fname,
+                        lname: lname,
+                        hp: hp,
+                        address: address,
+                        size: size,
+                        password: pw
+                        
+                        
+                    
+                    }, {
+                        where: {
+                            id: req.user.id
+                    }
+                    }).then(() => {
+                            // After saving, redirect to router.get(/listVideos...) to retrieve all updated
+                            // videos
+                            console.log(pw)
+                    res.redirect('/user/edit-user-account');
+                    }).catch(err => console.log(err));
+                    req.logout()
+                    res.redirect('/user/login');
+                    
+                } else {
+                    alertMessage(res, 'danger', 'New passwords must match.', true);
+                    res.redirect('/user/edit-user-account');
+                }
+            } else {
+                
+                alertMessage(res, 'danger', 'Old password is incorrect.', true);
+                res.redirect('/user/edit-user-account');
+            }
+        }).catch(err => console.log(err))
+    } else {
+        User.findOne({
+            where: {
+                id: req.user.id
+            }
+        }).then((user) => {
+            pw = user.password
+            User.update({
+        
+                fname: fname,
+                lname: lname,
+                hp: hp,
+                address: address,
+                size: size,
+                password: pw
+                
+                
+            
+            }, {
+                where: {
+                    id: req.user.id
+            }
+            }).then(() => {
+            res.redirect('/user/edit-user-account');
+            }).catch(err => console.log(err));
+            
+        }).catch(err => console.log(err))
+
+    }
+    
 });
 
 // Logout User
@@ -126,7 +220,23 @@ router.get('/logout', (req, res) => {
 	req.logout();
 	res.redirect('/');
 });
-
+router.get('/deleteacc',(req, res)=>{ 
+    console.log("delete");
+    User.findOne({
+        where: {
+            id: req.user.id
+        }
+    }).then((user) =>
+   
+    User.destroy({
+        where: {
+            id: req.user.id
+        }
+        })).then((User) => {
+        //alertMessage(res, 'success', 'You have deleted your account, please register to be able to login again.', true);
+        res.send('/user/login?delete=1');
+        })
+} );
 router.get('/accounts', (req, res) => {
     User.findAll({
         raw: true

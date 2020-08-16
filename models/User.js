@@ -23,6 +23,9 @@ const User = db.define('user', {
     hp: {
         type: Sequelize.STRING
     },
+    size: {
+        type: Sequelize.STRING
+    },
     address: {
         type: Sequelize.STRING
     },

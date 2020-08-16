@@ -22,6 +22,7 @@ const Op = sequelize.Op;
 const upload = require('../helpers/staffUpload');
 const multer = require('multer');
 const path = require('path');
+const { DATEONLY } = require('sequelize');
 
 // var Handlebars = require("handlebars");
 // var MomentHandler = require("handlebars.moment");
@@ -684,7 +685,8 @@ router.post('/inventory/order-stock/:itemSerial', (req, res) => {
     let errors = [];
 
     //Adds new item
-    let stockorderDate = moment(req.body.stockorderDate, 'DD-MM-YYY');
+    // let stockorderDate = moment(req.body.stockorderDate, 'DD-MM-YYY');
+    let stockorderDate = new DATEONLY();
     let shipmentStatus = req.body.shipmentStatus;
     let shipmentDate = moment(req.body.shipmentDate, 'DD-MM-YYY');
     let itemSerial = req.body.itemSerial;
@@ -699,10 +701,17 @@ router.post('/inventory/order-stock/:itemSerial', (req, res) => {
         stockorderQuantity,
         receivedDate
         }).then(stockorder => {
-            res.redirect('/staff/inventory');
+            res.redirect('/staff/inventory/view-stock-orders');
         })
-        .catch(err => console.log(err))
+        .catch(err => res.redirect('/staff/error'))
 
+})
+
+router.get('/error', (req, res) => {
+    let errors = [];
+    res.render('/staff/errorpage', {
+        errors
+    })
 })
 
 

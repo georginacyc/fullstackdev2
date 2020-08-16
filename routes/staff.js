@@ -47,7 +47,7 @@ router.get('/update', (req, res) => {
 })
 
 router.get('/home', (req, res) => {
-        res.render('staff/staffhome', {layout: staffMain});
+    res.render('staff/staffhome', {layout: staffMain});
 });
 
 // to retrieve ALL accounts, regardless of whether it's a staff or customer account.

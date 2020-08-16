@@ -9,7 +9,6 @@ const User = require('../models/User')
 const ensureAuthenticated = require('../helpers/auth'); // to verify that a user is logged in
 const staffAuth = require('../helpers/staffAuth'); // to verify that user logged in is a Staff
 const Item = require('../models/Item');
-const bootstrap = require('bootstrap')
 
 router.get('/', (req, res) => {
     res.render('home')
@@ -26,10 +25,6 @@ router.post('/staff-login', (req, res, next) => {
         failureFlash: true,
     }) (req, res, next);
 });
-
-// router.use('/user', ensureAuthenticated, userRoute);
-router.use('/user', userRoute);
-router.use('/staff', ensureAuthenticated, staffAuth, staffRoute);
 
 router.get('/catalogue', (req, res) => {
     Item.findAll({
@@ -59,4 +54,13 @@ router.get('/view/:itemSerial', (req, res) => {
         });
     }).catch(err => console.log(err)); // To catch no item serial
 });
+
+router.get('/error', (req, res) => {
+    res.render('user/errorpage');
+})
+
+// router.use('/user', ensureAuthenticated, userRoute);
+router.use('/user', userRoute);
+router.use('/staff', ensureAuthenticated, staffAuth, staffRoute);
+
 module.exports = router;

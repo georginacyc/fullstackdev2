@@ -550,7 +550,7 @@ router.post('/item/create', (req, res) => {
     let itemPrice = req.body.itemPrice;
     let itemDescription = req.body.itemDescription;
     let stockLevel = 0;
-    let status = "In Production"
+    let status = "Active"
     // check for errors if not will add to db
     if (errors.length > 0) {
         res.render("/staff/createItem", {
@@ -702,7 +702,7 @@ router.post('/inventory/stock/order/:itemSerial', (req, res) => {
     // let stockorderDate = moment(req.body.stockorderDate, 'DD-MM-YYY');
     let stockorderDate = new DATEONLY();
     let shipmentStatus = req.body.shipmentStatus;
-    let shipmentDate = moment(req.body.shipmentDate, 'DD-MM-YYY');
+    let shipmentDate = moment(req.body.shipmentDate, 'YYYY-MM-DD');
     let itemSerial = req.body.itemSerial;
     let stockorderQuantity = req.body.stockorderQuantity;
     let receivedDate = undefined;

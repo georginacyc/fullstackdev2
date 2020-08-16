@@ -22,6 +22,7 @@ const Op = sequelize.Op;
 const upload = require('../helpers/staffUpload');
 const multer = require('multer');
 const path = require('path');
+const CustOrders = require('../models/CustOrders');
 
 // var Handlebars = require("handlebars");
 // var MomentHandler = require("handlebars.moment");
@@ -47,7 +48,114 @@ router.get('/update', (req, res) => {
 })
 
 router.get('/home', (req, res) => {
-    res.render('staff/staffhome', {layout: staffMain});
+    let data = [1, 10, 43, 23, 98, 90, 52]
+    let pendingShipments;
+    let thisMonthSales;
+    let OOSitems;
+    let genderData = [];
+    let ageData = [];
+    let categoryData = [];
+
+    let date = new Date();
+    let currMonth = date.getMonth() + 1;
+    let currYear = date.getFullYear();
+    let currDate = currYear.toString() + "-" + ("0" + currMonth.toString()).slice(-2) + "-" + "01";
+    let nextDate = currYear.toString() + "-" + ("0" + currMonth.toString()).slice(-2) + "-" + "01";
+
+    async function charts() {
+        await CustOrders.count({
+            where: {
+                ship_Date: null
+            }
+        }).then((num) => {
+            pendingShipments = num;
+        }).catch(err => console.log(err));
+        await CustOrders.count({
+            where: {
+                order_Date: {
+                    [Op.gte]: currDate,
+                    [Op.lt]: nextDate
+                }
+            }
+        }).then((num) => {
+            thisMonthSales = num;
+        }).catch(err => console.log(err));
+        await Item.count({
+            where: {
+                'stockLevel': 0
+            }
+        }).then((num) => {
+            OOSitems = num;
+        }).catch(err => console.log(err));
+        await User.count({
+            where: {
+                type: 'User',
+                gender: 'Female'
+            }
+        }).then((num) => {
+            genderData.push(num)
+        }).catch(err => console.log(err));
+        await User.count({
+            where: {
+                type: 'User',
+                gender: 'Male'
+            }
+        }).then((num) => {
+            genderData.push(num);
+        }).catch(err => console.log(err));
+        await User.count({
+            where: {
+                type: 'User',
+                gender: 'Other'
+            }
+        }).then((num) => {
+            genderData.push(num);
+        }).catch(err => console.log(err));
+        await User.findAll({
+            where: {
+                type: 'User'
+            },
+            attributes: ['dob'],
+            raw: true
+        }).then((result) => {
+            let p = {'18-29': 0, '30-39': 0, '40-49': 0, '50-59': 0, '60<': 0}
+            for (i=0; i<result.length; i++) {
+                str = result[i]['dob'].slice(0,5);
+                age = parseInt(currYear) - parseInt(str);
+                if (age >= 18 && age <= 29) {
+                    p['18-29'] += 1;
+                } else if (age >= 30 && age <= 39) {
+                    p['30-39'] += 1;
+                } else if (age >= 40 && age <= 49) {
+                    p['40-49'] += 1;
+                } else if (age >= 50 && age <= 59) {
+                    p['50-59'] += 1;
+                } else if (age >= 60) {
+                    p['60<'] += 1;
+                }
+            }
+            for (var key in p) {
+                ageData.push(p[key]);
+            }
+        }).catch(err => console.log(err));
+        await Item.count({
+            where: {
+                itemCategory: 'Top'
+            }
+        }).then((num) => {
+            categoryData.push(num);
+        }).catch(err => console.log(err));
+        await Item.coount({
+            where: {
+                itemCategory: 'Bottom'
+            }
+        }).then((num) => {
+            categoryData.push(num);
+        }).catch(err => console.log(err));
+    }
+    charts().then(() => {
+        res.render('staff/staffhome', {layout: staffMain, chartData: data, pendingShipments, thisMonthSales, OOSitems, genderData, ageData, categoryData});
+    }).catch(err => console.log(err))
 });
 
 // to retrieve ALL accounts, regardless of whether it's a staff or customer account.
@@ -272,13 +380,10 @@ router.post('/create-staff', (req, res) => {
             console.log(type3)
             if (fs.existsSync(type1)) {
                 image = path.basename(type1);
-                console.log('type1!')
             } else if (fs.existsSync(type2)) {
                 image = path.basename(type2);
-                console.log('type2!')
             } else if (fs.existsSync(type3)) {
                 image = path.basename(type3);
-                console.log('type3!')
             } else {
                 image = 'staff.png'
             }

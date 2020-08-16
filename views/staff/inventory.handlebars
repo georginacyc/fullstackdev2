@@ -22,7 +22,7 @@
 
 <nav class = "navbar-light">
     <a style="font-weight: bold; color:darkslategrey" href= "#">Main</a>
-    <a style="color:darkslategrey" href = "/staff/inventory/view-stock-orders">Incoming Orders</a>
+    <a style="color:darkslategrey" href = "/staff/inventory/stock/view-orders">Incoming Orders</a>
 </nav>
 <hr>
 
@@ -46,10 +46,10 @@
                     <td>${{itemCost}}</td>
                     <td>{{stockLevel}}</td>
                     <td>{{status}}</td>
-                    {{#if (isDiscontinued status)}}
+                    {{#if (discontinueCheck status)}}
                         <td>-</td>
                     {{else}}
-                        <td><a href="/staff/inventory/order-stock/{{itemSerial}}" class="btn btn-warning">Request Stock</a></td>
+                        <td><a href="/staff/inventory/stock/order/{{itemSerial}}" class="btn btn-warning">Request Stock</a></td>
                     {{/if}}
                 </tr>
             {{/each}}

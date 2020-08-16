@@ -23,20 +23,12 @@ const upload = require('../helpers/staffUpload');
 const multer = require('multer');
 const path = require('path');
 const { DATEONLY } = require('sequelize');
-var Handlebars = require("handlebars");
 
+//var Handlebars = require("handlebars");
 // var MomentHandler = require("handlebars.moment");
 // MomentHandler.registerHelpers(Handlebars);
 
-// item status helper
-Handlebars.registerHelper('isDiscontinued', function(status){
-        return status == "Discontinued";
-})
     
-// stock order status helper
-Handlebars.registerHelper('isReceived', function (status) {
-    return status == "Received";
-})
 
 router.get('/logout', (req, res) => {
     req.logout();
@@ -663,7 +655,7 @@ router.get('/inventory', (req, res) => {
 
 //Stock Order Routes
 
-router.get('/inventory/view-stock-orders', (req, res) => {
+router.get('/inventory/stock/view-orders', (req, res) => {
     StockOrder.findAll({
         raw: true
     }).then((stockorder) => {
@@ -674,7 +666,7 @@ router.get('/inventory/view-stock-orders', (req, res) => {
         })
 });
 
-router.get('/inventory/order-stock/:itemSerial', (req, res) => {
+router.get('/inventory/stock/order/:itemSerial', (req, res) => {
     Item.findOne({
         where: {
             itemSerial: req.params.itemSerial
@@ -691,7 +683,7 @@ router.get('/inventory/order-stock/:itemSerial', (req, res) => {
 });
 
 
-router.post('/inventory/order-stock/:itemSerial', (req, res) => {
+router.post('/inventory/stock/order/:itemSerial', (req, res) => {
     let errors = [];
 
     //Adds new item
@@ -711,7 +703,7 @@ router.post('/inventory/order-stock/:itemSerial', (req, res) => {
         stockorderQuantity,
         receivedDate
         }).then(stockorder => {
-            res.redirect('/staff/inventory/view-stock-orders');
+            res.redirect('/staff/inventory/stock/view-orders');
         })
         .catch(err => res.render('/staff/errorpage', {errors}))
 
@@ -770,7 +762,7 @@ router.put('/inventory/stock/save-recieve/:id', (req, res) => {
         }))
     })
         // redirects back to the main item page
-        res.redirect('/staff/inventory/view-stock-orders');
+        res.redirect('/staff/inventory/stock/view-orders');
     }).catch(err => res.render('staff/errorpage')); // To catch no item serial
 });
 

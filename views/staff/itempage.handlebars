@@ -45,7 +45,7 @@
                 <td>${{itemPrice}}</td>
                 <td>{{status}}</td>
                 <td><a href="/staff/item/edit/{{itemSerial}}" class="btn btn-warning">Update</a></td>
-                {{#if (isDiscontinued status)}}
+                {{#if (discontinueCheck status)}}
                     <td>Discontinued</td>
                 {{else}}
                     <td><a type="button" href="/staff/item/discontinue/{{itemSerial}}" class="btn btn-danger" disabled>Discontinue</a></td>

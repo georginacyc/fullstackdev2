@@ -1,62 +1,80 @@
-<div class="staffForms">
+<div style="padding-bottom: 120px">
     <h1 class="text-muted">New Staff</h1>
     <hr class="titleHR">
-    <form method="POST" action="/staff/createStaffAccount">
-        <div class="col-12 col-sm-12 col-md-6 col-lg-6">
-            <label class="font-italic">Account Type</label>
-            <br>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" id="Staff" value="Staff" name="type" checked>
-                <label class="form-check-label" for="Staff">Staff</label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" id="Admin" value="Admin" name="type">
-                <label class="form-check-label" for="Admin">Admin</label>
-            </div>
-        </div>
+    <form method="POST" action="/staff/create-staff">
 
-        <div class="form-group">
-            <label class="font-italic" for="fname">First Name</label>
-            <input class="form-control" type="text" id="fname" name="fname">
-        </div>
-        <div class="form-group mb-4">
-            <label class="font-italic" for="lname">Last Name</label>
-            <input class="form-control" type="text" id="lname" name="lname">
-        </div>
-
-        <div class="col-12 col-sm-12 col-md-6 col-lg-6">
-            <label class="font-italic">Gender</label>
-            <br>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" id="sFemale" value="Female" name="gender">
-                <label class="form-check-label" for="sFemale">Female</label>
+        <div class="row">
+            <div class="col-12 col-sm-12 col-md-6 col-lg-6">
+                <img class="border img-thumbnail img-fluid" style="max-height: 360px; max-width: 240px" id="preview" src="\uploads\staff_pictures\staff.png"><br>
+                <input type="file" id="staffUpload" name="staffUpload" accept="image/png, image/jpeg, image/jpg">
             </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" id="sMale" value="Male" name="gender">
-                <label class="form-check-label" for="sMale">Male</label>
+            
+            <div class="col-12 col-sm-12 col-md-6 col-lg-6">
+                <div class="short-div">
+                    <div class="form-group">
+                        <label class="font-italic" for="fname">First Name</label>
+                        <input class="form-control" type="text" id="fname" name="fname" value="{{fname}}">
+                    </div>
+                </div>
+                <div class="short-div">
+                    <div class="form-group mb-4">
+                        <label class="font-italic" for="lname">Last Name</label>
+                        <input class="form-control" type="text" id="lname" name="lname" value="{{lname}}">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <br>
+
+        <div class="row">
+            <div class="col-12 col-sm-12 col-md-6 col-lg-6">
+                <label class="font-italic">Gender</label>
+                <br>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" id="sFemale" value="Female" name="gender">
+                    <label class="form-check-label" for="sFemale">Female</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" id="sMale" value="Male" name="gender">
+                    <label class="form-check-label" for="sMale">Male</label>
+                </div>
+            </div>
+            
+            <div class="col-12 col-sm-12 col-md-6 col-lg-6">
+                <label class="font-italic">Account Type</label>
+                <br>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" id="Staff" value="Staff" name="type" checked>
+                    <label class="form-check-label" for="Staff">Staff</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" id="Admin" value="Admin" name="type">
+                    <label class="form-check-label" for="Admin">Admin</label>
+                </div>
             </div>
         </div>
 
         <div class="form-group">
             <label for="sDOB">Date of Birth</label>
-			<input type="date" class="form-control" id="sDOB" name="dob" value="">
+			<input type="date" class="form-control" id="sDOB" name="dob" value="{{dob}}">
         </div>
         <div class="form-group">
             <label for="sHP">HP</label>
-			<input type="text" class="form-control" id="sHP" name="hp" value="" placeholder="6550 9999">
+			<input type="text" class="form-control" id="sHP" name="hp" value="{{hp}}" placeholder="65500999">
         </div>
         <div class="form-group">
             <label class="font-italic" for="sAddr">Address</label>
-			<textarea class="form-control" id="sAddr" name="address" rows="7"></textarea>
+			<textarea class="form-control" id="sAddr" name="address" rows="3">{{address}}</textarea>
         </div>
         <div class="form-group halfField">
             <label for="pw1">Password</label>
-			<input type="password" class="form-control" id="pw1" name="password" value="" placeholder="">
+			<input type="password" class="form-control" id="pw1" name="password">
         </div>
         <div class="form-group halfFieldPass">
             <label for="pw2">Confirm Password</label>
-			<input type="password" class="form-control" id="pw2" name="pw2" value="" placeholder="">
+			<input type="password" class="form-control" id="pw2" name="pw2">
         </div>
-        <input type="submit" value="Submit" class="btn btn-primary"/>
+        <input type="submit" value="Submit" class="btn btn-dark float-right"/>
     </form>
 </div>

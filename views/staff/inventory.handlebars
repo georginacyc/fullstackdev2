@@ -1,30 +1,32 @@
 {{!-- view stock page --}}
+<h2>Inventory</h2>
+
+<nav class = "navbar-light">
+    <a style="font-weight: bold; color:darkslategrey" href= "#">Main</a>
+    <a style="color:darkslategrey" href = "/staff/inventory/view-stock-orders">Incoming Orders</a>
+</nav>
+<hr>
 
 <div class="container">
-    <h2>Inventory</h2>
     <table class="table table-fluid" id="myTable">
         <thead>
             <tr class="table-primary">
                 <th>Item Name</th>
                 <th>Item Serial</th>
-                <th>Item Category</th>
-                <th>Item Gender</th>
-                <th>Quantity</th>
+                <th>Stock Level</th>
                 <th>Status</th>
                 <th>Request Stock</th>
             </tr>
         </thead>
         <tbody>
             {{#each item}}
-            <tr>
-                <td>{{itemName}}</td>
-                <td>{{itemSerial}}</td>
-                <td>{{itemCategory}}</td>
-                <td>{{itemGender}}</td>
-                <td>{{itemQuantity}}</td>
-                <td>{{itemStockStatus}}</td>
-                <td><a href="" class="btn btn-warning">Request Stock</a></td>
-            </tr>
+                <tr>
+                    <td>{{itemName}}</td>
+                    <td>{{itemSerial}}</td>
+                    <td>{{stockLevel}}</td>
+                    <td>{{status}}</td>
+                    <td><a href="/staff/inventory/order-stock/{{itemSerial}}" class="btn btn-warning">Request Stock</a></td>
+                </tr>
             {{/each}}
         </tbody>
     </table>

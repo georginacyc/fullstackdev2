@@ -4,7 +4,7 @@ const Sequelize = require('sequelize');
 const db = require('../config/DBConfig');
 
 const StockOrder = db.define('stockorder', {
-    stcokorderDate: {
+    stockorderDate: {
         type: Sequelize.DATE
     },
     shipmentStatus: {

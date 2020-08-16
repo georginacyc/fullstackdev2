@@ -3,10 +3,10 @@ const Sequelize = require('sequelize');
 const db = require('../config/DBConfig');
 
 const Item = db.define('item', {
-    itemName: {
+    itemSerial: {
         type: Sequelize.STRING, primaryKey: true
     },
-    itemSerial: {
+    itemName: {
         type: Sequelize.STRING
     },
     itemCategory: {
@@ -24,6 +24,12 @@ const Item = db.define('item', {
     itemDescription: {
         type: Sequelize.STRING
     },
+    stockLevel: {
+        type: Sequelize.INTEGER
+    },
+    status: {
+        type: Sequelize.STRING
+    }
 });
 
 module.exports = Item;

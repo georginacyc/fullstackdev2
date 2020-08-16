@@ -17,43 +17,98 @@ const staffAuth = require('../helpers/staffAuth'); // to verify that user logged
 const adminAuth = require('../helpers/adminAuth'); // to verify that user logged in is an Admin
 const pdf = require('pdf-creator-node');
 const fs = require('fs');
+const sequelize = require('sequelize');
+const Op = sequelize.Op;
+const upload = require('../helpers/staffUpload');
+const multer = require('multer');
+const path = require('path');
 
 // var Handlebars = require("handlebars");
 // var MomentHandler = require("handlebars.moment");
 // MomentHandler.registerHelpers(Handlebars);
-
-let domain = "@monoqlo.com";
-
-var con = mysql.createConnection({ // creating a connection to query database below.
-    host: "localhost",
-    user: "monoqlo",
-    password: "monoqlo",
-    database: "monoqlo"
-});
-
-router.get('/login', (req, res) => {
-    res.render('staff/login');
-});
-
-router.post('/login', (req, res, next) => {
-    passport.authenticate('local', {
-        successRedirect: '/staff/home',
-        failureRedirect: '/staff/login',
-        failureFlash: true,
-    }) (req, res, next);
-});
 
 router.get('/logout', (req, res) => {
     req.logout();
     res.redirect('/');
 });
 
-router.get('/home', ensureAuthenticated, staffAuth, (req, res) => {
+router.get('/update', (req, res) => {
+    date = new Date();
+    now = ("0" + date.getDate()).slice(-2) + '/' + ("0" + (date.getMonth() + 1)).slice(-2) + '/' + date.getFullYear() + " " + date.getHours()+ ":" + date.getMinutes()
+    User.update({
+        lastLogin: now
+    }, {
+        where: {
+            id: req.user.id
+        }
+    }).then(() => {
+        res.redirect('/staff/home');
+    }).catch(err => console.log(err));
+})
+
+router.get('/home', (req, res) => {
         res.render('staff/staffhome', {layout: staffMain});
 });
 
 // to retrieve ALL accounts, regardless of whether it's a staff or customer account.
-router.get('/accounts', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+// router.get('/accounts', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+//     User.findAll({
+//         raw: true
+//     })
+//     .then((users) => {
+//         res.render('staff/accountList', {
+//             accounts: users,
+//             layout: staffMain
+//         });
+//     })
+// });
+
+async function accountsData(req, res) {
+    var sortBy = 'title';
+	var order  = 'asc';
+	var offset = 0;
+    var limit  = 25;
+    
+    console.log("Incoming Query:");
+	console.log(req.query);
+
+    try {
+		sortBy = (req.query.sort)?   req.query.sort   : sortBy;
+		order  = (req.query.order)?  req.query.order  : order;
+		offset = (req.query.offset)? parseInt(req.query.offset, 10) : offset;
+		limit  = (req.query.limit)?  parseInt(req.query.limit, 10)  : limit;
+	
+	}
+	catch(error) {
+		console.error("Malformed Get request:");
+		console.error(req.query);
+		console.error(error);
+		return res.status(400).end();
+    }
+
+    try {
+        const total = await User.count();
+        const accsList = await User.findAll({
+            offset: offset,
+            limit: limit,
+            order: [
+                [sortBy, order.toUpperCase()]
+            ], 
+            raw: true
+        })
+        return res.status(200).json({
+            "total": total,
+            "rows": accsList
+        });
+    }
+    catch (error) {
+        console.log("Accounts Listing Error");
+        return res.status(500);
+    }
+
+}
+
+router.get('/accounts', (req, res) => {
     User.findAll({
         raw: true
     })
@@ -63,32 +118,66 @@ router.get('/accounts', ensureAuthenticated, staffAuth, adminAuth, (req, res) =>
             layout: staffMain
         });
     })
-});
+})
+
+router.get('/accounts-data', accountsData);
 
 // retrieves all announcements
-router.get('/announcements', ensureAuthenticated, staffAuth, (req, res) => {
-    let allannouncements = []
-    con.query('SELECT * FROM monoqlo.snotifs AS notifs ORDER BY id DESC;', function(err, results, fields) {
-        if (err) throw err;
-        let count = 0;
-        while (count < results.length) { // ensures that count never exceeds number of rows returned, to prevent an Index-Out-of-Range error.
-            let a = {};
-            a['date'] = results[count].date;
-            a['title'] = results[count].title;
-            a['description'] = results[count].description;
-            
-            allannouncements.push(a);
-            count += 1;
-        }
-        res.render('staff/allAnnouncements', {layout:staffMain, allannouncements: allannouncements})
-    })
-})
+async function announcementsData(req, res) {
+    var sortBy = 'data';
+    var order = 'desc';
+    var offset = 0;
+    var limit = 25;
 
-router.get('/createAnnouncement', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+    try {
+		sortBy = (req.query.sort)?   req.query.sort   : sortBy;
+		order  = (req.query.order)?  req.query.order  : order;
+		offset = (req.query.offset)? parseInt(req.query.offset, 10) : offset;
+		limit  = (req.query.limit)?  parseInt(req.query.limit, 10)  : limit;
+	
+	}
+	catch(error) {
+		console.error("Malformed Get request:");
+		console.error(req.query);
+		console.error(error);
+		return res.status(400);
+    }
+
+    try {
+        const total = await sNotif.count();
+        const annList = await sNotif.findAll({
+            offset: offset,
+            limit: limit,
+            order: [
+                [sortBy, order.toUpperCase()]
+            ]
+        }).map((it) => {
+            console.log(it.uuid);
+            return it.toJSON();
+        });
+        return res.status(200).json({
+            "total": total,
+            "rows": annList
+        });
+    }
+    catch (error) {
+        console.log("Announcement Listing Error");
+        return res.status(500);
+    }
+}
+
+router.get('/announcements', (req, res) => {
+    res.render('staff/allAnnouncements', {layout: staffMain});
+});
+
+router.get('/announcements-data', announcementsData);
+
+router.get('/create-announcement', adminAuth, (req, res) => {
+    console.log(req.body.preview);
     res.render('staff/createAnnouncements', {layout: staffMain});
-})
+});
 
-router.post('/createAnnouncement', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+router.post('/create-announcement', adminAuth, (req, res) => {
     let errors = [];
 
     let {title, description} = req.body;
@@ -118,11 +207,29 @@ router.post('/createAnnouncement', ensureAuthenticated, staffAuth, adminAuth, (r
     }
 });
 
-router.get('/createStaffAccount', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+router.get('/create-staff', (req, res) => {
     res.render('staff/createStaff', {layout: staffMain});
 });
 
-router.post('/createStaffAccount', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+router.post('/upload', (req, res) => {
+    console.log('post upload')
+    if (!fs.existsSync('./public/uploads/staff_pictures/')) {
+        fs.mkdirSync('./public/uploads/staff_pictures/')
+    }
+    upload(req, res, (err) => {
+        if (err) {
+            res.json({err: err})
+        } else {
+            if (req.file === undefined) {
+                res.json({err: err})
+            } else {
+                res.json({file: `/uploads/staff_pictures/${req.file.filename}`});
+            }
+        }
+    });
+})
+
+router.post('/create-staff', (req, res) => {
     let errors = [];
 
     let {type, fname, lname, gender, dob, hp, address, password, pw2} = req.body;
@@ -144,71 +251,74 @@ router.post('/createStaffAccount', ensureAuthenticated, staffAuth, adminAuth, (r
     if (errors.length > 0) {
         res.render('staff/createStaff', {
             errors,
-            type,
             fname,
             lname,
-            gender,
             dob,
             hp,
             address,
-            password,
-            pw2,
             layout: staffMain
         });
     } else {
-        let num = ""
-        password = bcrypt.hashSync(password, 10);
-
-        con.query("SELECT COUNT(*) AS tableCheck FROM users WHERE type='Admin' OR type='Staff'", function(err, result, fields) {
-            
-            let email = ""
-    
-            if (err) throw err;
-            if (result[0].tableCheck > 0) {
-                con.query("SELECT MAX(id) AS count FROM users WHERE type='Admin' or type='Staff'", function(err, result, fields) {
-                    if (err) throw err;
-                    num = result[0].count + 1;
-                    num = num.toString().padStart(6, "0");
-                    email = num.toString() + domain;
-                    User.create({type, email, fname, lname, gender, dob, hp, address, password})
-                    .then(user => {
-                        res.redirect('/staff/accounts');
-                        alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
-                    }).catch(err => console.log(err));
-                });
+        let image;
+        User.max('id')
+        .then((x) => {
+            x = parseInt(x) + 1
+            let p = './public/uploads/staff_pictures/' + x.toString()
+            let type1 = p + '.jpg'
+            let type2 = p + '.jpeg'
+            let type3 = p + '.png'
+            console.log(type1)
+            console.log(type2)
+            console.log(type3)
+            if (fs.existsSync(type1)) {
+                image = path.basename(type1);
+                console.log('type1!')
+            } else if (fs.existsSync(type2)) {
+                image = path.basename(type2);
+                console.log('type2!')
+            } else if (fs.existsSync(type3)) {
+                image = path.basename(type3);
+                console.log('type3!')
             } else {
-                num = "000001";
-                email = num.toString() + domain;
-                User.create({type, email, fname, lname, gender, dob, hp, address, password})
-                .then(user => {
-                    res.redirect('/staff/accounts');
-                    alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
-                })
-                .catch(err => console.log(err));
-            };
-        });
-    };
+                image = 'staff.png'
+            }
+        })
+        User.max('staffId')
+        .then(c => {
+            password = bcrypt.hashSync(password, 10);
+            let staffId = (1 + parseInt(c)).toString().padStart(6, '0');
+            let domain = "@monoqlo.com";
+            email = staffId + domain;
+            User.create({type, staffId, image, email, fname, lname, gender, dob, hp, address, password})
+            .then(user => {
+                res.redirect('/staff/accounts');
+                alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
+            })
+        })
+        .catch(err => console.log(err));
+    }
 });
 
-
-router.get('/yourAccount', ensureAuthenticated, staffAuth, (req, res) => {
+router.get('/your-account', (req, res) => {
     User.findOne({
         where: {
             id: req.user.id
         }
     }).then((user) => {
-        res.render('staff/accountDetails', {layout: staffMain, user})
+        let src = "/uploads/staff_pictures/" + user.image
+        console.log(src)
+        res.render('staff/accountDetails', {layout: staffMain, user, src})
     })
 });
 
-router.put('/changePassword/:id', ensureAuthenticated, staffAuth, (req, res) => {
+router.put('/change-password/:id', (req, res) => {
     let {oldpw, newpw, newpw2} = req.body;
     User.findOne({
         where: {
             id: req.user.id
         }
     }).then((user) => {
-        check = bcrypt.compareSync(oldpw, user.password)
+        let check = bcrypt.compareSync(oldpw, user.password)
         console.log(check);
         if (check) {
             if (newpw == newpw2) {
@@ -222,19 +332,19 @@ router.put('/changePassword/:id', ensureAuthenticated, staffAuth, (req, res) => 
                 })
                 alertMessage(res, 'success', 'Successfully changed password!', true);
                 req.logout()
-                res.redirect('/staff/login');
+                res.redirect('/staff-login');
             } else {
                 alertMessage(res, 'danger', 'New passwords must match.', true);
-                res.redirect('/staff/yourAccount');
+                res.redirect('/staff/your-account');
             }
         } else {
             alertMessage(res, 'danger', 'Old password is incorrect.', true);
-            res.redirect('/staff/yourAccount');
+            res.redirect('/staff/your-account');
         }
     }).catch(err => console.log(err))
 });
 
-router.get('/manageAccount/:id', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+router.get('/manage-staff/:id', adminAuth, (req, res) => {
     User.findOne({
         where: {
             id: req.params.id
@@ -244,7 +354,54 @@ router.get('/manageAccount/:id', ensureAuthenticated, staffAuth, adminAuth, (req
     }).catch(err => console.log(err));
 });
 
-router.put('/saveStaff/:id', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+router.post('/update-staff-picture/:id', (req, res) => {
+    const storage = multer.diskStorage({
+        destination: (req, file, callback) => {
+            callback(null, './public/uploads/staff_pictures/');
+        },
+        filename: (req, file, callback) => {
+            callback(null, req.params.id + path.extname(file.originalname));
+        }
+    });
+    
+    const upload = multer({
+        storage: storage,
+        limits: {
+            fileSize: 1000000
+        },
+        fileFilter: (req, file, callback) => {
+            checkFileType(file, callback);
+        }
+    }).single('staffUpload2')
+    
+    function checkFileType(file, callback) {
+        const filetypes = /jpeg|jpg|png/;
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = filetypes.test(file.mimetype);
+    
+        if (mimetype && extname) {
+            return callback(null, true);
+        } else {
+            callback({message: 'Images Only. No GIFs.'})
+        }
+    }
+    if (!fs.existsSync('./public/uploads/staff_pictures/')) {
+        fs.mkdirSync('./public/uploads/staff_pictures/')
+    }
+    upload(req, res, (err) => {
+        if (err) {
+            res.json({err: err})
+        } else {
+            if (req.file === undefined) {
+                res.json({err: err})
+            } else {
+                res.json({file: `/uploads/staff_pictures/${req.file.filename}`});
+            }
+        }
+    });
+})
+
+router.put('/save-staff/:id', adminAuth, (req, res) => {
     let {type, fname, lname, gender, dob, hp, address, resetpw} = req.body;
     console.log(resetpw);
     if (resetpw == "reset") {
@@ -276,7 +433,7 @@ router.put('/saveStaff/:id', ensureAuthenticated, staffAuth, adminAuth, (req, re
     }).catch(err => console.log(err));
 });
 
-router.get('/deleteStaff/:id', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
+router.get('/delete-staff/:id', adminAuth, (req, res) => {
     User.findOne({
         where: {
             id: req.params.id
@@ -298,7 +455,7 @@ router.get('/deleteStaff/:id', ensureAuthenticated, staffAuth, adminAuth, (req, 
     }).catch(err => console.log(err))
 });
 
-router.get('/staffPDF/:id', (req, res) => {
+router.get('/pdf/:id', (req, res) => {
     User.findOne({
         where: {
             id: req.params.id
@@ -310,11 +467,10 @@ router.get('/staffPDF/:id', (req, res) => {
             orientation: "portrait",
             border: "10mm",
             header: {
-                height: "10mm",
-                contents: 'Monoqlo Staff Summary'
+                height: "10mm"
             },
             "footer": {
-                "height": "14mm",
+                "height": "10mm",
                 "contents": {
                     default: 'Copyright © 2019 Monoqlo Inc. All rights reserved.'
                 }
@@ -345,25 +501,26 @@ router.get('/staffPDF/:id', (req, res) => {
 
 //item routes
 
-router.get('/itempage', (req, res) => {
+router.get('/item/view-all', (req, res) => {
     Item.findAll({
         raw: true
     })
         .then((item) => {
             res.render('staff/itempage', {
-            layout:staffMain
+                item : item,
+                layout:staffMain
         })
     })
     
 });
 
-router.post('/createItem', (req, res) => {
+router.post('/item/create', (req, res) => {
     let errors = [];
 
     //Adds new item
 
     console.log(req);
-
+    // form data and variables
     let itemName = req.body.itemName;
     let itemSerial = req.body.itemSerial;
     let itemCategory = req.body.itemCategory === undefined ? '' : req.body.itemCategory.toString();
@@ -371,12 +528,12 @@ router.post('/createItem', (req, res) => {
     let itemCost = req.body.itemCost;
     let itemPrice = req.body.itemPrice;
     let itemDescription = req.body.itemDescription;
-
-    console.log(itemName);
-
+    let stockLevel = 0;
+    let status = "In Production"
+    // check for errors if not will add to db
     if (errors.length > 0) {
         res.render("/staff/createItem", {
-            errors, itemName, itemSerial, itemCategory, itemGender, itemCost, itemPrice, itemDescription, layout: staffMain
+            errors, itemName, itemSerial, itemCategory, itemGender, itemCost, itemPrice, itemDescription, stockLevel, status, layout: staffMain
         });
     } else {
         Item.create({
@@ -386,34 +543,144 @@ router.post('/createItem', (req, res) => {
             itemGender,
             itemCost,
             itemPrice,
-            itemDescription
+            itemDescription,
+            stockLevel,
+            status
         }).then(item => {
-            res.redirect('/staff/itempage');
             alertMessage(res, 'success', 'Item successfully added', true);
+            res.redirect('/staff/item/view-all');
         })
             .catch(err => console.log(err));
     }
 });
-    
 
-router.get('/createItem', (req, res) => {
+router.get('/item/edit/:itemSerial', (req, res) => {
+    Item.findOne({
+        where: {
+            itemSerial: req.params.itemSerial
+        }, raw: true
+    }).then((item) => {
+        // calls views/staff/editItem.handlebar to render the edit item
+
+        res.render('staff/editItem', {
+            layout: staffMain,
+            item // passes the item object to handlebars
+
+        });
+    }).catch(err => console.log(err)); // To catch no item serial
+});
+
+router.put('/item/save-edited/:itemSerial', (req, res) => {
+    let {itemCost, itemPrice, itemDescription} = req.body
+    Item.findOne({
+        where: {
+            itemSerial:req.params.itemSerial
+        },raw: true
+    }).then((item) => {
+        // variables to be updated
+        // only select variables can be edited
+        Item.update({
+            itemCost: itemCost,
+            itemPrice: itemPrice,
+            itemDescription: itemDescription
+        }, {
+            where: {
+                itemSerial: req.params.itemSerial
+            }
+        })
+        // redirects back to the main item page
+        res.redirect('/staff/item/view-all'); 
+    }).catch(err => console.log(err)); // To catch no item serial
+});
+
+// discontinue item
+router.get('/item/discontinue/:itemSerial', (req, res) => {
+    Item.findOne({
+        where: {
+            itemSerial: req.params.itemSerial
+        }, raw: true
+    }).then((item) => {
+        // calls views/staff/editItem.handlebar to render the edit item
+
+        res.render('staff/discontinueItem', {
+            layout: staffMain,
+            item // passes the item object to handlebars
+
+        });
+    }).catch(err => console.log(err)); // To catch no item serial
+});
+
+
+router.put('/item/save-discontinue/:itemSerial', (req, res) => {
+    Item.findOne({
+        where: {
+            itemSerial: req.params.itemSerial
+        }, raw: true
+    }).then((item) => {
+        // variables to be updated
+        // only select variables can be edited
+        Item.update({
+            status : "Discontinued"
+        }, {
+            where: {
+                itemSerial: req.params.itemSerial
+            }
+        })
+        // redirects back to the main item page
+        res.redirect('/staff/item/view-all');
+    }).catch(err => console.log(err)); // To catch no item serial
+});
+
+
+
+router.get('/item/create', (req, res) => {
     res.render('staff/createItem', { layout: staffMain })
 });
 
 //Inventory Routes
 router.get('/inventory', (req, res) => {
-    res.render('staff/inventory', { layout: staffMain })
+    Item.findAll({
+        raw: true
+    })
+        .then((item) => {
+            res.render('staff/inventory', {
+                item: item,
+                layout: staffMain
+            })
+        })
 });
 
 //Stock Order Routes
 
-router.get('/createStockOrder', (req, res) => {
-    res.render('staff/createStockOrder', {
-        layout: staffMain
-    })
+router.get('/inventory/view-stock-orders', (req, res) => {
+    StockOrder.findAll({
+        raw: true
+    }).then((stockorder) => {
+            res.render('staff/stockOrders', {
+                stockorder,
+                layout: staffMain
+            })
+        })
 });
 
-router.post('/createStockOrder', (req, res) => {
+router.get('/inventory/order-stock/:itemSerial', (req, res) => {
+    Item.findOne({
+        where: {
+            itemSerial: req.params.itemSerial
+        }, raw: true
+    }).then((item) => {
+        // calls views/staff/editItem.handlebar to render the edit item
+
+        res.render('staff/createStockOrder', {
+            layout: staffMain,
+            item // passes the item object to handlebars
+
+        });
+    }).catch(err => console.log(err)); // To catch no item serial
+});
+
+
+router.post('/inventory/order-stock/:itemSerial', (req, res) => {
     let errors = [];
 
     //Adds new item
@@ -422,7 +689,7 @@ router.post('/createStockOrder', (req, res) => {
     let shipmentDate = moment(req.body.shipmentDate, 'DD-MM-YYY');
     let itemSerial = req.body.itemSerial;
     let stockorderQuantity = req.body.stockorderQuantity;
-    let receivedDate = "";
+    let receivedDate = undefined;
 
     StockOrder.create({
         stockorderDate,
@@ -434,7 +701,7 @@ router.post('/createStockOrder', (req, res) => {
         }).then(stockorder => {
             res.redirect('/staff/inventory');
         })
-        .catc(err => console.log(err))
+        .catch(err => console.log(err))
 
 })
 

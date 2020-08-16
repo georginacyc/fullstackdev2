@@ -1,9 +1,17 @@
 const Sequelize = require('sequelize');
 const db = require('../config/DBConfig');
+const sequelize = require('../config/DBConfig');
 
 const User = db.define('user', {
     type: {
         type: Sequelize.STRING
+    },
+    staffId: {
+        type: Sequelize.STRING
+    },
+    image: {
+        type: Sequelize.STRING,
+        defaultValue: 'staff.png'
     },
     email: {
         type: Sequelize.STRING
@@ -32,6 +40,10 @@ const User = db.define('user', {
     password: {
         type: Sequelize.STRING
     },
+    lastLogin: {
+        type: Sequelize.STRING,
+        defaultValue: 'N/A'
+    }
 });
 
 module.exports = User;

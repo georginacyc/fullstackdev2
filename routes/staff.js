@@ -545,7 +545,7 @@ router.post('/item/create', (req, res) => {
     let itemCategory = req.body.itemCategory === undefined ? '' : req.body.itemCategory.toString();
     let itemGender = req.body.itemGender === undefined ? '' : req.body.itemGender.toString();
     let prefix = generateSerial();
-    let itemSerial = prefix + itemCategory.slice(0,1) + itemGender;
+    let itemSerial = prefix + itemCategory.slice(0, 1) + itemGender;
     let itemCost = req.body.itemCost;
     let itemPrice = req.body.itemPrice;
     let itemDescription = req.body.itemDescription;
@@ -554,7 +554,7 @@ router.post('/item/create', (req, res) => {
     // check for errors if not will add to db
     if (errors.length > 0) {
         res.render("/staff/createItem", {
-            errors, itemName, itemSerial, itemCategory, itemGender, itemCost, itemPrice, itemDescription, stockLevel, status, layout: staffMain
+            errors, itemName, itemCategory, itemGender, itemCost, itemPrice, itemDescription, stockLevel, status, layout: staffMain
         });
     } else {
         Item.create({
@@ -569,8 +569,7 @@ router.post('/item/create', (req, res) => {
             status
         }).then(item => {
             res.redirect('/staff/item/view-all');
-        })
-            .catch(err => console.log(err));
+        }).catch(err => res.render('/staff/errorpage', { errors }));
     }
 });
 
@@ -689,7 +688,6 @@ router.get('/inventory/stock/order/:itemSerial', (req, res) => {
         res.render('staff/createStockOrder', {
             layout: staffMain,
             item // passes the item object to handlebars
-
         });
     }).catch(err => console.log(err)); // To catch no item serial
 });
@@ -714,12 +712,12 @@ router.post('/inventory/stock/order/:itemSerial', (req, res) => {
         itemSerial,
         stockorderQuantity,
         receivedDate
-        }).then(stockorder => {
-            res.redirect('/staff/inventory/stock/view-orders');
-        })
-        .catch(err => res.render('/staff/errorpage', {errors}))
+    }).then(stockorder => {
+        res.redirect('/staff/inventory/stock/view-orders');
+    })
+        .catch(err => res.render('/staff/errorpage', { errors }))
 
-})
+});
 
 router.get('/inventory/stock/receive/:id', (req, res) => {
     let receivedDate = moment().format('YYYY-MM-DD');
@@ -780,12 +778,12 @@ router.put('/inventory/stock/save-recieve/:id', (req, res) => {
 
 
 //error page
-router.get('/error', (req, res) => {
-    let errors = [];
-    res.render('/staff/errorpage', {
-        errors
-    })
-})
+    router.get('/error', (req, res) => {
+        let errors = [];
+        res.render('/staff/errorpage', {
+            errors
+        })
+    });
 
 
 module.exports = router;

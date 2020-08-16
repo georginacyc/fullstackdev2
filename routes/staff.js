@@ -517,17 +517,36 @@ router.get('/item/view-all', (req, res) => {
     
 });
 
+//generate random Serial
+function generateSerial() {
+    'use strict';
+    var chars = '1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+        serialLength = 10,
+        randomSerial = "",
+        i,
+        randomNumber;
+
+    for (i = 0; i < serialLength; i = i + 1) {
+        randomNumber = Math.floor(Math.random() * chars.length);
+        randomSerial += chars.substring(randomNumber, randomNumber + 1);
+    }
+    return randomSerial
+}
+
+router.get('/item/create', (req, res) => {
+    res.render('staff/createItem', { layout: staffMain })
+});
+
 router.post('/item/create', (req, res) => {
     let errors = [];
 
-    //Adds new item
-
-    console.log(req);
     // form data and variables
     let itemName = req.body.itemName;
-    let itemSerial = req.body.itemSerial;
     let itemCategory = req.body.itemCategory === undefined ? '' : req.body.itemCategory.toString();
     let itemGender = req.body.itemGender === undefined ? '' : req.body.itemGender.toString();
+    let prefix = generateSerial();
+    console.log(prefix+"ahhh");
+    let itemSerial = prefix + itemCategory.slice(0,1) + itemGender;
     let itemCost = req.body.itemCost;
     let itemPrice = req.body.itemPrice;
     let itemDescription = req.body.itemDescription;
@@ -550,7 +569,6 @@ router.post('/item/create', (req, res) => {
             stockLevel,
             status
         }).then(item => {
-            alertMessage(res, 'success', 'Item successfully added', true);
             res.redirect('/staff/item/view-all');
         })
             .catch(err => console.log(err));
@@ -634,11 +652,6 @@ router.put('/item/save-discontinue/:itemSerial', (req, res) => {
     }).catch(err => console.log(err)); // To catch no item serial
 });
 
-
-
-router.get('/item/create', (req, res) => {
-    res.render('staff/createItem', { layout: staffMain })
-});
 
 //Inventory Routes
 router.get('/inventory', (req, res) => {

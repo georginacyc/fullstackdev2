@@ -26,10 +26,6 @@ router.post('/staff-login', (req, res, next) => {
     }) (req, res, next);
 });
 
-// router.use('/user', ensureAuthenticated, userRoute);
-router.use('/user', userRoute);
-router.use('/staff', ensureAuthenticated, staffAuth, staffRoute);
-
 router.get('/catalogue', (req, res) => {
     Item.findAll({
         where: {
@@ -58,4 +54,13 @@ router.get('/view/:itemSerial', (req, res) => {
         });
     }).catch(err => console.log(err)); // To catch no item serial
 });
+
+router.get('/error', (req, res) => {
+    res.render('user/errorpage');
+})
+
+// router.use('/user', ensureAuthenticated, userRoute);
+router.use('/user', userRoute);
+router.use('/staff', ensureAuthenticated, staffAuth, staffRoute);
+
 module.exports = router;

@@ -23,10 +23,14 @@ const upload = require('../helpers/staffUpload');
 const multer = require('multer');
 const path = require('path');
 const { DATEONLY } = require('sequelize');
+var Handlebars = require("handlebars");
 
-// var Handlebars = require("handlebars");
 // var MomentHandler = require("handlebars.moment");
 // MomentHandler.registerHelpers(Handlebars);
+
+Handlebars.registerHelper('isDiscontinued', function(status){
+        return status == "Discontinued";
+    })
 
 router.get('/logout', (req, res) => {
     req.logout();

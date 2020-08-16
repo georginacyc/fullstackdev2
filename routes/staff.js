@@ -20,7 +20,8 @@ const fs = require('fs');
 const sequelize = require('sequelize');
 const Op = sequelize.Op;
 const upload = require('../helpers/staffUpload');
-const path = require('path')
+const multer = require('multer');
+const path = require('path');
 
 // var Handlebars = require("handlebars");
 // var MomentHandler = require("handlebars.moment");
@@ -31,27 +32,23 @@ router.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
+router.get('/update', (req, res) => {
+    date = new Date();
+    now = ("0" + date.getDate()).slice(-2) + '/' + ("0" + (date.getMonth() + 1)).slice(-2) + '/' + date.getFullYear() + " " + date.getHours()+ ":" + date.getMinutes()
+    User.update({
+        lastLogin: now
+    }, {
+        where: {
+            id: req.user.id
+        }
+    }).then(() => {
+        res.redirect('/staff/home');
+    }).catch(err => console.log(err));
+})
+
 router.get('/home', (req, res) => {
         res.render('staff/staffhome', {layout: staffMain});
 });
-
-router.post('/upload', (req, res) => {
-    console.log('post upload')
-    if (!fs.existsSync('./public/uploads/staff_pictures/')) {
-        fs.mkdirSync('./public/uploads/staff_pictures/')
-    }
-    upload(req, res, (err) => {
-        if (err) {
-            res.json({err: err})
-        } else {
-            if (req.file === undefined) {
-                res.json({err: err})
-            } else {
-                res.json({file: `/uploads/staff_pictures/${req.file.filename}`});
-            }
-        }
-    });
-})
 
 // to retrieve ALL accounts, regardless of whether it's a staff or customer account.
 // router.get('/accounts', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
@@ -214,6 +211,24 @@ router.get('/create-staff', (req, res) => {
     res.render('staff/createStaff', {layout: staffMain});
 });
 
+router.post('/upload', (req, res) => {
+    console.log('post upload')
+    if (!fs.existsSync('./public/uploads/staff_pictures/')) {
+        fs.mkdirSync('./public/uploads/staff_pictures/')
+    }
+    upload(req, res, (err) => {
+        if (err) {
+            res.json({err: err})
+        } else {
+            if (req.file === undefined) {
+                res.json({err: err})
+            } else {
+                res.json({file: `/uploads/staff_pictures/${req.file.filename}`});
+            }
+        }
+    });
+})
+
 router.post('/create-staff', (req, res) => {
     let errors = [];
 
@@ -339,6 +354,53 @@ router.get('/manage-staff/:id', adminAuth, (req, res) => {
     }).catch(err => console.log(err));
 });
 
+router.post('/update-staff-picture/:id', (req, res) => {
+    const storage = multer.diskStorage({
+        destination: (req, file, callback) => {
+            callback(null, './public/uploads/staff_pictures/');
+        },
+        filename: (req, file, callback) => {
+            callback(null, req.params.id + path.extname(file.originalname));
+        }
+    });
+    
+    const upload = multer({
+        storage: storage,
+        limits: {
+            fileSize: 1000000
+        },
+        fileFilter: (req, file, callback) => {
+            checkFileType(file, callback);
+        }
+    }).single('staffUpload2')
+    
+    function checkFileType(file, callback) {
+        const filetypes = /jpeg|jpg|png/;
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = filetypes.test(file.mimetype);
+    
+        if (mimetype && extname) {
+            return callback(null, true);
+        } else {
+            callback({message: 'Images Only. No GIFs.'})
+        }
+    }
+    if (!fs.existsSync('./public/uploads/staff_pictures/')) {
+        fs.mkdirSync('./public/uploads/staff_pictures/')
+    }
+    upload(req, res, (err) => {
+        if (err) {
+            res.json({err: err})
+        } else {
+            if (req.file === undefined) {
+                res.json({err: err})
+            } else {
+                res.json({file: `/uploads/staff_pictures/${req.file.filename}`});
+            }
+        }
+    });
+})
+
 router.put('/save-staff/:id', adminAuth, (req, res) => {
     let {type, fname, lname, gender, dob, hp, address, resetpw} = req.body;
     console.log(resetpw);
@@ -393,7 +455,7 @@ router.get('/delete-staff/:id', adminAuth, (req, res) => {
     }).catch(err => console.log(err))
 });
 
-router.get('/staff-pdf/:id', (req, res) => {
+router.get('/pdf/:id', (req, res) => {
     User.findOne({
         where: {
             id: req.params.id
@@ -405,11 +467,10 @@ router.get('/staff-pdf/:id', (req, res) => {
             orientation: "portrait",
             border: "10mm",
             header: {
-                height: "10mm",
-                contents: 'Monoqlo Staff Summary'
+                height: "10mm"
             },
             "footer": {
-                "height": "14mm",
+                "height": "10mm",
                 "contents": {
                     default: 'Copyright © 2019 Monoqlo Inc. All rights reserved.'
                 }
@@ -591,6 +652,17 @@ router.get('/inventory', (req, res) => {
 
 //Stock Order Routes
 
+router.get('/inventory/view-stock-orders', (req, res) => {
+    StockOrder.findAll({
+        raw: true
+    }).then((stockorder) => {
+            res.render('staff/stockOrders', {
+                stockorder,
+                layout: staffMain
+            })
+        })
+});
+
 router.get('/inventory/order-stock/:itemSerial', (req, res) => {
     Item.findOne({
         where: {
@@ -606,7 +678,6 @@ router.get('/inventory/order-stock/:itemSerial', (req, res) => {
         });
     }).catch(err => console.log(err)); // To catch no item serial
 });
-    
 
 
 router.post('/inventory/order-stock/:itemSerial', (req, res) => {

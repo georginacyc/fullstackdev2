@@ -17,7 +17,8 @@
             <th data-field="lname" data-sortable="true">Last Name</th>
             <th data-field="email">Email</th>
             <th data-field="hp">H/P</th>
-            <th></th>
+            <th data-field="lastLogin">Last Log In</th>
+            <th data-field="id" data-formatter="tableButtons"></th>
         </thead>
     </table>
 
@@ -28,80 +29,8 @@
         format: 'yyyy-mm-dd',
         uiLibrary: 'bootstrap4',
         defaultDate: "{{formatDate content.dob 'YYYY-MM-DD'}}"
-    
-    var $table = $('#table')
-
-    function operateFormatter(value, row, index) {
-        return [
-            '<a class="edit" href="javascript:void(0)" title="Edit">',
-            '<i class="fa fa-pencil"></i>',
-            '</a>  ',
-            '<a class="delete" href="javascript:void(0)" title="Remove">',
-            '<i class="fa fa-trash"></i>',
-            '</a>',
-            '<a class="print" href="javascript:void(0)" title="Print">',
-            '<i class="fa fa-printer"></i>',
-            '</a>'
-        ].join('')
-    }
-
-    window.operateEvents = {
-        'click .edit': function (e, value, row, index) {
-            $table.bootstrapTable('edit', {
-                field: 'id',
-                values: [row.id]
-            })
-        },
-        'click .delete': function (e, value, row, index) {
-            $table.bootstrapTable('remove', {
-                field: 'id',
-                values: [row.id]
-            })
-        },
-        'click .print': function (e, value, row, index) {
-            $table.bootstrapTable('print', {
-                field: 'id',
-                values: [row.id]
-            })
-        }
-    }
-
-    $table.bootstrapTable({
-        columns: [
-            {
-                title: 'Type',
-                field: 'type',
-                align: 'center',
-                valign: 'middle'
-                sortable: true,
-            }, {
-                title: 'First Name',
-                field: 'fname',
-                align: 'center',
-                valign: 'middle',
-                sortable: true,
-            }, {
-                title: 'Last Name',
-                field: 'lname',
-                align: 'center',
-                valign: 'middle',
-                sortable: true,
-            },
-            {
-                title: 'Email',
-                field: 'email',
-                align: 'center'
-            }, {
-                title: 'H/P',
-                field: 'hp',
-                align: 'center'
-            }, {
-                field: 'id',
-                align: 'center',
-                clickToSelect: false,
-                events: window.operateEvents,
-                formatter: operateFormatter
-            }
-        ]
     })
+    function tableButtons(id) {
+        return '<div style="display: flex; justify-content: space-between"><a href="/staff/manage-staff/' + id + '"><i class="fas fa-pencil-square-o text-dark"></i></a><a href="/staff/pdf/' + id + '" target="_blank"><i class="fas fa-print text-muted"></i></a><a href="/staff/delete-staff/' + id + '"><i class="fas fa-trash text-danger"></i></a></div>'
+    }
 </script>

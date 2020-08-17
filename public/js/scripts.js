@@ -3,7 +3,7 @@ $('#staffUpload').on('change', function() {
     let formdata = new FormData();
     formdata.append('staffUpload', image);
     $.ajax({
-        url: '/staff/upload',
+        url: '/staff/admin/upload',
         type: 'POST',
         data: formdata,
         contentType: false,

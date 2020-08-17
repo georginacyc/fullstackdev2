@@ -10,7 +10,7 @@
 </style>
 
 <div class="">
-    <table id="accountsList" data-toggle="table" data-pagination="true" data-url="/staff/accounts-data" data-search="true" data-sort-name="type" data-show-refresh="true" data-show-columns="true" data-search-on-enter-key="true" data-show-search-button="true">
+    <table id="accountsList" data-toggle="table" data-pagination="true" data-url="/staff/admin/accounts-data" data-search="true" data-sort-name="type" data-show-refresh="true" data-show-columns="true" data-search-on-enter-key="true" data-show-search-button="true">
         <thead>
             <th data-field="type" data-sortable="true">Type</th>
             <th data-field="fname" data-sortable="true">First Name</th>
@@ -33,12 +33,12 @@
     })
     function staffButtons(staffId) {
         if (staffId != null) {
-            return '<div style="display: flex; justify-content: space-between"><a href="/staff/manage-staff/' + staffId + '"><i class="fas fa-pencil-square-o text-dark"></i></a><a href="/staff/pdf/' + staffId + '" target="_blank"><i class="fas fa-print text-muted"></i></a>'
+            return '<div style="display: flex; justify-content: space-between"><a href="/staff/admin/manage-staff/' + staffId + '"><i class="fas fa-pencil-square-o text-dark"></i></a><a href="/staff/pdf/' + staffId + '" target="_blank"><i class="fas fa-print text-muted"></i></a>'
         } else {
             return ""
         }
     }
     function deleteButtons(id) {
-        return '<div style="display: flex; justify-content: space-between"><a href="/staff/delete-user/' + id + '"><i class="fas fa-trash text-danger"></i></a></div>'
+        return '<div style="display: flex; justify-content: space-between"><a href="/staff/admin/delete-user/' + id + '"><i class="fas fa-trash text-danger"></i></a></div>'
     }
 </script>

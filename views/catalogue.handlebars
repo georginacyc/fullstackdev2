@@ -41,7 +41,7 @@
                 <th>Price</th>
                 <th>Category</th>
                 <th data-orderable="false">Sizes</th>
-                <th data-orderable="false">Colours</th>
+                <th data-orderable="false"></th>
             </tr>
         </thead>
         <tbody>
@@ -52,7 +52,11 @@
                     <td>S${{itemPrice}}</td>
                     <td>{{itemCategory}}</td>
                     <td>XS, S, M, L, XL, XXL</td>
-                    <td></td>
+                    {{#if (stockLevelCheck stockLevel)}}
+                        <td>Out of Stock</td>
+                    {{else}}
+                        <td></td>
+                    {{/if}}
                 </tr>
             {{/each}}
         </tbody>

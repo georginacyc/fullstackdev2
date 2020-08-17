@@ -9,6 +9,7 @@ const user = require('../models/User')
 const ensureAuthenticated = require('../helpers/auth'); // to verify that a user is logged in
 const staffAuth = require('../helpers/staffAuth'); // to verify that user logged in is a Staff
 const Item = require('../models/Item');
+const stockLevelCheck = require('../helpers/stockLevelCheck') // for catalogue to disable buying items that are out of stock
 // const bootstrap = require('bootstrap')
 
 router.get('/', (req, res) => {

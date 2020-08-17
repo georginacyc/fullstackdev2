@@ -30,12 +30,14 @@ router.post('/staff-login', (req, res, next) => {
 router.get('/catalogueHis', (req, res) => {
     Item.findAll({
         where: {
-            itemGender: "M"
+            itemGender: "M",
+            status: "Active"
         },raw: true
     })
         .then((item) => {
             res.render('catalogue', {
                 item : item,
+                title : "Men's"
         })
     })
     

@@ -50,20 +50,17 @@
                       </div>
                       <div class="modal-body" style="align-items: center;">
                         <form method="post" action=""> 
-                          <div class="form-group">
-                            <input type="email" name="email" class="form-control" placeholder="Enter your Email" required>
-                          </div>
                           <div class="form-group">  
-                            <input type="number" name="card-cvv" class="form-control" placeholder="Enter your Name" required>
+                            <input type="text" name="name" class="form-control" placeholder="Enter your Name on Card" required>
                           </div>
                           <div class="form-group">
                             <input type="number" name="card" class="form-control" placeholder="Enter your Card Number" minlength="16" required>
                           </div>
                           <div class="form-group">  
-                            <input type="number" name="card-cvv" class="form-control" placeholder="Enter your cvv" minlength="3" maxlength="3" pattern="{3}" required>
+                            <input type="number" name="cardcvv" class="form-control" placeholder="Enter your cvv" minlength="3" maxlength="3" pattern="{3}" required>
                           </div>
                           <div class="form-group">  
-                            <input type="number" name="card-cvv" class="form-control" placeholder="MM/YY" required>
+                            <input type="text" name="expiredate" class="form-control" placeholder="MM/YY" required>
                           </div>
                           <div style="padding-bottom: 10px;">
                             <button type="submit" class="btn btn-dark" style="width:100%;" onclick="window.location.href='orders'">Pay</button>

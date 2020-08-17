@@ -17,32 +17,36 @@
     .table tr {
         text-align: center;
     }
-    .btn-add{
-    border-color: gray;
+
+    .btn-add {
+        border-color: gray;
     }
-    .btn-add:hover{
-    background-color: gray;
-    color:white;
+
+    .btn-add:hover {
+        background-color: gray;
+        color: white;
     }
-    .inav{
-    padding:10px;
+
+    .inav {
+        padding: 10px;
     }
 </style>
 
 <h2>Inventory</h2>
 
 <ul class="nav" style="list-style-type: none;">
-    <li class="nav-item inav" >
+    <li class="nav-item inav">
         <a style="color:darkslategrey" href="/staff/inventory">Main</a>
     </li>
     <li class="nav-item inav">
         <a style="font-weight: bold; color:darkslategrey" href="#">Incoming Orders</a>
     </li>
     <li class="ml-auto">
-        <a type="button" href="/staff/inventory/stock/order" class="btn btn-add">Add New Item</a>
+        <button type="button" class="btn btn-add open-button" onclick="processiSerial()">Order Stock</button>
     </li>
 </ul>
 <hr>
+
 
 <div class="container">
     <table class="table table-fluid" id="myTable">
@@ -65,9 +69,9 @@
                 <td>{{shipmentDate}}</td>
                 <td>{{receivedDate}}</td>
                 {{#if (receivedCheck shipmentStatus)}}
-                    <td>-</td>
+                <td>-</td>
                 {{else}}
-                <td><a href="/staff/inventory/stock/receive/{{id}}" class="btn btn-warning">Receive</a></td>
+                <td><a href="/staff/inventory/stock/receive/{{id}}" class="btn btn-secondary">Receive</a></td>
                 {{/if}}
             </tr>
             {{/each}}
@@ -79,4 +83,13 @@
     $(document).ready(function () {
         $('#myTable').DataTable();
     });
+
+    function processiSerial() {
+        var iSerial = prompt("Enter Item Serial to be Ordered");
+        if (iSerial != null){
+        var link = "/staff/inventory/stock/order/" + iSerial;
+        location.assign(link)
+        }
+    }
+
 </script>

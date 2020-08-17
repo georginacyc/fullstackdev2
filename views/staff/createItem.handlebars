@@ -12,68 +12,78 @@
     }
 </style>
 
-<form method="POST" id="createItem" action="/staff/item/create" >
-    <div class = "form-group">
-        <label for "itemName">Item Name</label>
-        <input type = "text" class="form-control" id = "itemName" name = "itemName" value="" required>
-    </div>
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card card-body">
+            <h3 class="text-muted text-center">New Item</h3>
+            <form method="POST" id="createItem" action="/staff/item/create">
+                <div class="form-group">
+                    <label for "itemName">Item Name</label>
+                    <input type="text" class="form-control" id="itemName" name="itemName" value="" required>
+                </div>
 
-    <div class= "form-group">
-        <label>Item Category</label>
-        <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="itemCategory" id="Tops" value="Tops" checked>
-            <label class="form-check-label" id="Tops" for="Tops">Tops</label>
+                <div class="form-group">
+                    <label>Item Category</label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="itemCategory" id="Tops" value="Tops" checked>
+                        <label class="form-check-label" id="Tops" for="Tops">Tops</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="itemCategory" id="Bottoms" value="Bottoms">
+                        <label class="form-check-label" id="Bottoms" for="Bottoms">Bottoms</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Item Gender</label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="itemGender" id="F" value="F" checked>
+                        <label class="form-check-label" id="F" for="F">F</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="itemGender" id="M" value="M">
+                        <label class="form-check-label" id="M" for="M">M</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for "itemCost">Item Cost</label>
+                    <input type="number" id="itemCost" step="0.05" class="form-control" name="itemCost" value=""
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for "itemPrice">Item Price</label>
+                    <input id="itemPrice" type="number" step="0.05" class="form-control" name="itemPrice" value=""
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for "itemDescription">Item Description</label>
+                    <textarea class="form-control" id="itemDescription" name="itemDescription"
+                        placeholder="Item description and sizing" required></textarea>
+                </div>
+                <br>
+                <button type="submit" class="btn float-right">Submit</button>
+            </form>
         </div>
-        <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="itemCategory" id="Bottoms" value="Bottoms" >
-            <label class="form-check-label" id="Bottoms" for="Bottoms">Bottoms</label>
-        </div>
     </div>
-
-    <div class="form-group">
-        <label>Item Gender</label>
-        <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="itemGender" id="F" value="F" checked>
-            <label class="form-check-label" id="F" for="F">F</label>
-        </div>
-        <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="itemGender" id="M" value="M" >
-            <label class="form-check-label" id="M" for="M">M</label>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label for "itemCost">Item Cost</label>
-        <input type="number" id = "itemCost" step="0.05" class="form-control" name="itemCost" value="" required>
-    </div>
-
-    <div class="form-group">
-        <label for "itemPrice">Item Price</label>
-        <input id = "itemPrice" type="number" step="0.05" class="form-control" name="itemPrice" value="" required>
-    </div>
-
-    <div class="form-group">
-        <label for "itemDescription">Item Description</label>
-        <textarea class="form-control" id="itemDescription" name = "itemDescription" placeholder="Item description and sizing" required ></textarea>
-    </div>
-    <br>
-    <button type="submit" class="btn">Submit</button>
-</form>
+</div>
 
 
 <script>
     function generateSerial() {
-            'use strict';
-            var chars = '1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
-                serialLength = 10,
-                randomSerial = "",
-                i,
-                randomNumber;
+        'use strict';
+        var chars = '1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+            serialLength = 10,
+            randomSerial = "",
+            i,
+            randomNumber;
 
-            for (i = 0; i < serialLength; i = i + 1) {
-                randomNumber = Math.floor(Math.random() * chars.length);
-                randomSerial += chars.substring(randomNumber, randomNumber + 1);
-            }
-            return randomSerial
+        for (i = 0; i < serialLength; i = i + 1) {
+            randomNumber = Math.floor(Math.random() * chars.length);
+            randomSerial += chars.substring(randomNumber, randomNumber + 1);
         }
+        return randomSerial
+    }
 </script>

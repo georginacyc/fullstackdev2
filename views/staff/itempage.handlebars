@@ -38,21 +38,26 @@
 
 <ul class="nav nav-tabs" id="myTab" role="tablist">
     <li class="nav-item">
-        <a class="nav-link active" id="active-tab" data-toggle="tab" href="#active" role="tab" aria-controls="active"
-            aria-selected="true">Active</a>
+        <a class="nav-link active" id="all-tab" data-toggle="tab" href="#all" role="tab" 
+            aria-controls="nav-all" aria-selected="true">View All</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link " id="active-tab" data-toggle="tab" href="#active" role="tab" 
+            aria-controls="nav-active" aria-selected="false">Active</a>
     </li>
     <li class="nav-item">
         <a class="nav-link" id="discontinued-tab" data-toggle="tab" href="#discontinued" role="tab"
-            aria-controls="discontinued" aria-selected="false">Discontinued</a>
+            aria-controls="nav-discontinued" aria-selected="false">Discontinued</a>
     </li>
     <li class="ml-auto">
         <a type="button" href="/staff/item/create" class="btn btn-add">Add New Item</a>
     </li>
 </ul>
 <div class="tab-content" id="myTabContent">
-    <div class="tab-pane fade show active" id="active" role="tabpanel" aria-labelledby="home-tab">
+
+    <div class="tab-pane fade show active" id="all" role="tabpanel" aria-labelledby="all-tab">
         <div style="padding: 10px;">
-            <table class="table table-fluid" id="myTable">
+            <table class="table table-fluid" id="allTable">
                 <thead style="color: white;">
                     <tr class="table-primary">
                         <th>Item Name</th>
@@ -67,6 +72,43 @@
                 </thead>
                 <tbody>
                     {{#each item}}
+                    <tr>
+                        <td>{{itemName}}</td>
+                        <td>{{itemSerial}}</td>
+                        <td>{{itemCategory}}</td>
+                        <td>{{itemGender}}</td>
+                        <td>${{itemPrice}}</td>
+                        <td>{{status}}</td>
+                        <td><a href="/staff/item/edit/{{itemSerial}}" class="btn btn-secondary">Update</a></td>
+                        {{#if (discontinueCheck status)}}
+                        <td>-</td>
+                        {{else}}
+                        <td><a type="button" href="/staff/item/discontinue/{{itemSerial}}"
+                                class="btn btn-danger">Discontinue</a></td>
+                        {{/if}}
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="active" role="tabpanel" aria-labelledby="active-tab">
+        <div style="padding: 10px;">
+            <table class="table table-fluid" id="activeTable">
+                <thead style="color: white;">
+                    <tr class="table-primary">
+                        <th>Item Name</th>
+                        <th>Item Serial</th>
+                        <th>Item Category</th>
+                        <th>Item Gender</th>
+                        <th>Item Price</th>
+                        <th>-</th>
+                        <th>-</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each item}}
                     {{#if (discontinueCheck status)}}
                     {{else}}
                     <tr>
@@ -75,8 +117,7 @@
                         <td>{{itemCategory}}</td>
                         <td>{{itemGender}}</td>
                         <td>${{itemPrice}}</td>
-                        <td>{{status}}</td>
-                        <td><a href="/staff/item/edit/{{itemSerial}}" class="btn btn-warning">Update</a></td>
+                        <td><a href="/staff/item/edit/{{itemSerial}}" class="btn btn-secondary">Update</a></td>
                         <td><a type="button" href="/staff/item/discontinue/{{itemSerial}}" class="btn btn-danger">Discontinue</a></td>
                     </tr>
                     {{/if}}
@@ -96,7 +137,6 @@
                         <th>Item Category</th>
                         <th>Item Gender</th>
                         <th>Item Price</th>
-                        <th>Status</th>
                         <th>-</th>
                     </tr>
                 </thead>
@@ -109,8 +149,7 @@
                         <td>{{itemCategory}}</td>
                         <td>{{itemGender}}</td>
                         <td>${{itemPrice}}</td>
-                        <td>{{status}}</td>
-                        <td><a href="/staff/item/edit/{{itemSerial}}" class="btn btn-warning">Update</a></td>
+                        <td><a href="/staff/item/edit/{{itemSerial}}" class="btn btn-secondary">Update</a></td>
                     </tr>
                     {{/if}}
                     {{/each}}
@@ -118,14 +157,20 @@
             </table>
         </div>
     </div>
+
+
+
 </div>
 
 
 <script>
     $(document).ready(function () {
-        $('#myTable').DataTable();
+        $('#activeTable').DataTable();
     });
     $(document).ready(function () {
             $('#discontinuedTable').DataTable();
-        });
+    });
+    $(document).ready(function () {
+            $('#allTable').DataTable();
+    });
 </script>

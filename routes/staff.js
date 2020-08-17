@@ -563,7 +563,7 @@ router.get('/delete-user/:id', adminAuth, (req, res) => {
 router.get('/pdf/:id', (req, res) => {
     User.findOne({
         where: {
-            id: req.params.id
+            staffId: req.params.id
         }
     }).then((user) => {
         var html = fs.readFileSync('./views/staff/staffPDF.handlebars', 'utf-8')
@@ -572,7 +572,7 @@ router.get('/pdf/:id', (req, res) => {
             orientation: "portrait",
             border: "10mm",
             header: {
-                height: "10mm"
+                height: "5mm"
             },
             "footer": {
                 "height": "10mm",
@@ -581,7 +581,7 @@ router.get('/pdf/:id', (req, res) => {
                 }
             }
         }
-        var x = {'fname': user.fname, 'lname': user.lname, 'type': user.type, 'email': user.email, 'dob': user.dob, 'hp': user.hp, 'address': user.address}
+        var x = {'image': user.image, 'fname': user.fname, 'lname': user.lname, 'type': user.type, 'staffId': user.staffId, 'email': user.email, 'gender': user.gender, 'dob': user.dob, 'hp': user.hp, 'address': user.address}
         var document = {
             html: html,
             data: {

@@ -30,9 +30,9 @@ router.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-router.get('/update', (req, res) => {
+router.get('/update', (req, res) => { // updates last login for staff/admin account
     date = new Date();
-    now = ("0" + date.getDate()).slice(-2) + '/' + ("0" + (date.getMonth() + 1)).slice(-2) + '/' + date.getFullYear() + " " + date.getHours()+ ":" + date.getMinutes()
+    now = ("0" + date.getDate()).slice(-2) + '/' + ("0" + (date.getMonth() + 1)).slice(-2) + '/' + date.getFullYear() + " " + date.getHours()+ ":" + date.getMinutes() // format: DD/MM/YYYY HH:MM
     User.update({
         lastLogin: now
     }, {
@@ -44,7 +44,7 @@ router.get('/update', (req, res) => {
     }).catch(err => console.log(err));
 })
 
-router.get('/home', (req, res) => {
+router.get('/home', (req, res) => { // everything below is retrieving data for charts in home page
     let pendingShipments;
     let thisMonthSales;
     let OOSitems;
@@ -55,25 +55,25 @@ router.get('/home', (req, res) => {
     let date = new Date();
     let currMonth = date.getMonth() + 1;
     let currYear = date.getFullYear();
-    let currDate = currYear.toString() + "-" + ("0" + currMonth.toString()).slice(-2) + "-" + "01";
+    let currDate = currYear.toString() + "-" + ("0" + currMonth.toString()).slice(-2) + "-" + "01"; // getting dates for calculating this months sales
     let nextDate = currYear.toString() + "-" + ("0" + currMonth.toString()).slice(-2) + "-" + "01";
 
     async function charts() {
-        await CustOrders.count({
+        await CustOrders.count({ // counts no. of pending shipments
             where: {
                 ship_Date: null
             }
         }).then((num) => {
             pendingShipments = num;
         }).catch(err => console.log(err));
-        await CustOrders.count({
+        await CustOrders.count({ // count to retrieve data for this months sales
             where: {
                 order_Date: {
                     [Op.gte]: currDate,
                     [Op.lt]: nextDate
                 }
             }
-        }).then((num) => {
+        }).then((num) => { // counts no. of out of stock items
             thisMonthSales = num;
         }).catch(err => console.log(err));
         await Item.count({
@@ -83,7 +83,7 @@ router.get('/home', (req, res) => {
         }).then((num) => {
             OOSitems = num;
         }).catch(err => console.log(err));
-        await User.count({
+        await User.count({ // counts no. of female customers
             where: {
                 type: 'User',
                 gender: 'Female'
@@ -91,7 +91,7 @@ router.get('/home', (req, res) => {
         }).then((num) => {
             genderData.push(num)
         }).catch(err => console.log(err));
-        await User.count({
+        await User.count({ // counts no. of male customers
             where: {
                 type: 'User',
                 gender: 'Male'
@@ -99,25 +99,17 @@ router.get('/home', (req, res) => {
         }).then((num) => {
             genderData.push(num);
         }).catch(err => console.log(err));
-        await User.count({
-            where: {
-                type: 'User',
-                gender: 'Other'
-            }
-        }).then((num) => {
-            genderData.push(num);
-        }).catch(err => console.log(err));
-        await User.findAll({
+        await User.findAll({ // retrieves all dob of registered customers
             where: {
                 type: 'User'
             },
             attributes: ['dob'],
             raw: true
         }).then((result) => {
-            let p = {'18-29': 0, '30-39': 0, '40-49': 0, '50-59': 0, '60<': 0}
+            let p = {'18-29': 0, '30-39': 0, '40-49': 0, '50-59': 0, '60<': 0} // dictionary to hold quantity of each age group
             for (i=0; i<result.length; i++) {
-                str = result[i]['dob'].slice(0,5);
-                age = parseInt(currYear) - parseInt(str);
+                str = result[i]['dob'].slice(0,5); // retrieving year from dob
+                age = parseInt(currYear) - parseInt(str); // getting age
                 if (age >= 18 && age <= 29) {
                     p['18-29'] += 1;
                 } else if (age >= 30 && age <= 39) {
@@ -131,17 +123,17 @@ router.get('/home', (req, res) => {
                 }
             }
             for (var key in p) {
-                ageData.push(p[key]);
+                ageData.push(p[key]); // passing in data for chartjs
             }
         }).catch(err => console.log(err));
-        await Item.count({
+        await Item.count({ // retrieve no. of tops
             where: {
                 itemCategory: 'Top'
             }
         }).then((num) => {
             categoryData.push(num);
         }).catch(err => console.log(err));
-        await Item.count({
+        await Item.count({ // retrieve no. of bottoms
             where: {
                 itemCategory: 'Bottom'
             }
@@ -210,8 +202,7 @@ router.get('/your-account', (req, res) => {
             id: req.user.id
         }
     }).then((user) => {
-        let src = "/uploads/staff_pictures/" + user.image
-        console.log(src)
+        let src = "/uploads/staff_pictures/" + user.image // to pass in the path for img src in handlebars
         res.render('staff/accountDetails', {layout: staffMain, user, src})
     }).catch((err) => {
         console.log(err)
@@ -219,18 +210,17 @@ router.get('/your-account', (req, res) => {
     })
 });
 
-router.put('/change-password/:id', (req, res) => {
+router.put('/change-password/:id', (req, res) => { // staff/admin changing their OWN password; this is provided they know their old password
     let {oldpw, newpw, newpw2} = req.body;
     User.findOne({
         where: {
             id: req.user.id
         }
     }).then((user) => {
-        let check = bcrypt.compareSync(oldpw, user.password)
-        console.log(check);
+        let check = bcrypt.compareSync(oldpw, user.password) // compares to see if they inputted the correct old password
         if (check) {
             if (newpw == newpw2) {
-                pw = bcrypt.hashSync(newpw, 10);
+                pw = bcrypt.hashSync(newpw, 10); // hash for secure storage
                 User.update({
                     password: pw
                 }, {
@@ -257,14 +247,14 @@ router.put('/change-password/:id', (req, res) => {
 
 
 
-router.get('/pdf/:id', (req, res) => {
+router.get('/pdf/:id', (req, res) => { // pdf for staff summary/profile. req.param.id is staffId, so normal customers do not get a pdf
     User.findOne({
-        where: {
+        where: { // retrieving user object
             staffId: req.params.id
         }
-    }).then((user) => {
-        var html = fs.readFileSync('./views/staff/staffPDF.handlebars', 'utf-8')
-        var options = {
+    }).then((user) => { // using retrieved user to construct pdf
+        var html = fs.readFileSync('./views/staff/staffPDF.handlebars', 'utf-8') // the format of the pdf
+        var options = { // various options
             format: "A4",
             orientation: "portrait",
             border: "10mm",
@@ -282,7 +272,7 @@ router.get('/pdf/:id', (req, res) => {
         var document = {
             html: html,
             data: {
-                staff: x
+                staff: x // passes in data for handlbars to cast into the staches
             },
             path: "./public/pdf/output.pdf"
         };

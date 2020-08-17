@@ -154,19 +154,6 @@ router.get('/home', (req, res) => {
     }).catch(err => console.log(err))
 });
 
-// to retrieve ALL accounts, regardless of whether it's a staff or customer account.
-// router.get('/accounts', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
-//     User.findAll({
-//         raw: true
-//     })
-//     .then((users) => {
-//         res.render('staff/accountList', {
-//             accounts: users,
-//             layout: staffMain
-//         });
-//     })
-// });
-
 router.get('/announcements', (req, res) => {
     res.render('staff/allAnnouncements', {layout: staffMain});
 });

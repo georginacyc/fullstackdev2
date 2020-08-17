@@ -263,18 +263,18 @@ router.get('/accounts', (req, res) => {
     })
      //res.render('user/userAccount');
 });
-    
+
 //user shopping cart
-router.get('/cart', (req, res) => {
-    Item.findAll({
-        raw: true
+router.get('/cart/:itemSerial', (req, res) => {
+    let carts = {}
+    Item.findOne({
+        where: {
+            itemSerial: req.params.itemSerial
+        }, raw: true
     })
         .then((item) => {
-            res.render('user/cart', {
-                item: item
-            })
-        })
-        // renders views/cart.handlebars
+            res.locals.carts = carts
+    }).catch(err => console.log(err));
 });
 
 //user checkout
@@ -282,24 +282,58 @@ router.get('/checkout', (req, res) => {
 	res.render('user/checkout') // renders views/checkout.handlebars
 });
 
-// user orders
-router.get('/orders', (req, res) => {
-	res.render('user/orders') // renders views/checkout.handlebars
-});
 
-/*
+
 router.get('/orders', (req, res) => {
-    CustOrders.findAll()
-    .then((custorder) => {
+    CustOrders.findAll({
+        raw: true
+    })
+    .then((orders) => {
     // pass object to orders.handlebar
         res.render('user/orders', {
             orders : orders,});
     })
     .catch(err => console.log(err));
 });
-*/
+
 router.post('/checkout', (req, res) => {
-    let {itemSerial} = req.body
+    let errors = [];
+    // Retrieves fields from page from request body
+    let {name,card,cardcvv,expiredate} = req.body;
+
+    // Checks cvv is 3 digit
+    if(cardcvv.length != 3) {
+        errors.push({text: 'wrong cvv'});
+    }
+
+    // Checks that card length is correct
+    if(card.length != 16) {
+        errors.push({text: 'invalid card'});
+    }
+    // checks if card starting with 4 , 4-visa
+    if (card[0] != 4) {
+        errors.push({text: 'invaid card'})
+    }
+    else{
+        let userId = req.userId
+
+        CustOrders.create({
+            userId,
+            itemSerial,
+            quantity,
+            status,
+            couponCode,
+            total_Amt,
+            order_Date, 
+            ship_Date,
+            paid_Date, 
+            completion_Date
+        }) 
+        .then(custorder => {
+            res.redirect('/user/orders');})
+        .catch(err => console.log(err))
+    }
+    
     /*let userId = 1001;
     let itemSerial = "2222TF";
     let quantity = 1;
@@ -328,6 +362,8 @@ router.post('/checkout', (req, res) => {
     .catch(err => console.log(err))*/
 
 });
+
+
 router.use('/user/cart', ensureAuthenticated);
 
 module.exports = router;

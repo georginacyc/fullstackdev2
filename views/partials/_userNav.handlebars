@@ -12,10 +12,10 @@
 					<a class="nav-link" href="/">Home</a>
 				</li>
 				<li class="nav-item">
-					<a class="nav-link" href="/catalogueHis">Men's</a>
+					<a class="nav-link" href="/catalogue/his">Men's</a>
 				</li>
 				<li class="nav-item">
-					<a class="nav-link" href="/catalogueHers">Women's</a>
+					<a class="nav-link" href="/catalogue/hers">Women's</a>
 				</li>
 				
 			</ul>
@@ -31,11 +31,11 @@
 						</div>
 					</li>
 					<li class="nav-link">
-						<a href="" i style = "color : white" class = "fa fa-shopping-cart"></a>
+						<a href="/user/cart" style="color: grey;"><i class="fa fa-shopping-cart mr-2"></i>Cart</a>
 					</li> 
 				{{else}}
 					<li class="nav-item">
-						<a href="/user/cart" class="nav-link"><i class="fa fa-shopping-cart mr-2"></i>Cart</a>
+						<a href="/user/login" class="nav-link" onclick="alert('Please Login')"><i class="fa fa-shopping-cart mr-2"></i>Cart</a>
 					</li>
 					<li class="nav-item">
 						<a href="/staff-login" class="nav-link">Staff Login</a>

@@ -1,25 +1,58 @@
-<h2>{{title}}</h2>
+<style>
+    img {
+        width: 150px;
+        height: 150px;
+    }
+    h1 {
+        text-align:center
+    }
+    a {
+        color:black;
+    }
+    .table-primary,
+    .table-primary>td,
+    .table-primary>th {
+        background-color: #353a40;
+        color:white
+    }
+
+    .table-primary tbody+tbody,
+    .table-primary td,
+    .table-primary th,
+    .table-primary thead th {
+        border-color: #353a40;
+    }
+
+    .table-primary,
+    .table tr {
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
+<h1>{{title}}</h1>
 <hr>
 
 <div class="container">
     <table class="table table-fluid" id="myTable">
         <thead>
             <tr class="table-primary">
-                <th>Item Name</th>
-                <th>Item Serial</th>
-                <th>Stock Level</th>
-                <th>Status</th>
-                <th>Request Stock</th>
+                <th data-orderable="false">Sort by:</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Category</th>
+                <th data-orderable="false">Sizes</th>
+                <th data-orderable="false">Colours</th>
             </tr>
         </thead>
         <tbody>
             {{#each item}}
                 <tr>
-                    <td><a href="/viewDetails/{{itemSerial}}">{{itemName}}</a></td>
-                    <td>{{itemPrice}}</td>
-                    <td>{{stockLevel}}</td>
-                    <td>{{status}}</td>
-                    <td><a href="/staff/inventory/order-stock/{{itemSerial}}" class="btn btn-warning">Request Stock</a></td>
+                    <td><a href="/view-details/{{itemSerial}}"><img src="\img\itemPlaceholder.jpg"></a></td>
+                    <td><a href="/view-details/{{itemSerial}}">{{itemName}}</a></td>
+                    <td>S${{itemPrice}}</td>
+                    <td>{{itemCategory}}</td>
+                    <td>XS, S, M, L, XL, XXL</td>
+                    <td></td>
                 </tr>
             {{/each}}
         </tbody>

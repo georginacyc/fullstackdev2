@@ -106,7 +106,10 @@ router.post('/create', (req, res) => {
             status
         }).then(item => {
             res.redirect('/staff/item/view-all');
-        }).catch(err => res.render('/staff/errorpage', { errors }));
+        }).catch((err) => {
+            console.log(err)
+            res.redirect('/staff/error')
+        });
     }
 });
 

@@ -1,0 +1,52 @@
+<style>
+    img {
+        height: 200px;
+        width: 200px;
+
+    }
+</style>
+<div class="container">
+    <h2>Men's</h2>
+    <table class="table table-fluid" id="table_id">
+        <tbody>
+            <tr>
+                <td><img src= "\img\itemPlaceholder.jpg " class="image1"></td>
+                <td><a href="/viewDetails/{{itemSerial}}">{{item.itemName}}</a></td>
+                <td>
+                    <p>Size</p>
+                </td>
+                </tr>
+                <tr>
+                <td>${{item.itemPrice}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="form-check form-check-inline">
+    <input class="form-check-input" type="radio" id="sizeXS" value="XS" name="size" {{radioCheck user.size "XS"}}>
+    <label class="form-check-label" for="sizeXS">XS</label>
+</div>
+<div class="form-check form-check-inline">
+    <input class="form-check-input" type="radio" id="sizeS" value="S" name="size" {{radioCheck user.size "S"}}>
+    <label class="form-check-label" for="sizeS">S</label>
+</div>
+<div class="form-check form-check-inline">
+    <input class="form-check-input" type="radio" id="sizeM" value="M" name="size" {{radioCheck user.size "M"}}>
+    <label class="form-check-label" for="sizeM">M</label>
+</div>
+<div class="form-check form-check-inline">
+    <input class="form-check-input" type="radio" id="sizeL" value="L" name="size" {{radioCheck user.size "L"}}>
+    <label class="form-check-label" for="sizeL">L</label>
+</div>
+<div class="form-check form-check-inline">
+    <input class="form-check-input" type="radio" id="sizeXL" value="XL" name="size" {{radioCheck user.size "XL"}}>
+    <label class="form-check-label" for="sizeXL">XL</label>
+</div>
+<div class="form-check form-check-inline">
+    <input class="form-check-input" type="radio" id="sizeXXL" value="XXL" name="size" {{radioCheck user.size "XXL"}}>
+    <label class="form-check-label" for="sizeXXL">XXL</label>
+</div>
+
+<form>
+    <button type="submit" class="btn btn-primary">Add to Cart</button>
+</form>

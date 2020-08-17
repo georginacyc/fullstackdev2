@@ -29,9 +29,6 @@ router.post('/staff-login', (req, res, next) => {
 
 router.get('/catalogue', (req, res) => {
     Item.findAll({
-        where: {
-            itemGender: "M"
-        },
         raw: true
     })
         .then((item) => {
@@ -42,18 +39,21 @@ router.get('/catalogue', (req, res) => {
     
 });
 
-router.get('/view/:itemSerial', (req, res) => {
+router.get('/viewDetails/:itemSerial', (req, res) => {
     Item.findOne({
         where: {
             itemSerial: req.params.itemSerial
         }, raw: true
     }).then((item) => {
-        res.render('view/:itemSerial', {
+        res.render('viewDetails/:itemSerial', {
             
             item // passes the item object to handlebars
 
         });
     }).catch(err => console.log(err)); // To catch no item serial
+    // if (req.user != null) {
+        
+    // }
 });
 
 router.get('/error', (req, res) => {

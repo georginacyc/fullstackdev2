@@ -5,13 +5,14 @@ const db = require('../config/DBConfig');
 
 const StockOrder = db.define('stockorder', {
     stockorderDate: {
-        type: Sequelize.DATE
+        type: Sequelize.DATEONLY
     },
     shipmentStatus: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        defaultValue: 'Processing'
     },
     shipmentDate: {
-        type: Sequelize.DATE
+        type: Sequelize.DATEONLY
     },
     itemSerial: {
         type: Sequelize.STRING
@@ -20,7 +21,7 @@ const StockOrder = db.define('stockorder', {
         type: Sequelize.INTEGER
     },
     receivedDate: {
-        type: Sequelize.DATE
+        type: Sequelize.DATEONLY
     },
 });
 

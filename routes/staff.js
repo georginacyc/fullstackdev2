@@ -23,10 +23,13 @@ const upload = require('../helpers/staffUpload');
 const multer = require('multer');
 const path = require('path');
 const CustOrders = require('../models/CustOrders');
+const { DATEONLY } = require('sequelize');
 
-// var Handlebars = require("handlebars");
+//var Handlebars = require("handlebars");
 // var MomentHandler = require("handlebars.moment");
 // MomentHandler.registerHelpers(Handlebars);
+
+    
 
 router.get('/logout', (req, res) => {
     req.logout();
@@ -619,26 +622,44 @@ router.get('/item/view-all', (req, res) => {
     
 });
 
+//generate random Serial
+function generateSerial() {
+    'use strict';
+    var chars = '1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+        serialLength = 10,
+        randomSerial = "",
+        i,
+        randomNumber;
+
+    for (i = 0; i < serialLength; i = i + 1) {
+        randomNumber = Math.floor(Math.random() * chars.length);
+        randomSerial += chars.substring(randomNumber, randomNumber + 1);
+    }
+    return randomSerial
+}
+
+router.get('/item/create', (req, res) => {
+    res.render('staff/createItem', { layout: staffMain })
+});
+
 router.post('/item/create', (req, res) => {
     let errors = [];
 
-    //Adds new item
-
-    console.log(req);
     // form data and variables
     let itemName = req.body.itemName;
-    let itemSerial = req.body.itemSerial;
     let itemCategory = req.body.itemCategory === undefined ? '' : req.body.itemCategory.toString();
     let itemGender = req.body.itemGender === undefined ? '' : req.body.itemGender.toString();
+    let prefix = generateSerial();
+    let itemSerial = prefix + itemCategory.slice(0, 1) + itemGender;
     let itemCost = req.body.itemCost;
     let itemPrice = req.body.itemPrice;
     let itemDescription = req.body.itemDescription;
     let stockLevel = 0;
-    let status = "In Production"
+    let status = "Active"
     // check for errors if not will add to db
     if (errors.length > 0) {
         res.render("/staff/createItem", {
-            errors, itemName, itemSerial, itemCategory, itemGender, itemCost, itemPrice, itemDescription, stockLevel, status, layout: staffMain
+            errors, itemName, itemCategory, itemGender, itemCost, itemPrice, itemDescription, stockLevel, status, layout: staffMain
         });
     } else {
         Item.create({
@@ -652,10 +673,8 @@ router.post('/item/create', (req, res) => {
             stockLevel,
             status
         }).then(item => {
-            alertMessage(res, 'success', 'Item successfully added', true);
             res.redirect('/staff/item/view-all');
-        })
-            .catch(err => console.log(err));
+        }).catch(err => res.render('/staff/errorpage', { errors }));
     }
 });
 
@@ -737,11 +756,6 @@ router.put('/item/save-discontinue/:itemSerial', (req, res) => {
 });
 
 
-
-router.get('/item/create', (req, res) => {
-    res.render('staff/createItem', { layout: staffMain })
-});
-
 //Inventory Routes
 router.get('/inventory', (req, res) => {
     Item.findAll({
@@ -757,7 +771,7 @@ router.get('/inventory', (req, res) => {
 
 //Stock Order Routes
 
-router.get('/inventory/view-stock-orders', (req, res) => {
+router.get('/inventory/stock/view-orders', (req, res) => {
     StockOrder.findAll({
         raw: true
     }).then((stockorder) => {
@@ -768,30 +782,30 @@ router.get('/inventory/view-stock-orders', (req, res) => {
         })
 });
 
-router.get('/inventory/order-stock/:itemSerial', (req, res) => {
+router.get('/inventory/stock/order/:itemSerial', (req, res) => {
     Item.findOne({
         where: {
             itemSerial: req.params.itemSerial
         }, raw: true
     }).then((item) => {
         // calls views/staff/editItem.handlebar to render the edit item
-
+        
         res.render('staff/createStockOrder', {
             layout: staffMain,
             item // passes the item object to handlebars
-
         });
     }).catch(err => console.log(err)); // To catch no item serial
 });
 
 
-router.post('/inventory/order-stock/:itemSerial', (req, res) => {
+router.post('/inventory/stock/order/:itemSerial', (req, res) => {
     let errors = [];
 
     //Adds new item
-    let stockorderDate = moment(req.body.stockorderDate, 'DD-MM-YYY');
+    // let stockorderDate = moment(req.body.stockorderDate, 'DD-MM-YYY');
+    let stockorderDate = new DATEONLY();
     let shipmentStatus = req.body.shipmentStatus;
-    let shipmentDate = moment(req.body.shipmentDate, 'DD-MM-YYY');
+    let shipmentDate = moment(req.body.shipmentDate, 'YYYY-MM-DD');
     let itemSerial = req.body.itemSerial;
     let stockorderQuantity = req.body.stockorderQuantity;
     let receivedDate = undefined;
@@ -803,12 +817,78 @@ router.post('/inventory/order-stock/:itemSerial', (req, res) => {
         itemSerial,
         stockorderQuantity,
         receivedDate
-        }).then(stockorder => {
-            res.redirect('/staff/inventory');
-        })
-        .catch(err => console.log(err))
+    }).then(stockorder => {
+        res.redirect('/staff/inventory/stock/view-orders');
+    })
+        .catch(err => res.render('/staff/errorpage', { errors }))
 
-})
+});
+
+router.get('/inventory/stock/receive/:id', (req, res) => {
+    let receivedDate = moment().format('YYYY-MM-DD');
+    StockOrder.findOne({
+        where: {
+            id: req.params.id
+        }, raw: true,
+    }).then((stockorder) => {
+        console.log(stockorder),
+        res.render('staff/receiveOrder', {
+            layout: staffMain,
+            stockorder, receivedDate // passes the item object to handlebars
+
+        });
+    }).catch(err => res.render('staff/errorpage')); // To catch no item serial
+});
+
+router.put('/inventory/stock/save-recieve/:id', (req, res) => {
+    let receivedDate = moment().format('YYYY-MM-DD');
+    
+    StockOrder.findOne({
+        where: {
+            id: req.params.id
+        }, raw: true
+    }).then((stockorder) => {
+        // variables to be updated
+        // only select variables can be edited
+        var stockorderQuantity = stockorder.stockorderQuantity
+        var itemSerial = stockorder.itemSerial
+        // find item to be updated
+        Item.findOne({
+            where: {
+                itemSerial: stockorder.itemSerial
+            }, raw: true
+        }).then((item) => {
+            // set new stock level
+            var newStockLevel = item.stockLevel += stockorderQuantity;
+            Item.update({
+                stockLevel: newStockLevel
+            }, {
+                where: {
+                    itemSerial: itemSerial
+                }
+            }).then(
+        StockOrder.update({
+            shipmentStatus: "Received",
+            receivedDate: receivedDate
+        }, {
+            where: {
+                id: req.params.id
+            }
+        }))
+    })
+        // redirects back to the main item page
+        res.redirect('/staff/inventory/stock/view-orders');
+    }).catch(err => res.render('staff/errorpage')); // To catch no item serial
+});
+
+
+//error page
+    router.get('/error', (req, res) => {
+        let errors = [];
+        res.render('/staff/errorpage', {
+            errors
+        })
+    });
 
 
 module.exports = router;

@@ -1,0 +1,29 @@
+{{!-- recieve order form --}}
+<style>
+    .btn{
+    background-color: gray; 
+    color: white;
+    }
+    .btn:hover {
+    background-color: white;
+    color: maroon;
+    border-color: maroon;
+    }
+</style>
+
+<h3>Receive Stock</h3>
+<p>Order ID: {{stockorder.id}}</p>
+<p>Order Date: {{stockorder.stockorderDate}}</p>
+<p>Shipment Date: {{stockorder.shipmentDate}}</p>
+<p>Item Serial: {{stockorder.itemSerial}}</p>
+<p>Quantity: {{stockorder.stockorderQuantity}}</p>
+<hr>
+<p>Shipment Status: Received</p>
+<p>Received Date: {{receivedDate}}</p>
+
+<form method="POST" action="/staff/inventory/stock/save-recieve/{{stockorder.id}}?_method=PUT">
+    <input type="hidden" name="_method" value="PUT">
+    <button type="submit" class="btn">Submit</button>
+</form>
+
+

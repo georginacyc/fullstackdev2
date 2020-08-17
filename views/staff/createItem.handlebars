@@ -1,13 +1,21 @@
 {{!-- create item form --}}
+<style>
+    .btn {
+        background-color: gray;
+        color: white;
+    }
+
+    .btn:hover {
+        background-color: white;
+        color: maroon;
+        border-color: maroon;
+    }
+</style>
+
 <form method="POST" id="createItem" action="/staff/item/create" >
     <div class = "form-group">
         <label for "itemName">Item Name</label>
         <input type = "text" class="form-control" id = "itemName" name = "itemName" value="" required>
-    </div>
-
-    <div class = "form-group">
-        <label for "itemSerial">Item Serial</label>
-        <input type = "text" class = "form-control"id = "itemSerial" name = "itemSerial" value="" required>
     </div>
 
     <div class= "form-group">
@@ -49,6 +57,23 @@
         <textarea class="form-control" id="itemDescription" name = "itemDescription" placeholder="Item description and sizing" required ></textarea>
     </div>
     <br>
-    <button type="submit" class="btn btn-primary">Submit</button>
-
+    <button type="submit" class="btn">Submit</button>
 </form>
+
+
+<script>
+    function generateSerial() {
+            'use strict';
+            var chars = '1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+                serialLength = 10,
+                randomSerial = "",
+                i,
+                randomNumber;
+
+            for (i = 0; i < serialLength; i = i + 1) {
+                randomNumber = Math.floor(Math.random() * chars.length);
+                randomSerial += chars.substring(randomNumber, randomNumber + 1);
+            }
+            return randomSerial
+        }
+</script>

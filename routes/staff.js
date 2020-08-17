@@ -6,23 +6,16 @@ const User = require('../models/User');
 const sNotif = require('../models/StaffNotifs');
 const alertMessage = require('../helpers/messenger');
 const bcrypt = require('bcryptjs');
-const mysql = require('mysql');
-const passport = require('passport');
 const staffMain = "../layouts/staff";
 const Item = require('../models/Item');
 const moment = require('moment');
 const StockOrder = require('../models/StockOrder');
-const ensureAuthenticated = require('../helpers/auth'); // to verify that a user is logged in
-const staffAuth = require('../helpers/staffAuth'); // to verify that user logged in is a Staff
 const adminAuth = require('../helpers/adminAuth'); // to verify that user logged in is an Admin
 const adminRoute = require('../routes/admin');
 const pdf = require('pdf-creator-node');
 const fs = require('fs');
 const sequelize = require('sequelize');
 const Op = sequelize.Op;
-const upload = require('../helpers/staffUpload');
-const multer = require('multer');
-const path = require('path');
 const CustOrders = require('../models/CustOrders');
 const { DATEONLY } = require('sequelize');
 
@@ -52,7 +45,6 @@ router.get('/update', (req, res) => {
 })
 
 router.get('/home', (req, res) => {
-    let data = [1, 10, 43, 23, 98, 90, 52]
     let pendingShipments;
     let thisMonthSales;
     let OOSitems;
@@ -158,7 +150,7 @@ router.get('/home', (req, res) => {
         }).catch(err => console.log(err));
     }
     charts().then(() => {
-        res.render('staff/staffhome', {layout: staffMain, chartData: data, pendingShipments, thisMonthSales, OOSitems, genderData, ageData, categoryData});
+        res.render('staff/staffhome', {layout: staffMain, pendingShipments, thisMonthSales, OOSitems, genderData, ageData, categoryData});
     }).catch(err => console.log(err))
 });
 
@@ -221,7 +213,7 @@ async function announcementsData(req, res) {
     }
     catch (error) {
         console.log("Announcement Listing Error");
-        return res.status(500);
+        res.redirect('/staff/error');
     }
 }
 
@@ -234,6 +226,9 @@ router.get('/your-account', (req, res) => {
         let src = "/uploads/staff_pictures/" + user.image
         console.log(src)
         res.render('staff/accountDetails', {layout: staffMain, user, src})
+    }).catch((err) => {
+        console.log(err)
+        res.redirect('/staff/error')
     })
 });
 
@@ -267,7 +262,10 @@ router.put('/change-password/:id', (req, res) => {
             alertMessage(res, 'danger', 'Old password is incorrect.', true);
             res.redirect('/staff/your-account');
         }
-    }).catch(err => console.log(err))
+    }).catch((err) => {
+        console.log(err);
+        res.redirect('/staff/error');
+    })
 });
 
 

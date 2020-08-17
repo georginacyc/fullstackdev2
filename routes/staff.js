@@ -145,7 +145,7 @@ router.get('/home', (req, res) => {
         }).then((num) => {
             categoryData.push(num);
         }).catch(err => console.log(err));
-        await Item.coount({
+        await Item.count({
             where: {
                 itemCategory: 'Bottom'
             }
@@ -538,7 +538,7 @@ router.put('/save-staff/:id', adminAuth, (req, res) => {
     }).catch(err => console.log(err));
 });
 
-router.get('/delete-staff/:id', adminAuth, (req, res) => {
+router.get('/delete-user/:id', adminAuth, (req, res) => {
     User.findOne({
         where: {
             id: req.params.id
@@ -553,7 +553,7 @@ router.get('/delete-staff/:id', adminAuth, (req, res) => {
                     id: req.params.id
                 }
             }).then((user) => {
-                alertMessage(res, "info", "Staff deleted", 'fas fa-exclamation-circle', true);
+                alertMessage(res, "info", "User deleted", 'fas fa-exclamation-circle', true);
                 res.redirect("/staff/accounts");
             }).catch(err => console.log(err));
         };

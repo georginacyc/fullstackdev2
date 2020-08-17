@@ -9,6 +9,7 @@ const user = require('../models/User')
 const ensureAuthenticated = require('../helpers/auth'); // to verify that a user is logged in
 const staffAuth = require('../helpers/staffAuth'); // to verify that user logged in is a Staff
 const Item = require('../models/Item');
+const stockLevelCheck = require('../helpers/stockLevelCheck') // for catalogue to disable buying items that are out of stock
 // const bootstrap = require('bootstrap')
 
 router.get('/', (req, res) => {
@@ -61,15 +62,33 @@ router.get('/catalogue/hers', (req, res) => {
 });
 
 router.get('/view-details/:itemSerial', (req, res) => {
-    Item.findOne({
-        where: {
-            itemSerial: req.params.itemSerial
-        }, raw: true
-    }).then((item) => {
-            res.render('view-details', {
-                item // passes the item object to handlebars
-        });
-    }).catch(err => console.log(err)); // To catch no item serial
+    let specificItem;
+    let allItems;
+    async function viewSpecificItem() {
+        await Item.findOne({
+            where: {
+                itemSerial: req.params.itemSerial
+            }, raw: true
+        }).then((item) => {
+                specificItem = item
+        }).catch(err => console.log(err)); // To catch no item serial
+        await Item.findAll({
+            where: {
+                status: "Active"
+            }, raw: true
+        }).then((item) => {
+                allItems = item
+            });
+    }
+    viewSpecificItem().then(() => {
+        console.log(specificItem, allItems)
+        res.render('view-details', {
+            specificItem, //passes item that was chosen to handlebars
+            allItems //passes all other items
+        })
+    })
+    console.log(specificItem, allItems)
+
 });
 
 router.get('/error', (req, res) => {

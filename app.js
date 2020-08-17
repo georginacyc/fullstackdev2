@@ -31,6 +31,7 @@ const mainRoute = require('./routes/main');
 const formatDate = require('./helpers/hbs');
 const radioCheck = require('./helpers/radioCheck');
 const discontinueCheck = require('./helpers/discontinueCheck');
+const stockLevelCheck = require('./helpers/stockLevelCheck')
 const receivedCheck = require('./helpers/receivedCheck')
 const { allowedNodeEnvironmentFlags } = require('process');
 const StaffNotifs = require('./models/StaffNotifs');
@@ -69,7 +70,8 @@ app.engine('handlebars', exphbs({
 		"formatDate": formatDate,
 		"radioCheck": radioCheck,
 		"discontinueCheck": discontinueCheck,
-		"receivedCheck": receivedCheck
+		"receivedCheck": receivedCheck,
+		"stockLevelCheck": stockLevelCheck
 	},
 	defaultLayout: 'main' // Specify default template views/layout/main.handlebar 
 }));

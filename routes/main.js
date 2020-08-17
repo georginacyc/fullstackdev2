@@ -26,7 +26,10 @@ router.post('/staff-login', (req, res, next) => {
     }) (req, res, next);
 });
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> d3917601087cfdcceb597be94c36f2a80e601643
 router.get('/catalogue', (req, res) => {
     Item.findAll({
         raw: true
@@ -54,6 +57,13 @@ router.get('/viewDetails/:itemSerial', (req, res) => {
     // }
 });
 
+<<<<<<< HEAD
+=======
+router.get('/error', (req, res) => {
+    res.render('user/errorpage');
+})
+
+>>>>>>> d3917601087cfdcceb597be94c36f2a80e601643
 // router.use('/user', ensureAuthenticated, userRoute);
 router.use('/user', userRoute);
 router.use('/staff', ensureAuthenticated, staffAuth, staffRoute);

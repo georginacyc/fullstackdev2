@@ -1,14 +1,15 @@
 {{!-- for admin view --}}
 
-<div class="staffForms">
+<div class="card card-body">
     <h1 class="display-4">Update Staff Details</h1>
     <hr class="titleHR">
-    <form method="POST" action="/staff/save-staff/{{user.id}}?_method=PUT">
+    <form method="POST" action="/staff/admin/save-staff/{{user.id}}?_method=PUT">
         <input type="hidden" name="_method" value="PUT">
         <div class="row">
             <div class="form-group col-6 col-sm-12 col-md-6 col-lg-6">
-                <img class="backup_picture border img-thumbnail img-fluid" style="max-height: 360px; max-width: 240px" id="preivew2" src="/uploads/staff_pictures/{{{user.image}}}" ><br>
-                <input type="file" id="staffUpload2" name="staffUpload2" accept="image/png, image/jpeg, image/jpg" onchange="staffUpload('/staff/update-staff-picture/{{user.id}}')">
+                <img class="backup_picture border img-thumbnail img-fluid" style="max-height: 360px; max-width: 240px" id="original" src="/uploads/staff_pictures/{{{user.image}}}" ><br>
+                <img class="backup_picture border img-thumbnail img-fluid" style="max-height: 360px; max-width: 240px" id="preview" src="" style="display: none"><br>
+                <input type="file" id="staffUpload2" name="staffUpload2" accept="image/png, image/jpeg, image/jpg" onchange="PreviewImage()">
             </div>
             <div class="form-group col-6 col-sm-12 col-md-6 col-lg-6">
                 <div class="short-div">
@@ -70,17 +71,16 @@
         </div>
             
         <div class="row">
-            <div class="form-group">
+            <div class="form-group col-12 col-sm-12 col-md-12 col-lg-12">
                 <input type="checkbox" class="" id="resetpw" name="resetpw" value="reset">
                 <label class="" for="resetpw">Reset Password</label>
             </div>
         </div>
-        
-        <input type="submit" value="Submit" class="btn btn-primary"/>
+        <input type="submit" value="Submit" class="btn btn-dark float-right"/>
     </form>
 </div>
 
-<script>
+<script type="text/javascript">
     function staffUpload(url) {
         let image = $('#staffUpload2')[0].files[0];
         let formdata = new FormData();
@@ -96,4 +96,16 @@
             }
         })
     }
+
+    function PreviewImage() {
+        var oFReader = new FileReader();
+        oFReader.readAsDataURL(document.getElementById("staffUpload2").files[0]);
+
+        oFReader.onload = function (oFREvent) {
+            document.getElementById("original").style.display = "none";
+            document.getElementById("preview").src = oFREvent.target.result;
+            document.getElementById("preview").style.display = "block";
+        };
+    };
+
 </script>

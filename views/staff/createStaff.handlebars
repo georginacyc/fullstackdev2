@@ -1,12 +1,12 @@
-<div style="padding-bottom: 120px">
+<div class="card card-body" style="padding-bottom: 20px">
     <h1 class="text-muted">New Staff</h1>
     <hr class="titleHR">
-    <form method="POST" action="/staff/create-staff">
+    <form method="POST" action="/staff/admin/create-staff">
 
         <div class="row">
             <div class="col-12 col-sm-12 col-md-6 col-lg-6">
                 <img class="border img-thumbnail img-fluid" style="max-height: 360px; max-width: 240px" id="preview" src="\uploads\staff_pictures\staff.png"><br>
-                <input type="file" id="staffUpload" name="staffUpload" accept="image/png, image/jpeg, image/jpg">
+                <input type="file" id="staffUpload" name="staffUpload" accept="image/png, image/jpeg, image/jpg" onchange="PreviewImage()">
             </div>
             
             <div class="col-12 col-sm-12 col-md-6 col-lg-6">
@@ -78,3 +78,13 @@
         <input type="submit" value="Submit" class="btn btn-dark float-right"/>
     </form>
 </div>
+<script type="text/javascript">
+    function PreviewImage() {
+        var oFReader = new FileReader();
+        oFReader.readAsDataURL(document.getElementById("staffUpload").files[0]);
+
+        oFReader.onload = function (oFREvent) {
+            document.getElementById("preview").src = oFREvent.target.result;
+        };
+    };
+</script>

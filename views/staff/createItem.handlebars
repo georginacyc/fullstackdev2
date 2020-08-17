@@ -16,7 +16,15 @@
     <div class="col-md-6 mx-auto">
         <div class="card card-body">
             <h3 class="text-muted text-center">New Item</h3>
+
             <form method="POST" id="createItem" action="/staff/item/create">
+
+                <div>
+                    <img class="border img-thumbnail img-fluid" style="object-fit:cover; max-height: 500px; width: 100%" id="preview"
+                        src="\uploads\item_pictures\item.png"><br>
+                    <input style="padding-top: 10px;" type="file" id="itemUpload" name="itemUpload" accept="image/png, image/jpeg, image/jpg">
+                </div>
+
                 <div class="form-group">
                     <label for "itemName">Item Name</label>
                     <input type="text" class="form-control" id="itemName" name="itemName" value="" required>
@@ -64,7 +72,7 @@
                         placeholder="Item description and sizing" required></textarea>
                 </div>
                 <br>
-                <button type="submit" class="btn float-right">Submit</button>
+                <button type="submit"  class="btn float-right">Submit</button>
             </form>
         </div>
     </div>
@@ -85,5 +93,22 @@
             randomSerial += chars.substring(randomNumber, randomNumber + 1);
         }
         return randomSerial
-    }
+    };
+
+    $('#itemUpload').on('change', function () {
+            let image = $('#itemUpload')[0].files[0];
+            let formdata = new FormData();
+            formdata.append('itemUpload', image)
+            $.ajax({
+                url: '/staff/item/upload-item-picture',
+                type: 'POST',
+                data: formdata,
+                contentType: false,
+                processData: false,
+                'success': (data) => {
+                    $('#preview').attr('src', data.file);
+                    console.log(data.file);
+                }
+            })
+        })
 </script>

@@ -121,7 +121,17 @@ router.get('/edit-user-account', (req,res)=>{
             id: req.user.id
         }
     }).then((user) => {
-        res.render('user/edit-user-account', {user});
+        res.render('user/edit-user-account', user);
+    }) 
+});
+
+router.get('/reset-password', (req,res)=>{
+    User.findOne({
+        where: {
+            id: req.user.id
+        }
+    }).then((user) => {
+        res.render('user/reset-password', {user});
     }) 
 });
 
@@ -147,7 +157,7 @@ router.put('/saveUser/:id', (req, res) => {
             check = bcrypt.compareSync(oldpw, user.password)
             console.log(check);
             if (check) {
-                if (newpw == newpw2) {
+                if (oldpw !=null, newpw == newpw2) {
                     
                     pw = bcrypt.hashSync(newpw, 10);
                     alertMessage(res, 'success', 'Successfully changed password!', true);
@@ -170,19 +180,19 @@ router.put('/saveUser/:id', (req, res) => {
                             // After saving, redirect to router.get(/listVideos...) to retrieve all updated
                             // videos
                             console.log(pw)
-                    res.redirect('/user/edit-user-account');
+                    res.redirect('/user/reset-password');
                     }).catch(err => console.log(err));
                     req.logout()
                     res.redirect('/user/login');
                     
                 } else {
                     alertMessage(res, 'danger', 'New passwords must match.', true);
-                    res.redirect('/user/edit-user-account');
+                    res.redirect('/user/reset-password');
                 }
             } else {
                 
                 alertMessage(res, 'danger', 'Old password is incorrect.', true);
-                res.redirect('/user/edit-user-account');
+                res.redirect('/user/reset-password');
             }
         }).catch(err => console.log(err))
     } else {

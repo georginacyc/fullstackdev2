@@ -2,15 +2,13 @@ const multer = require('multer');
 const path = require('path');
 const Item = require('../models/Item');
 
-var i = 0;
 
 const storage = multer.diskStorage({
     destination: (req, file, callback) => {
         callback(null, './public/uploads/item_pictures/');
     },
     filename: (req, file, callback) => {
-        callback(null, i + path.extname(file.originalname));
-        i=+1
+        callback(null, localStorage.getItem('count') + path.extname(file.originalname));
     }
 });
 // Initialise Upload

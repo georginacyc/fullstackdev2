@@ -73,8 +73,10 @@ router.post('/stock/order/:itemSerial', (req, res) => {
         receivedDate
     }).then(stockorder => {
         res.redirect('/staff/inventory/stock/view-orders');
-    })
-        .catch(err => res.render('/staff/errorpage'))
+    }).catch((err) => {
+        console.log(err)
+        res.redirect('/staff/error')
+    });
 });
 
 router.get('/stock/receive/:id', (req, res) => {

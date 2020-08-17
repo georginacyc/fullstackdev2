@@ -5,6 +5,21 @@ const router = express.Router();
 const staffMain = "../layouts/staff";
 const Item = require('../models/Item');
 const sequelize = require('sequelize');
+const upload = require('../helpers/itemUpload');
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
+const { Sequelize } = require('sequelize');
+
+var LocalStorage = require('node-localstorage').LocalStorage;
+localStorage = new LocalStorage('./scratch');
+
+// uncomment to clear local storage count key
+//localStorage.removeItem('count');
+
+// initialise local storage count key 
+//comment back after first time running
+localStorage.setItem('count', 0);
 
 //generate random Serial
 function generateSerial() {
@@ -39,6 +54,7 @@ router.get('/create', (req, res) => {
     res.render('staff/createItem', { layout: staffMain })
 });
 
+
 router.post('/create', (req, res) => {
     let errors = [];
 
@@ -59,7 +75,26 @@ router.post('/create', (req, res) => {
             errors, itemName, itemCategory, itemGender, itemCost, itemPrice, itemDescription, stockLevel, status, layout: staffMain
         });
     } else {
+        let image;
+        let c = parseInt(localStorage.getItem('count'));
+        let p = './public/uploads/item_pictures/' + c;
+        localStorage.setItem('count', c+=1)
+
+        let type1 = p + '.jpg'
+        let type2 = p + '.jpeg'
+        let type3 = p + '.png'
+        if (fs.existsSync(type1)) { // basically checks what extension the file is, if it exists
+            image = path.basename(type1);
+        } else if (fs.existsSync(type2)) {
+            image = path.basename(type2);
+        } else if (fs.existsSync(type3)) {
+            image = path.basename(type3);
+        } else { // if file does not exist at all, use default
+            image = 'item.png'
+        }
+
         Item.create({
+            image,
             itemName,
             itemSerial,
             itemCategory,
@@ -74,6 +109,21 @@ router.post('/create', (req, res) => {
         }).catch(err => res.render('/staff/errorpage', { errors }));
     }
 });
+
+router.post('/upload-item-picture', (req, res) => { // formless picture uploading for new item
+    upload(req, res, (err) => {
+        if (err) {
+            res.json({ file: '/uploads/item_pictures/item.png', err: err });
+        } else {
+            if (req.file === undefined) {
+                res.json({ file: '/uploads/item_pictures/item.png', err: err });
+            } else {
+                res.json({ file: `/uploads/item_pictures/${req.file.filename}` });
+            }
+        }
+    });
+}) 
+
 
 router.get('/edit/:itemSerial', (req, res) => {
     Item.findOne({

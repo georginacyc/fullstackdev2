@@ -134,6 +134,7 @@ router.get('/manage-staff/:id', (req, res) => {
             staffId: req.params.id
         }
     }).then((user)=> {
+        res.set('Cache-Control', 'no-store');
         res.render("staff/updateStaff", {layout: staffMain, user});
     }).catch((err) => {
         console.log(err);

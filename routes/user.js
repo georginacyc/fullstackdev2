@@ -8,6 +8,7 @@ const bcrypt = require('bcryptjs');
 const Custorder = require('../models/CustOrders');
 const CustOrders = require('../models/CustOrders');
 const Item = require('../models/Item');
+const ensureAuthenticated = require('../helpers/auth');
 
 
 router.get('/error', (req, res) => {
@@ -327,5 +328,6 @@ router.post('/checkout', (req, res) => {
     .catch(err => console.log(err))*/
 
 });
+router.use('/user/cart', ensureAuthenticated);
 
 module.exports = router;

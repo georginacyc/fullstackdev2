@@ -30,6 +30,8 @@ const bcrypt = require('bcryptjs');
 const mainRoute = require('./routes/main');
 const formatDate = require('./helpers/hbs');
 const radioCheck = require('./helpers/radioCheck');
+const discontinueCheck = require('./helpers/discontinueCheck');
+const receivedCheck = require('./helpers/receivedCheck')
 const { allowedNodeEnvironmentFlags } = require('process');
 const StaffNotifs = require('./models/StaffNotifs');
 
@@ -65,7 +67,9 @@ app.use(function(req, res, next) {
 app.engine('handlebars', exphbs({
 	helpers: {
 		"formatDate": formatDate,
-		"radioCheck": radioCheck
+		"radioCheck": radioCheck,
+		"discontinueCheck": discontinueCheck,
+		"receivedCheck": receivedCheck
 	},
 	defaultLayout: 'main' // Specify default template views/layout/main.handlebar 
 }));

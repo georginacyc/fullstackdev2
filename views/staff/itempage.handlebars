@@ -1,40 +1,131 @@
 {{!-- item list page --}}
 
-<div class="container">
-    <h2>Item List</h2>
-    <table class="table table-fluid" id="myTable">
-        <thead>
-            <tr class="table-primary">
-                <th>Item Name</th>
-                <th>Item Serial</th>
-                <th>Item Category</th>
-                <th>Item Gender</th>
-                <th>Item Cost</th>
-                <th>Item Price</th>
-                <th>-</th>
-                <th>-</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{#each item}}
-            <tr>
-                <td>{{itemName}}</td>
-                <td>{{itemSerial}}</td>
-                <td>{{itemCategory}}</td>
-                <td>{{itemGender}}</td>
-                <td>${{itemCost}}</td>
-                <td>${{itemPrice}}</td>
-                <td><a href="/staff/item/edit/{{itemSerial}}" class="btn btn-warning">Update</a></td>
-                <td><a href="/staff/item/discontinue/{{itemSerial}}" class="btn btn-danger">Discontinue</a></td>
-            </tr>
-            {{/each}}
-        </tbody>
-    </table>
+<style>
+    .table-primary,
+    .table-primary>td,
+    .table-primary>th {
+        background-color: gray;
+    }
+
+    .table-primary tbody+tbody,
+    .table-primary td,
+    .table-primary th,
+    .table-primary thead th {
+        border-color: black;
+    }
+
+    .table-primary,
+    .table tr {
+        text-align: center;
+        vertical-align: middle;
+    }
+    .nav-link{
+    color: black;
+    }
+    .nav-link:hover{
+    color: maroon;
+    }
+    .btn-add{
+    border-color: gray;
+    }
+    .btn-add:hover{
+    background-color: gray;
+    color:white;
+    }
+</style>
+
+<h2>Items</h2>
+
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item">
+        <a class="nav-link active" id="active-tab" data-toggle="tab" href="#active" role="tab" aria-controls="active"
+            aria-selected="true">Active</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="discontinued-tab" data-toggle="tab" href="#discontinued" role="tab"
+            aria-controls="discontinued" aria-selected="false">Discontinued</a>
+    </li>
+    <li class="ml-auto">
+        <a type="button" href="/staff/item/create" class="btn btn-add">Add New Item</a>
+    </li>
+</ul>
+<div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade show active" id="active" role="tabpanel" aria-labelledby="home-tab">
+        <div style="padding: 10px;">
+            <table class="table table-fluid" id="myTable">
+                <thead style="color: white;">
+                    <tr class="table-primary">
+                        <th>Item Name</th>
+                        <th>Item Serial</th>
+                        <th>Item Category</th>
+                        <th>Item Gender</th>
+                        <th>Item Price</th>
+                        <th>Status</th>
+                        <th>-</th>
+                        <th>-</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each item}}
+                    {{#if (discontinueCheck status)}}
+                    {{else}}
+                    <tr>
+                        <td>{{itemName}}</td>
+                        <td>{{itemSerial}}</td>
+                        <td>{{itemCategory}}</td>
+                        <td>{{itemGender}}</td>
+                        <td>${{itemPrice}}</td>
+                        <td>{{status}}</td>
+                        <td><a href="/staff/item/edit/{{itemSerial}}" class="btn btn-warning">Update</a></td>
+                        <td><a type="button" href="/staff/item/discontinue/{{itemSerial}}" class="btn btn-danger">Discontinue</a></td>
+                    </tr>
+                    {{/if}}
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="discontinued" role="tabpanel" aria-labelledby="discontinued-tab">
+        <div style="padding: 10px;">
+            <table class="table table-fluid" id="discontinuedTable">
+                <thead style="color: white;">
+                    <tr class="table-primary">
+                        <th>Item Name</th>
+                        <th>Item Serial</th>
+                        <th>Item Category</th>
+                        <th>Item Gender</th>
+                        <th>Item Price</th>
+                        <th>Status</th>
+                        <th>-</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each item}}
+                    {{#if (discontinueCheck status)}}
+                    <tr>
+                        <td>{{itemName}}</td>
+                        <td>{{itemSerial}}</td>
+                        <td>{{itemCategory}}</td>
+                        <td>{{itemGender}}</td>
+                        <td>${{itemPrice}}</td>
+                        <td>{{status}}</td>
+                        <td><a href="/staff/item/edit/{{itemSerial}}" class="btn btn-warning">Update</a></td>
+                    </tr>
+                    {{/if}}
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
+
 
 <script>
     $(document).ready(function () {
         $('#myTable').DataTable();
     });
+    $(document).ready(function () {
+            $('#discontinuedTable').DataTable();
+        });
 </script>
-

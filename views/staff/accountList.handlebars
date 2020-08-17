@@ -10,7 +10,7 @@
 </style>
 
 <div class="">
-    <table id="accountsList" data-toggle="table" data-pagination="true" data-url="/staff/accounts-data" data-search="true" data-sort-name="type" data-show-refresh="true" data-show-columns="true" data-search-on-enter-key="true" data-show-search-button="true">
+    <table id="accountsList" data-toggle="table" data-pagination="true" data-url="/staff/admin/accounts-data" data-search="true" data-sort-name="type" data-show-refresh="true" data-show-columns="true" data-search-on-enter-key="true" data-show-search-button="true">
         <thead>
             <th data-field="type" data-sortable="true">Type</th>
             <th data-field="fname" data-sortable="true">First Name</th>
@@ -18,7 +18,8 @@
             <th data-field="email">Email</th>
             <th data-field="hp">H/P</th>
             <th data-field="lastLogin">Last Log In</th>
-            <th data-field="id" data-formatter="tableButtons"></th>
+            <th data-field="staffId" data-formatter="staffButtons"></th>
+            <th data-field="id" data-formatter="deleteButtons"></th>
         </thead>
     </table>
 
@@ -30,7 +31,14 @@
         uiLibrary: 'bootstrap4',
         defaultDate: "{{formatDate content.dob 'YYYY-MM-DD'}}"
     })
-    function tableButtons(id) {
-        return '<div style="display: flex; justify-content: space-between"><a href="/staff/manage-staff/' + id + '"><i class="fas fa-pencil-square-o text-dark"></i></a><a href="/staff/pdf/' + id + '" target="_blank"><i class="fas fa-print text-muted"></i></a><a href="/staff/delete-staff/' + id + '"><i class="fas fa-trash text-danger"></i></a></div>'
+    function staffButtons(staffId) {
+        if (staffId != null) {
+            return '<div style="display: flex; justify-content: space-between"><a href="/staff/admin/manage-staff/' + staffId + '"><i class="fas fa-pencil-square-o text-dark"></i></a><a href="/staff/pdf/' + staffId + '" target="_blank"><i class="fas fa-print text-muted"></i></a>'
+        } else {
+            return ""
+        }
+    }
+    function deleteButtons(id) {
+        return '<div style="display: flex; justify-content: space-between"><a href="/staff/admin/delete-user/' + id + '"><i class="fas fa-trash text-danger"></i></a></div>'
     }
 </script>

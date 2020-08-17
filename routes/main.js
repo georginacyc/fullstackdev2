@@ -9,6 +9,7 @@ const User = require('../models/User')
 const ensureAuthenticated = require('../helpers/auth'); // to verify that a user is logged in
 const staffAuth = require('../helpers/staffAuth'); // to verify that user logged in is a Staff
 const Item = require('../models/Item');
+// const bootstrap = require('bootstrap')
 
 router.get('/', (req, res) => {
     res.render('home')
@@ -48,7 +49,7 @@ router.get('/view/:itemSerial', (req, res) => {
         }, raw: true
     }).then((item) => {
         res.render('view/:itemSerial', {
-            layout: staffMain,
+            
             item // passes the item object to handlebars
 
         });

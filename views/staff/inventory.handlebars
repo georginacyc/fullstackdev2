@@ -1,18 +1,55 @@
 {{!-- view stock page --}}
+
+<style>
+    .table-primary,
+    .table-primary>td,
+    .table-primary>th {
+        background-color: gray;
+    }
+
+    .table-primary tbody+tbody,
+    .table-primary td,
+    .table-primary th,
+    .table-primary thead th {
+        border-color: black;
+    }
+    .table-primary, .table tr{
+        text-align: center;
+    }
+    .btn-add{
+    border-color: gray;
+    }
+    .btn-add:hover{
+    background-color: gray;
+    color:white;
+    }
+    .inav{
+    padding:10px;
+    }
+</style>
+
 <h2>Inventory</h2>
 
-<nav class = "navbar-light">
-    <a style="font-weight: bold; color:darkslategrey" href= "#">Main</a>
-    <a style="color:darkslategrey" href = "/staff/inventory/view-stock-orders">Incoming Orders</a>
-</nav>
+<ul class="nav" style="list-style-type: none;">
+    <li class="nav-item inav">
+        <a style="font-weight: bold; color:darkslategrey" href="#">Main</a>
+    </li>
+    <li class="nav-item inav">
+        <a style="color:darkslategrey" href="/staff/inventory/stock/view-orders">Incoming Orders</a>
+    </li>
+    <li class="ml-auto">
+        <a type="button" href="/staff/inventory/stock/order" class="btn btn-add">Add New Item</a>
+    </li>
+</ul>
 <hr>
 
 <div class="container">
     <table class="table table-fluid" id="myTable">
-        <thead>
+        <thead style="color: white;">
             <tr class="table-primary">
                 <th>Item Name</th>
                 <th>Item Serial</th>
+                <th>Unit Cost</th>
                 <th>Stock Level</th>
                 <th>Status</th>
                 <th>Request Stock</th>
@@ -23,9 +60,14 @@
                 <tr>
                     <td>{{itemName}}</td>
                     <td>{{itemSerial}}</td>
+                    <td>${{itemCost}}</td>
                     <td>{{stockLevel}}</td>
                     <td>{{status}}</td>
-                    <td><a href="/staff/inventory/order-stock/{{itemSerial}}" class="btn btn-warning">Request Stock</a></td>
+                    {{#if (discontinueCheck status)}}
+                        <td>-</td>
+                    {{else}}
+                        <td><a href="/staff/inventory/stock/order/{{itemSerial}}" class="btn btn-warning">Request Stock</a></td>
+                    {{/if}}
                 </tr>
             {{/each}}
         </tbody>

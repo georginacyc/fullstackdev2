@@ -1,3 +1,5 @@
+// routing for admin pages
+
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
@@ -7,28 +9,23 @@ const bcrypt = require('bcryptjs');
 const staffMain = "../layouts/staff";
 const fs = require('fs');
 const sequelize = require('sequelize');
-const Op = sequelize.Op;
 const upload = require('../helpers/staffUpload');
 const multer = require('multer');
 const path = require('path');
 
 router.get('/create-announcement', (req, res) => {
-    console.log(req.body.preview);
     res.render('staff/createAnnouncements', {layout: staffMain});
 });
 
 router.post('/create-announcement', (req, res) => {
     let errors = [];
-
     let {title, description} = req.body;
-
     let date = new Date();
-    date = date.toISOString().slice(0, 10);
+    date = date.toISOString().slice(0, 10); // get just the date
 
     if (title.length == 0) {
         errors.push({text: "Please enter a title"});
     }
-
     if (errors.length > 0) {
         res.render("staff/createAnnouncements", {
             errors,
@@ -39,7 +36,6 @@ router.post('/create-announcement', (req, res) => {
     } else {
         sNotif.create({date, title, description})
         .then(snotif => {
-            console.log(date);
             alertMessage(res, 'success', 'Annoucement successfully added.', 'fas fa-sign-in-alt', true);
             res.redirect('/staff/announcements');
         }).catch((err) => {
@@ -55,23 +51,18 @@ router.get('/create-staff', (req, res) => {
 
 router.post('/create-staff', (req, res) => {
     let errors = [];
-
     let {type, fname, lname, gender, dob, hp, address, password, pw2} = req.body;
-
-    let isnum = /^\d+$/.test(hp);
+    let patt = new RegExp('[689]{1}[0-9]{7}'); // pattern to check hp against
     
     if (password !== pw2) {
         errors.push({text: 'Password must match'});
     }
-
-    if (password.length < 8 || pw2.length < 8 ) {
+    if (password.length < 8 || pw2.length < 8) {
         errors.push({text: 'Password must be at least 8 characters'});
     }
-
-    if (hp.length != 8 || isnum == false) {
+    if (patt.test(hp) == false) {
         errors.push({text: 'Please enter a valid contact number.'});
     }
-
     if (errors.length > 0) {
         res.render('staff/createStaff', {
             errors,
@@ -83,34 +74,25 @@ router.post('/create-staff', (req, res) => {
             layout: staffMain
         });
     } else {
-        upload(req, res, (err) => {
-            if (err) {
-                console.log(err)
-            } else {
-                if (req.file === undefined) {
-                    console.log(err)
-                }
-            }
-        });
         let image;
-        User.max('id')
+        User.max('id') // retrieves highest id (not staffId), for file naming purposes
         .then((x) => {
             x = parseInt(x) + 1
-            let p = './public/uploads/staff_pictures/' + x.toString()
+            let p = './public/uploads/staff_pictures/' + x.toString() //creating most of the path
             let type1 = p + '.jpg'
             let type2 = p + '.jpeg'
             let type3 = p + '.png'
-            if (fs.existsSync(type1)) {
+            if (fs.existsSync(type1)) { // basically checks what extension the file is, if it exists
                 image = path.basename(type1);
             } else if (fs.existsSync(type2)) {
                 image = path.basename(type2);
             } else if (fs.existsSync(type3)) {
                 image = path.basename(type3);
-            } else {
+            } else { // if file does not exist at all, use default
                 image = 'staff.png'
             }
         })
-        User.max('staffId')
+        User.max('staffId') // retrieving the staffId to increment for next staff's staff ID
         .then(c => {
             password = bcrypt.hashSync(password, 10);
             let staffId = (1 + parseInt(c)).toString().padStart(6, '0');
@@ -127,6 +109,21 @@ router.post('/create-staff', (req, res) => {
         }).catch(err => console.log(err));
     }
 });
+
+router.post('/upload-staff-picture', (req, res) => { // formless picture uploading for CREATING STAFF
+    upload(req, res, (err) => {
+        if (err) {
+            res.json({file: '/uploads/staff_pictures/staff.png', err: err});
+        } else {
+            if (req.file === undefined) {
+                res.json({file: '/uploads/staff_pictures/staff.png', err: err});
+            } else {
+                res.json({file: `/uploads/staff_pictures/${req.file.filename}`});
+            }
+        }
+    });
+}) 
+
 router.get('/manage-staff/:id', (req, res) => {
     User.findOne({
         where: {
@@ -142,27 +139,17 @@ router.get('/manage-staff/:id', (req, res) => {
 
 router.put('/save-staff/:id', (req, res) => {
     let {type, fname, lname, gender, dob, hp, address, resetpw} = req.body;
-    console.log(resetpw);
     if (resetpw == "reset") {
-        pw = bcrypt.hashSync("23456789", 10);
+        pw = bcrypt.hashSync(lname.toLowerCase() + hp.slice(0, 4), 10); // resets password to staff's last name and first 4 numbers of their phone number
     } else {
         User.findOne({
             where: {
                 id: req.params.id
             }
         }).then((user) => {
-            pw = user.password
+            pw = user.password // retrieves original password
         }).catch(err => console.log(err))
     }
-    upload(req, res, (err) => {
-        if (err) {
-            console.log(err)
-        } else {
-            if (req.file === undefined) {
-                console.log(err)
-            }
-        }
-    });
     User.update({
         type: type,
         fname: fname,
@@ -184,7 +171,51 @@ router.put('/save-staff/:id', (req, res) => {
     });
 });
 
-router.get('/delete-user/:id', (req, res) => {
+router.post('/save-staff-picture/:id', (req, res) => { // formless picture uploading for when UPDATING STAFF DETAILS
+    const storage2 = multer.diskStorage({
+        destination: (req, file, callback) => {
+            callback(null, './public/uploads/staff_pictures/');
+        },
+        filename: (req, file, callback) => {
+            callback(null, req.params.id + path.extname(file.originalname));
+        }
+    });
+    
+    const upload2 = multer({
+        storage: storage2,
+        limits: {
+            fileSize: 1000000
+        },
+        fileFilter: (req, file, callback) => {
+            checkFileType(file, callback);
+        }
+    }).single('staffUpload2')
+    
+    function checkFileType(file, callback) {
+        const filetypes = /jpeg|jpg|png/;
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = filetypes.test(file.mimetype);
+    
+        if (mimetype && extname) {
+            return callback(null, true);
+        } else {
+            callback({message: 'Images Only. No GIFs.'})
+        }
+    }
+    upload2(req, res, (err) => {
+        if (err) {
+            res.json({file: '/uploads/staff_pictures/staff.png', err: err});
+        } else {
+            if (req.file === undefined) {
+                res.json({file: '/uploads/staff_pictures/staff.png', err: err});
+            } else {
+                res.json({file: `/uploads/staff_pictures/${req.file.filename}`});
+            }
+        }
+    });
+})
+
+router.get('/delete-user/:id', (req, res) => { // deletion for either normal user or staff/admin accounts
     User.findOne({
         where: {
             id: req.params.id

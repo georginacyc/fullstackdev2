@@ -27,42 +27,46 @@ router.post('/staff-login', (req, res, next) => {
     }) (req, res, next);
 });
 
-router.get('/catalogueHis', (req, res) => {
+router.get('/catalogue/his', (req, res) => {
     Item.findAll({
         where: {
-            itemGender: "M"
+            itemGender: "M",
+            status: "Active"
         },raw: true
     })
         .then((item) => {
             res.render('catalogue', {
                 item : item,
+                title : "Men's",
+                availSizes: "XS, S, M, L, XL, XXL"
         })
     })
     
 });
 
-router.get('/catalogueHers', (req, res) => {
+router.get('/catalogue/hers', (req, res) => {
     Item.findAll({
         where: {
-            itemGender: "F"
+            itemGender: "F",
+            status: "Active"
         },raw: true
     })
         .then((item) => {
             res.render('catalogue', {
                 item : item,
-                title : "Men's"
+                title : "Women's"
         })
     })
     
 });
 
-router.get('/viewDetails/:itemSerial', (req, res) => {
+router.get('/view-details/:itemSerial', (req, res) => {
     Item.findOne({
         where: {
             itemSerial: req.params.itemSerial
         }, raw: true
     }).then((item) => {
-            res.render('viewDetails', {
+            res.render('view-details', {
                 item // passes the item object to handlebars
         });
     }).catch(err => console.log(err)); // To catch no item serial

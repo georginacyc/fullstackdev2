@@ -1,4 +1,17 @@
 {{!-- create item form --}}
+<style>
+    .btn {
+        background-color: gray;
+        color: white;
+    }
+
+    .btn:hover {
+        background-color: white;
+        color: maroon;
+        border-color: maroon;
+    }
+</style>
+
 <form method="POST" id="createItem" action="/staff/item/create" >
     <div class = "form-group">
         <label for "itemName">Item Name</label>
@@ -44,7 +57,7 @@
         <textarea class="form-control" id="itemDescription" name = "itemDescription" placeholder="Item description and sizing" required ></textarea>
     </div>
     <br>
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="submit" class="btn">Submit</button>
 </form>
 
 

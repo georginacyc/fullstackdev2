@@ -1,4 +1,17 @@
 {{!-- create stock order form --}}
+<style>
+    .btn {
+        background-color: gray;
+        color: white;
+    }
+
+    .btn:hover {
+        background-color: white;
+        color: maroon;
+        border-color: maroon;
+    }
+</style>
+
 
 <form method="POST" action="/staff/inventory/stock/order/{{item.itemSerial}}">
     <div class="form-group">
@@ -29,7 +42,7 @@
     </div>
 
     <br>
-    <button type="submit" class="btn btn-primary">Submit Order</button>
+    <button type="submit" class="btn">Submit Order</button>
 
 </form>
 

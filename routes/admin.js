@@ -7,13 +7,11 @@ const bcrypt = require('bcryptjs');
 const staffMain = "../layouts/staff";
 const fs = require('fs');
 const sequelize = require('sequelize');
-const Op = sequelize.Op;
 const upload = require('../helpers/staffUpload');
 const multer = require('multer');
 const path = require('path');
 
 router.get('/create-announcement', (req, res) => {
-    console.log(req.body.preview);
     res.render('staff/createAnnouncements', {layout: staffMain});
 });
 
@@ -39,7 +37,6 @@ router.post('/create-announcement', (req, res) => {
     } else {
         sNotif.create({date, title, description})
         .then(snotif => {
-            console.log(date);
             alertMessage(res, 'success', 'Annoucement successfully added.', 'fas fa-sign-in-alt', true);
             res.redirect('/staff/announcements');
         }).catch((err) => {
@@ -148,7 +145,6 @@ router.get('/manage-staff/:id', (req, res) => {
 
 router.put('/save-staff/:id', (req, res) => {
     let {type, fname, lname, gender, dob, hp, address, resetpw} = req.body;
-    console.log(resetpw);
     if (resetpw == "reset") {
         pw = bcrypt.hashSync("23456789", 10);
     } else {

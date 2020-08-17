@@ -578,9 +578,8 @@ router.put('/inventory/stock/save-recieve/:id', (req, res) => {
 
 //error page
 router.get('/error', (req, res) => {
-    let errors = [];
-    res.render('/staff/errorpage', {
-        errors
+    res.render('staff/errorpage', {
+        layout: staffMain
     })
 });
 

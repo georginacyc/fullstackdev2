@@ -47,9 +47,6 @@ const User = db.define('user', {
     postalcode: {
         type: Sequelize.STRING
     },
-    postalcode: {
-        type: Sequelize.STRING
-    },
     password: {
         type: Sequelize.STRING
     },

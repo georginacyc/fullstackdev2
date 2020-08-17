@@ -52,15 +52,15 @@ router.get('/create-staff', (req, res) => {
 router.post('/create-staff', (req, res) => {
     let errors = [];
     let {type, fname, lname, gender, dob, hp, address, password, pw2} = req.body;
-    let isnum = /^\d+$/.test(hp); // returns boolean; checks if hp contains only numbers
+    let patt = new RegExp('[689]{1}[0-9]{7}'); // pattern to check hp against
     
     if (password !== pw2) {
         errors.push({text: 'Password must match'});
     }
-    if (password.length < 8 || pw2.length < 8 ) {
+    if (password.length < 8 || pw2.length < 8) {
         errors.push({text: 'Password must be at least 8 characters'});
     }
-    if (hp.length != 8 || isnum == false) {
+    if (patt.test(hp) == false) {
         errors.push({text: 'Please enter a valid contact number.'});
     }
     if (errors.length > 0) {

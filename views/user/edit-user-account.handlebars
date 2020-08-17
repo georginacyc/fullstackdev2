@@ -44,24 +44,16 @@
                     <option>2XL</option>
                 </select>
             </div>
-            {{!-- <div class="row">
-            <div class="col-6 col-sm-12 col-md-6 col-lg-6"> --}}
-            {{!-- <br> --}}
             <br>
             <button type="submit" class="btn btn-dark float-right">Update</button>
-            {{!-- </br> --}}
-            {{!-- </div> --}}
-        {{!-- <div class="deleteconfirm">
-            <br> --}}
-        <a onclick="confirm_delete()" type="delete" class="btn btn-danger float-left" >Delete Account</a>
-        </br>
-        {{!-- </br>
-        </div>
-         </div>    --}}
+            <a onclick="confirm_delete()" type="delete" class="btn btn-danger float-left" >Delete Account</a>
+            </br>
+        
          </form>
        
         
         <script>
+            // after user clicks on delete it gets the deleteacc route and prompts user to confirm
             function confirm_delete(){
                 var result = confirm("Delete?"); 
                 if (result == true) { 
@@ -69,10 +61,7 @@
                     var xmlHttp = new XMLHttpRequest();
                     xmlHttp.open( "GET", href, false ); // false for synchronous request
                     xmlHttp.send( null );
-                    //console.log(xmlHttp.responseText)
-                    //return xmlHttp.responseText;
-                    window.location.href = '/user/login?delete=1';//xmlHttp.responseText;
-                    //alert(xmlHttp.responseText);
+                    window.location.href = '/user/login?delete=1';
                 } else { 
                     alert("delete cancelled");
                 } 

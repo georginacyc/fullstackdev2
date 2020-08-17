@@ -9,10 +9,6 @@ const Custorder = require('../models/CustOrders');
 const CustOrders = require('../models/CustOrders');
 const Item = require('../models/Item');
 const ensureAuthenticated = require('../helpers/auth');
-// const addressValidator = require('address-validator');
-// const Address = addressValidator.Address;
-// const _ = require('underscore');
-
 
 
 router.get('/error', (req, res) => {
@@ -29,20 +25,8 @@ router.post('/register', (req, res) => {
 	let errors = [];
     // Retrieves fields from register page from request body
     let {fname,lname,gender,dob,hp,size,address,city,country,postalcode, email, password, password2} = req.body;
-    
-    // addressValidator.validate(address, addressValidator.match.streetAddress, function(err, exact, inexact){
-    //     console.log('input: ', address.toString())
-    //     console.log('match: ', _.map(exact, function(a) {
-    //       return a.toString();
-    //     }));
-    //     console.log('did you mean: ', _.map(inexact, function(a) {
-    //       return a.toString();
-    //     }));
-     
-    //     //access some props on the exact match
-    //     var first = exact[0];
-    //     console.log(first.streetNumber + ' '+ first.street);
-    // });
+    let patt3 = new RegExp('[689]{1}[0-9]{7}'); // pattern to check hp against
+    let patt2 = new RegExp('[0-9]{6}'); // pattern to check postal code against
 
     // Checks if both passwords entered are the same
     if(password !== password2) {
@@ -55,10 +39,13 @@ router.post('/register', (req, res) => {
     }
     
     
-    if (hp.length < 8) {
-        errors.push({text: 'Mobile Number has to b at least 8 digits'});
+    if (patt3.test(hp) == false) {
+        errors.push({text: 'Please enter a valid contact number.'});
     }
-    
+
+    if (patt2.test(postalcode) == false) {
+        errors.push({text: 'Please enter a valid postal code'});
+    }
 
     if (errors.length > 0) {
         res.render('user/register', {
@@ -105,7 +92,7 @@ router.post('/register', (req, res) => {
         
         password = bcrypt.hashSync(password, 10);
         // Create new user record
-        User.create({ type,fname,lname,gender,dob,hp,address,city,country,postalcode,size, email, password })
+        User.create({ type,fname,lname,gender,dob,hp,address,postalcode,size, email, password })
             .then(user => {
             alertMessage(res, 'success',  ' Account created, please login', user.fname + 'fas fa-sign-in-alt', true);
             res.redirect('/');
@@ -224,7 +211,8 @@ router.put('/saveUser/:id', (req, res) => {
                 alertMessage(res, 'danger', 'Old password is incorrect.', true);
                 res.redirect('/user/reset-password');
             }
-        }).catch(err => console.log(err))
+        }).catch(err => console.log(err));
+        // if user is not changing password, update other details accordingly
     } else {
         User.findOne({
             where: {
@@ -254,7 +242,7 @@ router.put('/saveUser/:id', (req, res) => {
             res.redirect('/user/edit-user-account');
             }).catch(err => console.log(err));
             
-        }).catch(err => console.log(err))
+        }).catch(err => console.log(err));
 
     }
     

@@ -9,6 +9,10 @@ const Item = db.define('item', {
     itemName: {
         type: Sequelize.STRING
     },
+    image: {
+        type: Sequelize.STRING,
+        defaultValue: 'item.png'
+    },
     itemCategory: {
         type: Sequelize.STRING
     },

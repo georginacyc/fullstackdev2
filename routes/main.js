@@ -27,7 +27,7 @@ router.post('/staff-login', (req, res, next) => {
     }) (req, res, next);
 });
 
-router.get('/catalogueHis', (req, res) => {
+router.get('/catalogue/his', (req, res) => {
     Item.findAll({
         where: {
             itemGender: "M",
@@ -44,10 +44,11 @@ router.get('/catalogueHis', (req, res) => {
     
 });
 
-router.get('/catalogueHers', (req, res) => {
+router.get('/catalogue/hers', (req, res) => {
     Item.findAll({
         where: {
-            itemGender: "F"
+            itemGender: "F",
+            status: "Active"
         },raw: true
     })
         .then((item) => {

@@ -5,7 +5,7 @@ const router = express.Router();
 const userRoute = require('./user');
 const passport = require('passport');
 const staffRoute = require('./staff');
-const User = require('../models/User')
+const user = require('../models/User')
 const ensureAuthenticated = require('../helpers/auth'); // to verify that a user is logged in
 const staffAuth = require('../helpers/staffAuth'); // to verify that user logged in is a Staff
 const Item = require('../models/Item');
@@ -27,13 +27,30 @@ router.post('/staff-login', (req, res, next) => {
     }) (req, res, next);
 });
 
-router.get('/catalogue', (req, res) => {
+router.get('/catalogueHis', (req, res) => {
     Item.findAll({
-        raw: true
+        where: {
+            itemGender: "M"
+        },raw: true
     })
         .then((item) => {
             res.render('catalogue', {
                 item : item,
+        })
+    })
+    
+});
+
+router.get('/catalogueHers', (req, res) => {
+    Item.findAll({
+        where: {
+            itemGender: "F"
+        },raw: true
+    })
+        .then((item) => {
+            res.render('catalogue', {
+                item : item,
+                title : "Men's"
         })
     })
     
@@ -45,15 +62,10 @@ router.get('/viewDetails/:itemSerial', (req, res) => {
             itemSerial: req.params.itemSerial
         }, raw: true
     }).then((item) => {
-        res.render('viewDetails/:itemSerial', {
-            
-            item // passes the item object to handlebars
-
+            res.render('viewDetails', {
+                item // passes the item object to handlebars
         });
     }).catch(err => console.log(err)); // To catch no item serial
-    // if (req.user != null) {
-        
-    // }
 });
 
 router.get('/error', (req, res) => {

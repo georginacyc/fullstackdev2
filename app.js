@@ -144,7 +144,7 @@ app.use(function(req, res, next) {
 			let password = bcrypt.hashSync("12345678", 10);
 
 			// create an admin account with default details
-			User.create({'type': "Admin", 'staffId': '000001', 'email': "000001@monoqlo.com", 'fname': "Admin", 'lname': "Account", 'gender': "Male", 'dob': "1991-03-02", 'hp': '65500999', 'address':"31 Charlton Road", 'password': password})
+			User.create({'type': "Admin", 'staffId': '000001', 'email': "000001@monoqlo.com", 'fname': "Admin", 'lname': "Account", 'gender': "Male", 'dob': "1991-03-02", 'hp': '65500999', 'address':"31 Charlton Road", 'postalcode': '569830', 'password': password})
 			.then(() => {
 				console.log("Staple Admin account created! Email: 000001@monoqlo.com Password: 12345678")
 			})

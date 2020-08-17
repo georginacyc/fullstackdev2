@@ -12,27 +12,22 @@
 </style>
 
 <div class="card card-body">
-    <h1 class="display-4" style="text-align: center">Monoqlo Staff Profile</h1>
+    <h1 class="display-4" style="text-align: center;">Monoqlo Staff Profile</h1>
     <hr class="titleHR">
 
     <table style="margin-left: auto; margin-right:auto">
         <tr>
-            <td rowspan="5" colspan="4">
-                <img src="file:/y/uploads/staff_pictures/staff.png" max-height="360px" max-width="240px">
-            </td>
             <td>
                 First Name:
             </td>
             <td>
                 {{staff.fname}}
             </td>
-        </tr>
-        <tr>
             <td>
                 Last Name:
             </td>
             <td>
-                {{staff.fname}}
+                {{staff.lname}}
             </td>
         </tr>
         <tr>
@@ -42,10 +37,8 @@
             <td>
                 {{staff.gender}}
             </td>
-        </tr>
-        <tr>
             <td>
-                DOB:
+                Date of Birth:
             </td>
             <td>
                 {{staff.dob}}
@@ -58,30 +51,40 @@
             <td>
                 {{staff.hp}}
             </td>
-        </tr>
-        <tr>
             <td>
                 Type:
             </td>
             <td>
                 {{staff.type}}
             </td>
-            <td>
-                Staff ID:
-            </td>
-            <td>
-                {{staff.staffId}}
-            </td>
+        </tr>
+        <tr>
             <td>
                 Email:
             </td>
             <td>
                 {{staff.email}}
             </td>
+            <td>
+                Staff Id:
+            </td>
+            <td>
+                {{staff.staffId}}
+            </td>
         </tr>
         <tr>
-            <td>Address:</td>
-            <td colspan="5">{{staff.address}}</td>
+            <td>
+                Address:
+            </td>
+            <td>
+                {{staff.address}}
+            </td>
+            <td>
+                Postal Code:
+            </td>
+            <td>
+                {{staff.postalcode}}
+            </td>
         </tr>
     </table>
 </div>

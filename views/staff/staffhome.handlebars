@@ -1,6 +1,159 @@
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js" integrity="sha512-s+xg36jbIujB2S2VKfpGmlC3T5V2TF3lY48DX7u2r9XzGzgPsa6wTpOQA7J9iffvdeBN0q9tKzRxVxw1JviZPg==" crossorigin="anonymous"></script>
 <div class="">
     <div class="">
-        Hello, Staff!
-        {{!-- dashboard here --}}
+        <div class="row h1 text-muted">
+            Welcome back, {{staffName}}!
+        </div>
+
+        <div class="row">
+            <div class="col-4 col-sm-12 col-md-4 col-lg-4" style="padding-left: 0px; padding-right: 0px">
+                <div class="card" style="margin: 5px">
+                    <div class="card-header">
+                        <b>No. of sales this month: </b>
+                    </div>
+                    <div class="card-body">
+                        {{thisMonthSales}}
+                    </div>
+                </div>
+            </div>
+            <div class="col-4 col-sm-12 col-md-4 col-lg-4" style="padding-left: 0px; padding-right: 0px">
+                <div class="card" style="margin: 5px">
+                    <div class="card-header">
+                        <b>No. of pending shipments:</b>
+                    </div>
+                    <div class="card-body">
+                        {{pendingShipments}}
+                    </div>
+                </div>
+            </div>
+            <div class="col-4 col-sm-12 col-md-4 col-lg-4" style="padding-left: 0px; padding-right: 0px">
+                <div class="card" style="margin: 5px">
+                    <div class="card-header">
+                        <b>No. of out-of-stock items:</b>
+                    </div>
+                    <div class="card-body">
+                        {{OOSitems}}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-6 col-sm-12 col-md-6 col-lg-6" style="padding-left: 0px; padding-right: 0px">
+                <div class="card" style="margin: 5px">
+                    <div class="card-header">
+                        <b>No. of Each Gender</b>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="gender"></canvas>
+                        <script>
+                            var ctx1 = document.getElementById('gender').getContext('2d');
+                            var genderChart = new Chart(ctx1, {
+                                type: 'pie',
+                                data: {
+                                    labels: ['Female', 'Male', 'Other'],
+                                    datasets: [{
+                                        label: 'No. of Each Gender',
+                                        data: [{{genderData}}],
+                                        backgroundColor: [
+                                            'rgba(255, 99, 132, 0.5)',
+                                            'rgba(54, 162, 235, 0.5)',
+                                            'rgba(0, 0, 0, 0.5)'
+                                        ]
+                                    }]
+                                }
+                            })
+                        </script>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-sm-12 col-md-6 col-lg-6" style="padding-left: 0px; padding-right: 0px">
+                <div class="card" style="margin: 5px">
+                    <div class="card-header">
+                        <b>No. of Items Sold by Category</b>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="categorySales"></canvas>
+                        <script>
+                            var ctx4 = document.getElementById('categorySales').getContext('2d');
+                            var categoryChart = new Chart(ctx4, {
+                                type: 'doughnut',
+                                data: {
+                                    labels: ['Tops', 'Bottoms'],
+                                    datasets: [{
+                                        label: 'Items Sold by Category',
+                                        data: [{{categoryData}}],
+                                        backgroundColor: [
+                                            'rgba(255, 206, 86, 0.5)',
+                                            'rgba(54, 162, 235, 0.5)'
+                                        ]
+                                        
+                                    }]
+                                },
+                                options: {
+
+                                }
+                            })
+                        </script>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="row">
+            <div class="col-12 col-sm-12 col-md-12 col-lg-12" style="padding-left: 0px; padding-right: 0px">
+                <div class="card" style="margin: 5px">
+                    <div class="card-header">
+                        <b>Age Groups</b>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="ageGroup"></canvas>
+                        <script>
+                            var ctx2 = document.getElementById('ageGroup').getContext('2d');
+                            var ageChart = new Chart(ctx2, {
+                                type: 'bar',
+                                data: {
+                                    labels: ['18-29', '30-39', '40-49', '50-59', '60<'],
+                                    datasets: [{
+                                        label: 'Age Groups',
+                                        data: [{{ageData}}],
+                                        backgroundColor: [
+                                                'rgba(54, 162, 235, 0.2)',
+                                                'rgba(255, 206, 86, 0.2)',
+                                                'rgba(75, 192, 192, 0.2)',
+                                                'rgba(153, 102, 255, 0.2)',
+                                                'rgba(255, 159, 64, 0.2)'
+                                            ],
+                                            borderColor: [
+                                                'rgba(54, 162, 235, 1)',
+                                                'rgba(255, 206, 86, 1)',
+                                                'rgba(75, 192, 192, 1)',
+                                                'rgba(153, 102, 255, 1)',
+                                                'rgba(255, 159, 64, 1)'
+                                            ],
+                                            borderWidth: 1
+                                    }]
+                                    },
+                                    options: {
+                                        scales: {
+                                            yAxes: [{
+                                                ticks: {
+                                                    beginAtZero: true
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            display: false
+                                        }
+                                    }
+                                })
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

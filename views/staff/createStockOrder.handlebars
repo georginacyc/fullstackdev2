@@ -1,6 +1,19 @@
 {{!-- create stock order form --}}
+<style>
+    .btn {
+        background-color: gray;
+        color: white;
+    }
 
-<form method="POST" action="/staff/inventory/order-stock/{{item.itemSerial}}">
+    .btn:hover {
+        background-color: white;
+        color: maroon;
+        border-color: maroon;
+    }
+</style>
+
+
+<form method="POST" action="/staff/inventory/stock/order/{{item.itemSerial}}">
     <div class="form-group">
         <label for "stockorderDate">Order Date</label>
         <input id="stockorderDate" class="form-control" name="stockorderDate" width="200" name="dateRelease" readonly />
@@ -29,7 +42,7 @@
     </div>
 
     <br>
-    <button type="submit" class="btn btn-primary">Submit Order</button>
+    <button type="submit" class="btn">Submit Order</button>
 
 </form>
 

@@ -6,26 +6,24 @@ const User = require('../models/User');
 const sNotif = require('../models/StaffNotifs');
 const alertMessage = require('../helpers/messenger');
 const bcrypt = require('bcryptjs');
-const mysql = require('mysql');
-const passport = require('passport');
 const staffMain = "../layouts/staff";
 const Item = require('../models/Item');
 const moment = require('moment');
 const StockOrder = require('../models/StockOrder');
-const ensureAuthenticated = require('../helpers/auth'); // to verify that a user is logged in
-const staffAuth = require('../helpers/staffAuth'); // to verify that user logged in is a Staff
 const adminAuth = require('../helpers/adminAuth'); // to verify that user logged in is an Admin
+const adminRoute = require('../routes/admin');
 const pdf = require('pdf-creator-node');
 const fs = require('fs');
 const sequelize = require('sequelize');
 const Op = sequelize.Op;
-const upload = require('../helpers/staffUpload');
-const multer = require('multer');
-const path = require('path');
+const CustOrders = require('../models/CustOrders');
+const { DATEONLY } = require('sequelize');
 
-// var Handlebars = require("handlebars");
+//var Handlebars = require("handlebars");
 // var MomentHandler = require("handlebars.moment");
 // MomentHandler.registerHelpers(Handlebars);
+
+    
 
 router.get('/logout', (req, res) => {
     req.logout();
@@ -47,7 +45,113 @@ router.get('/update', (req, res) => {
 })
 
 router.get('/home', (req, res) => {
-        res.render('staff/staffhome', {layout: staffMain});
+    let pendingShipments;
+    let thisMonthSales;
+    let OOSitems;
+    let genderData = [];
+    let ageData = [];
+    let categoryData = [];
+
+    let date = new Date();
+    let currMonth = date.getMonth() + 1;
+    let currYear = date.getFullYear();
+    let currDate = currYear.toString() + "-" + ("0" + currMonth.toString()).slice(-2) + "-" + "01";
+    let nextDate = currYear.toString() + "-" + ("0" + currMonth.toString()).slice(-2) + "-" + "01";
+
+    async function charts() {
+        await CustOrders.count({
+            where: {
+                ship_Date: null
+            }
+        }).then((num) => {
+            pendingShipments = num;
+        }).catch(err => console.log(err));
+        await CustOrders.count({
+            where: {
+                order_Date: {
+                    [Op.gte]: currDate,
+                    [Op.lt]: nextDate
+                }
+            }
+        }).then((num) => {
+            thisMonthSales = num;
+        }).catch(err => console.log(err));
+        await Item.count({
+            where: {
+                'stockLevel': 0
+            }
+        }).then((num) => {
+            OOSitems = num;
+        }).catch(err => console.log(err));
+        await User.count({
+            where: {
+                type: 'User',
+                gender: 'Female'
+            }
+        }).then((num) => {
+            genderData.push(num)
+        }).catch(err => console.log(err));
+        await User.count({
+            where: {
+                type: 'User',
+                gender: 'Male'
+            }
+        }).then((num) => {
+            genderData.push(num);
+        }).catch(err => console.log(err));
+        await User.count({
+            where: {
+                type: 'User',
+                gender: 'Other'
+            }
+        }).then((num) => {
+            genderData.push(num);
+        }).catch(err => console.log(err));
+        await User.findAll({
+            where: {
+                type: 'User'
+            },
+            attributes: ['dob'],
+            raw: true
+        }).then((result) => {
+            let p = {'18-29': 0, '30-39': 0, '40-49': 0, '50-59': 0, '60<': 0}
+            for (i=0; i<result.length; i++) {
+                str = result[i]['dob'].slice(0,5);
+                age = parseInt(currYear) - parseInt(str);
+                if (age >= 18 && age <= 29) {
+                    p['18-29'] += 1;
+                } else if (age >= 30 && age <= 39) {
+                    p['30-39'] += 1;
+                } else if (age >= 40 && age <= 49) {
+                    p['40-49'] += 1;
+                } else if (age >= 50 && age <= 59) {
+                    p['50-59'] += 1;
+                } else if (age >= 60) {
+                    p['60<'] += 1;
+                }
+            }
+            for (var key in p) {
+                ageData.push(p[key]);
+            }
+        }).catch(err => console.log(err));
+        await Item.count({
+            where: {
+                itemCategory: 'Top'
+            }
+        }).then((num) => {
+            categoryData.push(num);
+        }).catch(err => console.log(err));
+        await Item.count({
+            where: {
+                itemCategory: 'Bottom'
+            }
+        }).then((num) => {
+            categoryData.push(num);
+        }).catch(err => console.log(err));
+    }
+    charts().then(() => {
+        res.render('staff/staffhome', {layout: staffMain, pendingShipments, thisMonthSales, OOSitems, genderData, ageData, categoryData});
+    }).catch(err => console.log(err))
 });
 
 // to retrieve ALL accounts, regardless of whether it's a staff or customer account.
@@ -63,64 +167,11 @@ router.get('/home', (req, res) => {
 //     })
 // });
 
-async function accountsData(req, res) {
-    var sortBy = 'title';
-	var order  = 'asc';
-	var offset = 0;
-    var limit  = 25;
-    
-    console.log("Incoming Query:");
-	console.log(req.query);
+router.get('/announcements', (req, res) => {
+    res.render('staff/allAnnouncements', {layout: staffMain});
+});
 
-    try {
-		sortBy = (req.query.sort)?   req.query.sort   : sortBy;
-		order  = (req.query.order)?  req.query.order  : order;
-		offset = (req.query.offset)? parseInt(req.query.offset, 10) : offset;
-		limit  = (req.query.limit)?  parseInt(req.query.limit, 10)  : limit;
-	
-	}
-	catch(error) {
-		console.error("Malformed Get request:");
-		console.error(req.query);
-		console.error(error);
-		return res.status(400).end();
-    }
-
-    try {
-        const total = await User.count();
-        const accsList = await User.findAll({
-            offset: offset,
-            limit: limit,
-            order: [
-                [sortBy, order.toUpperCase()]
-            ], 
-            raw: true
-        })
-        return res.status(200).json({
-            "total": total,
-            "rows": accsList
-        });
-    }
-    catch (error) {
-        console.log("Accounts Listing Error");
-        return res.status(500);
-    }
-
-}
-
-router.get('/accounts', (req, res) => {
-    User.findAll({
-        raw: true
-    })
-    .then((users) => {
-        res.render('staff/accountList', {
-            accounts: users,
-            layout: staffMain
-        });
-    })
-})
-
-router.get('/accounts-data', accountsData);
+router.get('/announcements-data', announcementsData);
 
 // retrieves all announcements
 async function announcementsData(req, res) {
@@ -162,142 +213,9 @@ async function announcementsData(req, res) {
     }
     catch (error) {
         console.log("Announcement Listing Error");
-        return res.status(500);
+        res.redirect('/staff/error');
     }
 }
-
-router.get('/announcements', (req, res) => {
-    res.render('staff/allAnnouncements', {layout: staffMain});
-});
-
-router.get('/announcements-data', announcementsData);
-
-router.get('/create-announcement', adminAuth, (req, res) => {
-    console.log(req.body.preview);
-    res.render('staff/createAnnouncements', {layout: staffMain});
-});
-
-router.post('/create-announcement', adminAuth, (req, res) => {
-    let errors = [];
-
-    let {title, description} = req.body;
-
-    let date = new Date();
-    date = date.toISOString().slice(0, 10);
-
-    if (title.length == 0) {
-        errors.push({text: "Please enter a title"});
-    }
-
-    if (errors.length > 0) {
-        res.render("staff/createAnnouncements", {
-            errors,
-            date,
-            description,
-            layout: staffMain
-        });
-    } else {
-        sNotif.create({date, title, description})
-        .then(snotif => {
-            console.log(date);
-            alertMessage(res, 'success', 'Annoucement successfully added.', 'fas fa-sign-in-alt', true);
-            res.redirect('/staff/announcements');
-        })
-        .catch(err => console.log(err));
-    }
-});
-
-router.get('/create-staff', (req, res) => {
-    res.render('staff/createStaff', {layout: staffMain});
-});
-
-router.post('/upload', (req, res) => {
-    console.log('post upload')
-    if (!fs.existsSync('./public/uploads/staff_pictures/')) {
-        fs.mkdirSync('./public/uploads/staff_pictures/')
-    }
-    upload(req, res, (err) => {
-        if (err) {
-            res.json({err: err})
-        } else {
-            if (req.file === undefined) {
-                res.json({err: err})
-            } else {
-                res.json({file: `/uploads/staff_pictures/${req.file.filename}`});
-            }
-        }
-    });
-})
-
-router.post('/create-staff', (req, res) => {
-    let errors = [];
-
-    let {type, fname, lname, gender, dob, hp, address, password, pw2} = req.body;
-
-    let isnum = /^\d+$/.test(hp);
-    
-    if (password !== pw2) {
-        errors.push({text: 'Password must match'});
-    }
-
-    if (password.length < 8 || pw2.length < 8 ) {
-        errors.push({text: 'Password must be at least 8 characters'});
-    }
-
-    if (hp.length != 8 || isnum == false) {
-        errors.push({text: 'Please enter a valid contact number.'});
-    }
-
-    if (errors.length > 0) {
-        res.render('staff/createStaff', {
-            errors,
-            fname,
-            lname,
-            dob,
-            hp,
-            address,
-            layout: staffMain
-        });
-    } else {
-        let image;
-        User.max('id')
-        .then((x) => {
-            x = parseInt(x) + 1
-            let p = './public/uploads/staff_pictures/' + x.toString()
-            let type1 = p + '.jpg'
-            let type2 = p + '.jpeg'
-            let type3 = p + '.png'
-            console.log(type1)
-            console.log(type2)
-            console.log(type3)
-            if (fs.existsSync(type1)) {
-                image = path.basename(type1);
-                console.log('type1!')
-            } else if (fs.existsSync(type2)) {
-                image = path.basename(type2);
-                console.log('type2!')
-            } else if (fs.existsSync(type3)) {
-                image = path.basename(type3);
-                console.log('type3!')
-            } else {
-                image = 'staff.png'
-            }
-        })
-        User.max('staffId')
-        .then(c => {
-            password = bcrypt.hashSync(password, 10);
-            let staffId = (1 + parseInt(c)).toString().padStart(6, '0');
-            let domain = "@monoqlo.com";
-            email = staffId + domain;
-            User.create({type, staffId, image, email, fname, lname, gender, dob, hp, address, password})
-            .then(user => {
-                res.redirect('/staff/accounts');
-                alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
-            })
-        })
-        .catch(err => console.log(err));
-    }
-});
 
 router.get('/your-account', (req, res) => {
     User.findOne({
@@ -308,6 +226,9 @@ router.get('/your-account', (req, res) => {
         let src = "/uploads/staff_pictures/" + user.image
         console.log(src)
         res.render('staff/accountDetails', {layout: staffMain, user, src})
+    }).catch((err) => {
+        console.log(err)
+        res.redirect('/staff/error')
     })
 });
 
@@ -341,124 +262,18 @@ router.put('/change-password/:id', (req, res) => {
             alertMessage(res, 'danger', 'Old password is incorrect.', true);
             res.redirect('/staff/your-account');
         }
-    }).catch(err => console.log(err))
+    }).catch((err) => {
+        console.log(err);
+        res.redirect('/staff/error');
+    })
 });
 
-router.get('/manage-staff/:id', adminAuth, (req, res) => {
-    User.findOne({
-        where: {
-            id: req.params.id
-        }
-    }).then((user)=> {
-        res.render("staff/updateStaff", {layout: staffMain, user});
-    }).catch(err => console.log(err));
-});
 
-router.post('/update-staff-picture/:id', (req, res) => {
-    const storage = multer.diskStorage({
-        destination: (req, file, callback) => {
-            callback(null, './public/uploads/staff_pictures/');
-        },
-        filename: (req, file, callback) => {
-            callback(null, req.params.id + path.extname(file.originalname));
-        }
-    });
-    
-    const upload = multer({
-        storage: storage,
-        limits: {
-            fileSize: 1000000
-        },
-        fileFilter: (req, file, callback) => {
-            checkFileType(file, callback);
-        }
-    }).single('staffUpload2')
-    
-    function checkFileType(file, callback) {
-        const filetypes = /jpeg|jpg|png/;
-        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = filetypes.test(file.mimetype);
-    
-        if (mimetype && extname) {
-            return callback(null, true);
-        } else {
-            callback({message: 'Images Only. No GIFs.'})
-        }
-    }
-    if (!fs.existsSync('./public/uploads/staff_pictures/')) {
-        fs.mkdirSync('./public/uploads/staff_pictures/')
-    }
-    upload(req, res, (err) => {
-        if (err) {
-            res.json({err: err})
-        } else {
-            if (req.file === undefined) {
-                res.json({err: err})
-            } else {
-                res.json({file: `/uploads/staff_pictures/${req.file.filename}`});
-            }
-        }
-    });
-})
-
-router.put('/save-staff/:id', adminAuth, (req, res) => {
-    let {type, fname, lname, gender, dob, hp, address, resetpw} = req.body;
-    console.log(resetpw);
-    if (resetpw == "reset") {
-        pw = bcrypt.hashSync("23456789", 10);
-    } else {
-        User.findOne({
-            where: {
-                id: req.params.id
-            }
-        }).then((user) => {
-            pw = user.password
-        }).catch(err => console.log(err))
-    }
-    User.update({
-        type: type,
-        fname: fname,
-        lname: lname,
-        gender: gender,
-        dob: dob,
-        hp: hp,
-        address: address,
-        password: pw
-    }, {
-        where: {
-            id: req.params.id
-        }
-    }).then(() => {
-        res.redirect("/staff/accounts");
-    }).catch(err => console.log(err));
-});
-
-router.get('/delete-staff/:id', adminAuth, (req, res) => {
-    User.findOne({
-        where: {
-            id: req.params.id
-        }
-    }).then((user) => {
-        if (user == null) {
-            alertMessage(res, "danger", "User does not exist", 'fas fa-exclamation-circle', true);
-            res.redirect('/staff/accounts');
-        } else {
-            User.destroy({
-                where: {
-                    id: req.params.id
-                }
-            }).then((user) => {
-                alertMessage(res, "info", "Staff deleted", 'fas fa-exclamation-circle', true);
-                res.redirect("/staff/accounts");
-            }).catch(err => console.log(err));
-        };
-    }).catch(err => console.log(err))
-});
 
 router.get('/pdf/:id', (req, res) => {
     User.findOne({
         where: {
-            id: req.params.id
+            staffId: req.params.id
         }
     }).then((user) => {
         var html = fs.readFileSync('./views/staff/staffPDF.handlebars', 'utf-8')
@@ -467,7 +282,7 @@ router.get('/pdf/:id', (req, res) => {
             orientation: "portrait",
             border: "10mm",
             header: {
-                height: "10mm"
+                height: "5mm"
             },
             "footer": {
                 "height": "10mm",
@@ -476,7 +291,7 @@ router.get('/pdf/:id', (req, res) => {
                 }
             }
         }
-        var x = {'fname': user.fname, 'lname': user.lname, 'type': user.type, 'email': user.email, 'dob': user.dob, 'hp': user.hp, 'address': user.address}
+        var x = {'image': user.image, 'fname': user.fname, 'lname': user.lname, 'type': user.type, 'staffId': user.staffId, 'email': user.email, 'gender': user.gender, 'dob': user.dob, 'hp': user.hp, 'address': user.address}
         var document = {
             html: html,
             data: {
@@ -514,26 +329,44 @@ router.get('/item/view-all', (req, res) => {
     
 });
 
+//generate random Serial
+function generateSerial() {
+    'use strict';
+    var chars = '1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+        serialLength = 10,
+        randomSerial = "",
+        i,
+        randomNumber;
+
+    for (i = 0; i < serialLength; i = i + 1) {
+        randomNumber = Math.floor(Math.random() * chars.length);
+        randomSerial += chars.substring(randomNumber, randomNumber + 1);
+    }
+    return randomSerial
+}
+
+router.get('/item/create', (req, res) => {
+    res.render('staff/createItem', { layout: staffMain })
+});
+
 router.post('/item/create', (req, res) => {
     let errors = [];
 
-    //Adds new item
-
-    console.log(req);
     // form data and variables
     let itemName = req.body.itemName;
-    let itemSerial = req.body.itemSerial;
     let itemCategory = req.body.itemCategory === undefined ? '' : req.body.itemCategory.toString();
     let itemGender = req.body.itemGender === undefined ? '' : req.body.itemGender.toString();
+    let prefix = generateSerial();
+    let itemSerial = prefix + itemCategory.slice(0, 1) + itemGender;
     let itemCost = req.body.itemCost;
     let itemPrice = req.body.itemPrice;
     let itemDescription = req.body.itemDescription;
     let stockLevel = 0;
-    let status = "In Production"
+    let status = "Active"
     // check for errors if not will add to db
     if (errors.length > 0) {
         res.render("/staff/createItem", {
-            errors, itemName, itemSerial, itemCategory, itemGender, itemCost, itemPrice, itemDescription, stockLevel, status, layout: staffMain
+            errors, itemName, itemCategory, itemGender, itemCost, itemPrice, itemDescription, stockLevel, status, layout: staffMain
         });
     } else {
         Item.create({
@@ -547,10 +380,8 @@ router.post('/item/create', (req, res) => {
             stockLevel,
             status
         }).then(item => {
-            alertMessage(res, 'success', 'Item successfully added', true);
             res.redirect('/staff/item/view-all');
-        })
-            .catch(err => console.log(err));
+        }).catch(err => res.render('/staff/errorpage', { errors }));
     }
 });
 
@@ -632,11 +463,6 @@ router.put('/item/save-discontinue/:itemSerial', (req, res) => {
 });
 
 
-
-router.get('/item/create', (req, res) => {
-    res.render('staff/createItem', { layout: staffMain })
-});
-
 //Inventory Routes
 router.get('/inventory', (req, res) => {
     Item.findAll({
@@ -652,7 +478,7 @@ router.get('/inventory', (req, res) => {
 
 //Stock Order Routes
 
-router.get('/inventory/view-stock-orders', (req, res) => {
+router.get('/inventory/stock/view-orders', (req, res) => {
     StockOrder.findAll({
         raw: true
     }).then((stockorder) => {
@@ -663,30 +489,30 @@ router.get('/inventory/view-stock-orders', (req, res) => {
         })
 });
 
-router.get('/inventory/order-stock/:itemSerial', (req, res) => {
+router.get('/inventory/stock/order/:itemSerial', (req, res) => {
     Item.findOne({
         where: {
             itemSerial: req.params.itemSerial
         }, raw: true
     }).then((item) => {
         // calls views/staff/editItem.handlebar to render the edit item
-
+        
         res.render('staff/createStockOrder', {
             layout: staffMain,
             item // passes the item object to handlebars
-
         });
     }).catch(err => console.log(err)); // To catch no item serial
 });
 
 
-router.post('/inventory/order-stock/:itemSerial', (req, res) => {
+router.post('/inventory/stock/order/:itemSerial', (req, res) => {
     let errors = [];
 
     //Adds new item
-    let stockorderDate = moment(req.body.stockorderDate, 'DD-MM-YYY');
+    // let stockorderDate = moment(req.body.stockorderDate, 'DD-MM-YYY');
+    let stockorderDate = new DATEONLY();
     let shipmentStatus = req.body.shipmentStatus;
-    let shipmentDate = moment(req.body.shipmentDate, 'DD-MM-YYY');
+    let shipmentDate = moment(req.body.shipmentDate, 'YYYY-MM-DD');
     let itemSerial = req.body.itemSerial;
     let stockorderQuantity = req.body.stockorderQuantity;
     let receivedDate = undefined;
@@ -698,12 +524,79 @@ router.post('/inventory/order-stock/:itemSerial', (req, res) => {
         itemSerial,
         stockorderQuantity,
         receivedDate
-        }).then(stockorder => {
-            res.redirect('/staff/inventory');
-        })
-        .catch(err => console.log(err))
+    }).then(stockorder => {
+        res.redirect('/staff/inventory/stock/view-orders');
+    })
+        .catch(err => res.render('/staff/errorpage', { errors }))
 
-})
+});
 
+router.get('/inventory/stock/receive/:id', (req, res) => {
+    let receivedDate = moment().format('YYYY-MM-DD');
+    StockOrder.findOne({
+        where: {
+            id: req.params.id
+        }, raw: true,
+    }).then((stockorder) => {
+        console.log(stockorder),
+        res.render('staff/receiveOrder', {
+            layout: staffMain,
+            stockorder, receivedDate // passes the item object to handlebars
+
+        });
+    }).catch(err => res.render('staff/errorpage')); // To catch no item serial
+});
+
+router.put('/inventory/stock/save-recieve/:id', (req, res) => {
+    let receivedDate = moment().format('YYYY-MM-DD');
+    
+    StockOrder.findOne({
+        where: {
+            id: req.params.id
+        }, raw: true
+    }).then((stockorder) => {
+        // variables to be updated
+        // only select variables can be edited
+        var stockorderQuantity = stockorder.stockorderQuantity
+        var itemSerial = stockorder.itemSerial
+        // find item to be updated
+        Item.findOne({
+            where: {
+                itemSerial: stockorder.itemSerial
+            }, raw: true
+        }).then((item) => {
+            // set new stock level
+            var newStockLevel = item.stockLevel += stockorderQuantity;
+            Item.update({
+                stockLevel: newStockLevel
+            }, {
+                where: {
+                    itemSerial: itemSerial
+                }
+            }).then(
+        StockOrder.update({
+            shipmentStatus: "Received",
+            receivedDate: receivedDate
+        }, {
+            where: {
+                id: req.params.id
+            }
+        }))
+    })
+        // redirects back to the main item page
+        res.redirect('/staff/inventory/stock/view-orders');
+    }).catch(err => res.render('staff/errorpage')); // To catch no item serial
+});
+
+
+//error page
+router.get('/error', (req, res) => {
+    let errors = [];
+    res.render('/staff/errorpage', {
+        errors
+    })
+});
+
+router.use('/admin', adminAuth, adminRoute);
 
 module.exports = router;

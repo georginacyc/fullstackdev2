@@ -9,7 +9,9 @@ const Custorder = require('../models/CustOrders');
 const CustOrders = require('../models/CustOrders');
 
 
-// routing goes in between !!!!
+router.get('/error', (req, res) => {
+    res.render('user/errorpage')
+})
 
 // Register User
 router.get('/register', (req, res) => {

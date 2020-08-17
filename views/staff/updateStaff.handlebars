@@ -1,6 +1,6 @@
 {{!-- for admin view --}}
 
-<div class="staffForms">
+<div class="card card-body">
     <h1 class="display-4">Update Staff Details</h1>
     <hr class="titleHR">
     <form method="POST" action="/staff/save-staff/{{user.id}}?_method=PUT">
@@ -70,13 +70,12 @@
         </div>
             
         <div class="row">
-            <div class="form-group">
+            <div class="form-group col-12 col-sm-12 col-md-12 col-lg-12">
                 <input type="checkbox" class="" id="resetpw" name="resetpw" value="reset">
                 <label class="" for="resetpw">Reset Password</label>
             </div>
         </div>
-        
-        <input type="submit" value="Submit" class="btn btn-primary"/>
+        <input type="submit" value="Submit" class="btn btn-dark float-right"/>
     </form>
 </div>
 

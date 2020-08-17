@@ -3,11 +3,13 @@
 <div class="card card-body">
     <h1 class="display-4 text-center">Update Staff Details</h1>
     <hr class="titleHR">
-    <form method="POST" action="/staff/admin/save-staff/{{user.id}}?_method=PUT">
+    <form method="POST" action="/staff/admin/save-staff/{{user.staffId}}?_method=PUT">
         <input type="hidden" name="_method" value="PUT">
         <div class="row">
             <div class="form-group col-6 col-sm-12 col-md-6 col-lg-6">
-                <img class="backup_picture border img-thumbnail img-fluid" style="max-height: 360px; max-width: 240px" id="original" src="/uploads/staff_pictures/{{{user.image}}}" ><br>
+                <div id="previewDiv">
+                    <img class="backup_picture border img-thumbnail img-fluid" style="max-height: 360px; max-width: 240px" id="original" src="/uploads/staff_pictures/{{{user.image}}}" >
+                </div>
                 <input type="file" id="staffUpload2" name="staffUpload2" accept="image/png, image/jpeg, image/jpg" onchange="staffUpload('/staff/admin/save-staff-picture/{{user.id}}')">
             </div>
             <div class="form-group col-6 col-sm-12 col-md-6 col-lg-6">
@@ -30,6 +32,9 @@
                         <input class="form-check-input" type="radio" id="sMale" value="Male" name="gender" {{radioCheck user.gender "Male"}}>
                         <label class="form-check-label" for="sMale">Male</label>
                     </div>
+
+                    <br><br>
+
                     <div class="short-div">
                         <label class="font-italic">Account Type</label>
                         <br>
@@ -63,9 +68,13 @@
         
         
         <div class="row">
-            <div class="form-group col-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="form-group col-8 col-sm-12 col-md-8 col-lg-8">
                 <label class="font-italic" for="sAddr">Address</label>
                 <textarea class="form-control" id="sAddr" name="address" rows="3">{{user.address}}</textarea>
+            </div>
+            <div class="form-group col-4 col-sm-12 col-md-4 col-lg-4">
+                <label class="font-italic" for="pcode">Postal Code</label>
+                <input type="text" class="form-control" id="postalcode" name="postalcode" value="{{user.postalcode}}">
             </div>
         </div>
             
@@ -81,7 +90,6 @@
 
 <script type="text/javascript">
     function staffUpload(url) {
-        console.log('fireed')
         let image = $('#staffUpload2')[0].files[0];
         let formdata = new FormData();
         formdata.append('staffUpload2', image);
@@ -92,7 +100,6 @@
             contentType: false,
             processData: false,
             'success': (data) => {
-                $('#preview2').attr('src', data.file);
             }
         })
     }

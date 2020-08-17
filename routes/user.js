@@ -24,7 +24,9 @@ router.post('/register', (req, res) => {
     let type = "User";
 	let errors = [];
     // Retrieves fields from register page from request body
-    let {fname,lname,gender,dob,hp,size,address, email, password, password2} = req.body;
+    let {fname,lname,gender,dob,hp,size,address,city,country,postalcode, email, password, password2} = req.body;
+    let patt3 = new RegExp('[689]{1}[0-9]{7}'); // pattern to check hp against
+    let patt2 = new RegExp('[0-9]{6}'); // pattern to check postal code against
 
     // Checks if both passwords entered are the same
     if(password !== password2) {
@@ -32,12 +34,17 @@ router.post('/register', (req, res) => {
     }
 
     // Checks that password length is more than 4
-    if(password.length < 4) {
-        errors.push({text: 'Password must be at least 4 characters'});
+    if(password.length < 8) {
+        errors.push({text: 'Password must be at least 8 characters'});
+    }
+    
+    
+    if (patt3.test(hp) == false) {
+        errors.push({text: 'Please enter a valid contact number.'});
     }
 
-    if (hp.length < 8) {
-        errors.push({text: 'Mobile Number has to b at least 8 digits'})
+    if (patt2.test(postalcode) == false) {
+        errors.push({text: 'Please enter a valid postal code'});
     }
 
     if (errors.length > 0) {
@@ -49,6 +56,9 @@ router.post('/register', (req, res) => {
             dob,
             hp,
             address,
+            city,
+            country,
+            postalcode,
             size,
             email,
             password,
@@ -70,6 +80,9 @@ router.post('/register', (req, res) => {
                     dob,
                     hp,
                     address,
+                    city,
+                    country,
+                    postalcode,
                     size,
                     email,
                     password,
@@ -79,7 +92,7 @@ router.post('/register', (req, res) => {
         
         password = bcrypt.hashSync(password, 10);
         // Create new user record
-        User.create({ type,fname,lname,gender,dob,hp,address,size, email, password })
+        User.create({ type,fname,lname,gender,dob,hp,address,postalcode,size, email, password })
             .then(user => {
             alertMessage(res, 'success',  ' Account created, please login', user.fname + 'fas fa-sign-in-alt', true);
             res.redirect('/');
@@ -126,7 +139,7 @@ router.get('/edit-user-account', (req,res)=>{
         res.render('user/edit-user-account', user);
     }) 
 });
-
+// User reset password page
 router.get('/reset-password', (req,res)=>{
     User.findOne({
         where: {
@@ -143,7 +156,7 @@ router.get('/reset-password', (req,res)=>{
 // Save user profile
 router.put('/saveUser/:id', (req, res) => {
     // Retrieves edited values from req.body
-    let {fname, lname, hp, address,size,resetpw} = req.body;
+    let {fname, lname, hp, address,city,country,postalcode,size,resetpw} = req.body;
     let {oldpw,newpw,newpw2} = req.body;
     let pw;
     if (resetpw == "reset") {
@@ -169,6 +182,9 @@ router.put('/saveUser/:id', (req, res) => {
                         lname: lname,
                         hp: hp,
                         address: address,
+                        city: city,
+                        country: country,
+                        postalcode: postalcode,
                         size: size,
                         password: pw
                         
@@ -179,8 +195,7 @@ router.put('/saveUser/:id', (req, res) => {
                             id: req.user.id
                     }
                     }).then(() => {
-                            // After saving, redirect to router.get(/listVideos...) to retrieve all updated
-                            // videos
+                            
                             console.log(pw)
                     res.redirect('/user/reset-password');
                     }).catch(err => console.log(err));
@@ -196,7 +211,8 @@ router.put('/saveUser/:id', (req, res) => {
                 alertMessage(res, 'danger', 'Old password is incorrect.', true);
                 res.redirect('/user/reset-password');
             }
-        }).catch(err => console.log(err))
+        }).catch(err => console.log(err));
+        // if user is not changing password, update other details accordingly
     } else {
         User.findOne({
             where: {
@@ -210,6 +226,9 @@ router.put('/saveUser/:id', (req, res) => {
                 lname: lname,
                 hp: hp,
                 address: address,
+                city: city,
+                country: country,
+                postalcode: postalcode,
                 size: size,
                 password: pw
                 
@@ -223,7 +242,7 @@ router.put('/saveUser/:id', (req, res) => {
             res.redirect('/user/edit-user-account');
             }).catch(err => console.log(err));
             
-        }).catch(err => console.log(err))
+        }).catch(err => console.log(err));
 
     }
     
@@ -248,6 +267,7 @@ router.get('/deleteacc',(req, res)=>{
         }
         })).then((User) => {
         //alertMessage(res, 'success', 'You have deleted your account, please register to be able to login again.', true);
+        req.logout();
         res.send('/user/login?delete=1');
         })
 } );

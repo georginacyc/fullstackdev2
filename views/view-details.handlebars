@@ -1,28 +1,31 @@
 <style>
+    .image1 {
+        height: 300px;
+        width: 300px;
+    }
     img {
-        height: 200px;
-        width: 200px;
-
+        height: 150px;
+        width: 150px;
+    }
+    #addToCart {
+        background-color: #353a40;
+    }
+    #thickLine {
+        border: 5px solid #353a40;
+    }
+    #price {
+        display: inline-block; 
+        padding-left:34%;
     }
 </style>
 <div class="container">
-    <h2>Men's</h2>
-    <table class="table table-fluid" id="table_id">
-        <tbody>
-            <tr>
-                <td><img src= "\img\itemPlaceholder.jpg " class="image1"></td>
-                <td><a href="/viewDetails/{{itemSerial}}">{{item.itemName}}</a></td>
-                <td>
-                    <p>Size</p>
-                </td>
-                </tr>
-                <tr>
-                <td>${{item.itemPrice}}</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-<div class="form-check form-check-inline">
+    <h2 style="text-align: center;">{{specificItem.itemName}}</h2>
+    <img src= "\img\itemPlaceholder.jpg " class="image1">
+    <h3 id="price">Price: ${{specificItem.itemPrice}}</h3>
+    <hr>
+    <p>{{specificItem.itemDescription}}</p>
+    <h4 id="sizeHead">Size</h4>
+<div class="form-check form-check-inline" >
     <input class="form-check-input" type="radio" id="sizeXS" value="XS" name="size" {{radioCheck user.size "XS"}}>
     <label class="form-check-label" for="sizeXS">XS</label>
 </div>
@@ -46,7 +49,39 @@
     <input class="form-check-input" type="radio" id="sizeXXL" value="XXL" name="size" {{radioCheck user.size "XXL"}}>
     <label class="form-check-label" for="sizeXXL">XXL</label>
 </div>
+<br>
+<br>
+    {{#if (stockLevelCheck stockLevel)}}
+        <form>
+        <button type="submit" class="btn btn-primary float-right" id="addToCart">Add to Cart</button>
+        </form>
+    {{else}}
+        <button type="button" disabled> Out of Stock</button>
+    {{/if}}
+</div>
+<br>
+<hr id="thickLine">
+<h3>More Items</h3>
+<hr id="thickLine">
+<div class="container">
+    <table class="table table-fluid" id="myTable">
+        <tbody>
+            {{#each allItems}}
+                <tr>
+                    <td><a href="/view-details/{{itemSerial}}"><img src="\img\itemPlaceholder.jpg"></a></td>
+                    <td><a href="/view-details/{{itemSerial}}">{{itemName}}</a></td>
+                    <td>S${{itemPrice}}</td>
+                    <td>{{itemCategory}}</td>
+                    <td>XS, S, M, L, XL, XXL</td>
+                    <td></td>
+                </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>
 
-<form>
-    <button type="submit" class="btn btn-primary">Add to Cart</button>
-</form>
+<script>
+    $(document).ready(function () {
+        $('#myTable').DataTable();
+    });
+</script>

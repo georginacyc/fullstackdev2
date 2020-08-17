@@ -119,7 +119,7 @@ router.get('/edit-user-account', (req,res)=>{
             id: req.user.id
         }
     }).then((user) => {
-        res.render('user/edit-user-account', {user});
+        res.render('user/edit-user-account', user);
     }) 
 });
 

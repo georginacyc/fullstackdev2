@@ -130,14 +130,14 @@ router.get('/home', (req, res) => { // everything below is retrieving data for c
         }).catch(err => console.log(err));
         await Item.count({ // retrieve no. of tops
             where: {
-                itemCategory: 'Top'
+                itemCategory: 'Tops'
             }
         }).then((num) => {
             categoryData.push(num);
         }).catch(err => console.log(err));
         await Item.count({ // retrieve no. of bottoms
             where: {
-                itemCategory: 'Bottom'
+                itemCategory: 'Bottoms'
             }
         }).then((num) => {
             categoryData.push(num);

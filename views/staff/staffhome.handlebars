@@ -2,7 +2,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js" integrity="sha512-s+xg36jbIujB2S2VKfpGmlC3T5V2TF3lY48DX7u2r9XzGzgPsa6wTpOQA7J9iffvdeBN0q9tKzRxVxw1JviZPg==" crossorigin="anonymous"></script>
 <div class="">
     <div class="">
-        <div class="row h1 text-muted">
+        <div class="row display-4">
             Welcome back, {{staffName}}!
         </div>
 
@@ -52,14 +52,13 @@
                             var genderChart = new Chart(ctx1, {
                                 type: 'pie',
                                 data: {
-                                    labels: ['Female', 'Male', 'Other'],
+                                    labels: ['Female', 'Male'],
                                     datasets: [{
                                         label: 'No. of Each Gender',
                                         data: [{{genderData}}],
                                         backgroundColor: [
                                             'rgba(255, 99, 132, 0.5)',
-                                            'rgba(54, 162, 235, 0.5)',
-                                            'rgba(0, 0, 0, 0.5)'
+                                            'rgba(54, 162, 235, 0.5)'
                                         ]
                                     }]
                                 }

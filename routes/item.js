@@ -11,7 +11,15 @@ const fs = require('fs');
 const path = require('path');
 const { Sequelize } = require('sequelize');
 
-var i = 0;
+var LocalStorage = require('node-localstorage').LocalStorage;
+localStorage = new LocalStorage('./scratch');
+
+// uncomment to clear local storage count key
+//localStorage.removeItem('count');
+
+// initialise local storage count key 
+//comment back after first time running
+localStorage.setItem('count', 0);
 
 //generate random Serial
 function generateSerial() {
@@ -68,8 +76,10 @@ router.post('/create', (req, res) => {
         });
     } else {
         let image;
-        let p = './public/uploads/item_pictures/' + i;
-        i += 1;
+        let c = parseInt(localStorage.getItem('count'));
+        let p = './public/uploads/item_pictures/' + c;
+        localStorage.setItem('count', c+=1)
+
         let type1 = p + '.jpg'
         let type2 = p + '.jpeg'
         let type3 = p + '.png'

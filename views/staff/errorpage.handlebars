@@ -1,7 +1,11 @@
 {{!-- error page --}}
-<div style="text-align: center;">
-<h3>Oops, we've encountered an error !!</h3>
-<p>Please Try Again</p>
-{{>_errors}}
-<br>
-<button style="background-color: cornflowerblue;"><a style="color: white;" href="/staff/home">Return home
+<div class="card card-body" style="text-align: center;">
+    <h3>Oops, we've encountered an error!</h3>
+    <h4>Please Try Again</h4>
+    {{#if reason}}
+        <p>Remarks: {{reason}}</p>
+    {{/if}}
+    <div>
+        <a class="btn btn-dark" href="/staff/home">Return home</a>
+    </div>
+</div>

@@ -5,10 +5,11 @@ const router = express.Router();
 const userRoute = require('./user');
 const passport = require('passport');
 const staffRoute = require('./staff');
-const User = require('../models/User')
+const user = require('../models/User')
 const ensureAuthenticated = require('../helpers/auth'); // to verify that a user is logged in
 const staffAuth = require('../helpers/staffAuth'); // to verify that user logged in is a Staff
 const Item = require('../models/Item');
+// const bootstrap = require('bootstrap')
 
 router.get('/', (req, res) => {
     res.render('home')
@@ -26,31 +27,45 @@ router.post('/staff-login', (req, res, next) => {
     }) (req, res, next);
 });
 
-router.get('/catalogue', (req, res) => {
+router.get('/catalogueHis', (req, res) => {
     Item.findAll({
         where: {
-            itemGender: "M"
-        },
-        raw: true
+            itemGender: "M",
+            status: "Active"
+        },raw: true
     })
         .then((item) => {
             res.render('catalogue', {
                 item : item,
+                title : "Men's"
         })
     })
     
 });
 
-router.get('/view/:itemSerial', (req, res) => {
+router.get('/catalogueHers', (req, res) => {
+    Item.findAll({
+        where: {
+            itemGender: "F"
+        },raw: true
+    })
+        .then((item) => {
+            res.render('catalogue', {
+                item : item,
+                title : "Men's"
+        })
+    })
+    
+});
+
+router.get('/viewDetails/:itemSerial', (req, res) => {
     Item.findOne({
         where: {
             itemSerial: req.params.itemSerial
         }, raw: true
     }).then((item) => {
-        res.render('view/:itemSerial', {
-            layout: staffMain,
-            item // passes the item object to handlebars
-
+            res.render('viewDetails', {
+                item // passes the item object to handlebars
         });
     }).catch(err => console.log(err)); // To catch no item serial
 });

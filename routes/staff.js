@@ -6,22 +6,17 @@ const User = require('../models/User');
 const sNotif = require('../models/StaffNotifs');
 const alertMessage = require('../helpers/messenger');
 const bcrypt = require('bcryptjs');
-const mysql = require('mysql');
-const passport = require('passport');
 const staffMain = "../layouts/staff";
 const Item = require('../models/Item');
 const moment = require('moment');
 const StockOrder = require('../models/StockOrder');
-const ensureAuthenticated = require('../helpers/auth'); // to verify that a user is logged in
-const staffAuth = require('../helpers/staffAuth'); // to verify that user logged in is a Staff
 const adminAuth = require('../helpers/adminAuth'); // to verify that user logged in is an Admin
+const adminRoute = require('../routes/admin');
 const pdf = require('pdf-creator-node');
 const fs = require('fs');
 const sequelize = require('sequelize');
 const Op = sequelize.Op;
-const upload = require('../helpers/staffUpload');
-const multer = require('multer');
-const path = require('path');
+const CustOrders = require('../models/CustOrders');
 const { DATEONLY } = require('sequelize');
 
 //var Handlebars = require("handlebars");
@@ -35,9 +30,9 @@ router.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-router.get('/update', (req, res) => {
+router.get('/update', (req, res) => { // updates last login for staff/admin account
     date = new Date();
-    now = ("0" + date.getDate()).slice(-2) + '/' + ("0" + (date.getMonth() + 1)).slice(-2) + '/' + date.getFullYear() + " " + date.getHours()+ ":" + date.getMinutes()
+    now = ("0" + date.getDate()).slice(-2) + '/' + ("0" + (date.getMonth() + 1)).slice(-2) + '/' + date.getFullYear() + " " + date.getHours()+ ":" + date.getMinutes() // format: DD/MM/YYYY HH:MM
     User.update({
         lastLogin: now
     }, {
@@ -49,81 +44,113 @@ router.get('/update', (req, res) => {
     }).catch(err => console.log(err));
 })
 
-router.get('/home', (req, res) => {
-    res.render('staff/staffhome', {layout: staffMain});
+router.get('/home', (req, res) => { // everything below is retrieving data for charts in home page
+    let pendingShipments;
+    let thisMonthSales;
+    let OOSitems;
+    let genderData = [];
+    let ageData = [];
+    let categoryData = [];
+
+    let date = new Date();
+    let currMonth = date.getMonth() + 1;
+    let currYear = date.getFullYear();
+    let currDate = currYear.toString() + "-" + ("0" + currMonth.toString()).slice(-2) + "-" + "01"; // getting dates for calculating this months sales
+    let nextDate = currYear.toString() + "-" + ("0" + currMonth.toString()).slice(-2) + "-" + "01";
+
+    async function charts() {
+        await CustOrders.count({ // counts no. of pending shipments
+            where: {
+                ship_Date: null
+            }
+        }).then((num) => {
+            pendingShipments = num;
+        }).catch(err => console.log(err));
+        await CustOrders.count({ // count to retrieve data for this months sales
+            where: {
+                order_Date: {
+                    [Op.gte]: currDate,
+                    [Op.lt]: nextDate
+                }
+            }
+        }).then((num) => { // counts no. of out of stock items
+            thisMonthSales = num;
+        }).catch(err => console.log(err));
+        await Item.count({
+            where: {
+                'stockLevel': 0
+            }
+        }).then((num) => {
+            OOSitems = num;
+        }).catch(err => console.log(err));
+        await User.count({ // counts no. of female customers
+            where: {
+                type: 'User',
+                gender: 'Female'
+            }
+        }).then((num) => {
+            genderData.push(num)
+        }).catch(err => console.log(err));
+        await User.count({ // counts no. of male customers
+            where: {
+                type: 'User',
+                gender: 'Male'
+            }
+        }).then((num) => {
+            genderData.push(num);
+        }).catch(err => console.log(err));
+        await User.findAll({ // retrieves all dob of registered customers
+            where: {
+                type: 'User'
+            },
+            attributes: ['dob'],
+            raw: true
+        }).then((result) => {
+            let p = {'18-29': 0, '30-39': 0, '40-49': 0, '50-59': 0, '60<': 0} // dictionary to hold quantity of each age group
+            for (i=0; i<result.length; i++) {
+                str = result[i]['dob'].slice(0,5); // retrieving year from dob
+                age = parseInt(currYear) - parseInt(str); // getting age
+                if (age >= 18 && age <= 29) {
+                    p['18-29'] += 1;
+                } else if (age >= 30 && age <= 39) {
+                    p['30-39'] += 1;
+                } else if (age >= 40 && age <= 49) {
+                    p['40-49'] += 1;
+                } else if (age >= 50 && age <= 59) {
+                    p['50-59'] += 1;
+                } else if (age >= 60) {
+                    p['60<'] += 1;
+                }
+            }
+            for (var key in p) {
+                ageData.push(p[key]); // passing in data for chartjs
+            }
+        }).catch(err => console.log(err));
+        await Item.count({ // retrieve no. of tops
+            where: {
+                itemCategory: 'Top'
+            }
+        }).then((num) => {
+            categoryData.push(num);
+        }).catch(err => console.log(err));
+        await Item.count({ // retrieve no. of bottoms
+            where: {
+                itemCategory: 'Bottom'
+            }
+        }).then((num) => {
+            categoryData.push(num);
+        }).catch(err => console.log(err));
+    }
+    charts().then(() => {
+        res.render('staff/staffhome', {layout: staffMain, pendingShipments, thisMonthSales, OOSitems, genderData, ageData, categoryData});
+    }).catch(err => console.log(err))
 });
 
-// to retrieve ALL accounts, regardless of whether it's a staff or customer account.
-// router.get('/accounts', ensureAuthenticated, staffAuth, adminAuth, (req, res) => {
-//     User.findAll({
-//         raw: true
-//     })
-//     .then((users) => {
-//         res.render('staff/accountList', {
-//             accounts: users,
-//             layout: staffMain
-//         });
-//     })
-// });
+router.get('/announcements', (req, res) => {
+    res.render('staff/allAnnouncements', {layout: staffMain});
+});
 
-async function accountsData(req, res) {
-    var sortBy = 'title';
-	var order  = 'asc';
-	var offset = 0;
-    var limit  = 25;
-    
-    console.log("Incoming Query:");
-	console.log(req.query);
-
-    try {
-		sortBy = (req.query.sort)?   req.query.sort   : sortBy;
-		order  = (req.query.order)?  req.query.order  : order;
-		offset = (req.query.offset)? parseInt(req.query.offset, 10) : offset;
-		limit  = (req.query.limit)?  parseInt(req.query.limit, 10)  : limit;
-	
-	}
-	catch(error) {
-		console.error("Malformed Get request:");
-		console.error(req.query);
-		console.error(error);
-		return res.status(400).end();
-    }
-
-    try {
-        const total = await User.count();
-        const accsList = await User.findAll({
-            offset: offset,
-            limit: limit,
-            order: [
-                [sortBy, order.toUpperCase()]
-            ], 
-            raw: true
-        })
-        return res.status(200).json({
-            "total": total,
-            "rows": accsList
-        });
-    }
-    catch (error) {
-        console.log("Accounts Listing Error");
-        return res.status(500);
-    }
-
-}
-
-router.get('/accounts', (req, res) => {
-    User.findAll({
-        raw: true
-    })
-    .then((users) => {
-        res.render('staff/accountList', {
-            accounts: users,
-            layout: staffMain
-        });
-    })
-})
-
-router.get('/accounts-data', accountsData);
+router.get('/announcements-data', announcementsData);
 
 // retrieves all announcements
 async function announcementsData(req, res) {
@@ -165,142 +192,9 @@ async function announcementsData(req, res) {
     }
     catch (error) {
         console.log("Announcement Listing Error");
-        return res.status(500);
+        res.redirect('/staff/error');
     }
 }
-
-router.get('/announcements', (req, res) => {
-    res.render('staff/allAnnouncements', {layout: staffMain});
-});
-
-router.get('/announcements-data', announcementsData);
-
-router.get('/create-announcement', adminAuth, (req, res) => {
-    console.log(req.body.preview);
-    res.render('staff/createAnnouncements', {layout: staffMain});
-});
-
-router.post('/create-announcement', adminAuth, (req, res) => {
-    let errors = [];
-
-    let {title, description} = req.body;
-
-    let date = new Date();
-    date = date.toISOString().slice(0, 10);
-
-    if (title.length == 0) {
-        errors.push({text: "Please enter a title"});
-    }
-
-    if (errors.length > 0) {
-        res.render("staff/createAnnouncements", {
-            errors,
-            date,
-            description,
-            layout: staffMain
-        });
-    } else {
-        sNotif.create({date, title, description})
-        .then(snotif => {
-            console.log(date);
-            alertMessage(res, 'success', 'Annoucement successfully added.', 'fas fa-sign-in-alt', true);
-            res.redirect('/staff/announcements');
-        })
-        .catch(err => console.log(err));
-    }
-});
-
-router.get('/create-staff', (req, res) => {
-    res.render('staff/createStaff', {layout: staffMain});
-});
-
-router.post('/upload', (req, res) => {
-    console.log('post upload')
-    if (!fs.existsSync('./public/uploads/staff_pictures/')) {
-        fs.mkdirSync('./public/uploads/staff_pictures/')
-    }
-    upload(req, res, (err) => {
-        if (err) {
-            res.json({err: err})
-        } else {
-            if (req.file === undefined) {
-                res.json({err: err})
-            } else {
-                res.json({file: `/uploads/staff_pictures/${req.file.filename}`});
-            }
-        }
-    });
-})
-
-router.post('/create-staff', (req, res) => {
-    let errors = [];
-
-    let {type, fname, lname, gender, dob, hp, address, password, pw2} = req.body;
-
-    let isnum = /^\d+$/.test(hp);
-    
-    if (password !== pw2) {
-        errors.push({text: 'Password must match'});
-    }
-
-    if (password.length < 8 || pw2.length < 8 ) {
-        errors.push({text: 'Password must be at least 8 characters'});
-    }
-
-    if (hp.length != 8 || isnum == false) {
-        errors.push({text: 'Please enter a valid contact number.'});
-    }
-
-    if (errors.length > 0) {
-        res.render('staff/createStaff', {
-            errors,
-            fname,
-            lname,
-            dob,
-            hp,
-            address,
-            layout: staffMain
-        });
-    } else {
-        let image;
-        User.max('id')
-        .then((x) => {
-            x = parseInt(x) + 1
-            let p = './public/uploads/staff_pictures/' + x.toString()
-            let type1 = p + '.jpg'
-            let type2 = p + '.jpeg'
-            let type3 = p + '.png'
-            console.log(type1)
-            console.log(type2)
-            console.log(type3)
-            if (fs.existsSync(type1)) {
-                image = path.basename(type1);
-                console.log('type1!')
-            } else if (fs.existsSync(type2)) {
-                image = path.basename(type2);
-                console.log('type2!')
-            } else if (fs.existsSync(type3)) {
-                image = path.basename(type3);
-                console.log('type3!')
-            } else {
-                image = 'staff.png'
-            }
-        })
-        User.max('staffId')
-        .then(c => {
-            password = bcrypt.hashSync(password, 10);
-            let staffId = (1 + parseInt(c)).toString().padStart(6, '0');
-            let domain = "@monoqlo.com";
-            email = staffId + domain;
-            User.create({type, staffId, image, email, fname, lname, gender, dob, hp, address, password})
-            .then(user => {
-                res.redirect('/staff/accounts');
-                alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
-            })
-        })
-        .catch(err => console.log(err));
-    }
-});
 
 router.get('/your-account', (req, res) => {
     User.findOne({
@@ -308,24 +202,25 @@ router.get('/your-account', (req, res) => {
             id: req.user.id
         }
     }).then((user) => {
-        let src = "/uploads/staff_pictures/" + user.image
-        console.log(src)
+        let src = "/uploads/staff_pictures/" + user.image // to pass in the path for img src in handlebars
         res.render('staff/accountDetails', {layout: staffMain, user, src})
+    }).catch((err) => {
+        console.log(err)
+        res.redirect('/staff/error')
     })
 });
 
-router.put('/change-password/:id', (req, res) => {
+router.put('/change-password/:id', (req, res) => { // staff/admin changing their OWN password; this is provided they know their old password
     let {oldpw, newpw, newpw2} = req.body;
     User.findOne({
         where: {
             id: req.user.id
         }
     }).then((user) => {
-        let check = bcrypt.compareSync(oldpw, user.password)
-        console.log(check);
+        let check = bcrypt.compareSync(oldpw, user.password) // compares to see if they inputted the correct old password
         if (check) {
             if (newpw == newpw2) {
-                pw = bcrypt.hashSync(newpw, 10);
+                pw = bcrypt.hashSync(newpw, 10); // hash for secure storage
                 User.update({
                     password: pw
                 }, {
@@ -344,133 +239,27 @@ router.put('/change-password/:id', (req, res) => {
             alertMessage(res, 'danger', 'Old password is incorrect.', true);
             res.redirect('/staff/your-account');
         }
-    }).catch(err => console.log(err))
+    }).catch((err) => {
+        console.log(err);
+        res.redirect('/staff/error');
+    })
 });
 
-router.get('/manage-staff/:id', adminAuth, (req, res) => {
+
+
+router.get('/pdf/:id', (req, res) => { // pdf for staff summary/profile. req.param.id is staffId, so normal customers do not get a pdf
     User.findOne({
-        where: {
-            id: req.params.id
+        where: { // retrieving user object
+            staffId: req.params.id
         }
-    }).then((user)=> {
-        res.render("staff/updateStaff", {layout: staffMain, user});
-    }).catch(err => console.log(err));
-});
-
-router.post('/update-staff-picture/:id', (req, res) => {
-    const storage = multer.diskStorage({
-        destination: (req, file, callback) => {
-            callback(null, './public/uploads/staff_pictures/');
-        },
-        filename: (req, file, callback) => {
-            callback(null, req.params.id + path.extname(file.originalname));
-        }
-    });
-    
-    const upload = multer({
-        storage: storage,
-        limits: {
-            fileSize: 1000000
-        },
-        fileFilter: (req, file, callback) => {
-            checkFileType(file, callback);
-        }
-    }).single('staffUpload2')
-    
-    function checkFileType(file, callback) {
-        const filetypes = /jpeg|jpg|png/;
-        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = filetypes.test(file.mimetype);
-    
-        if (mimetype && extname) {
-            return callback(null, true);
-        } else {
-            callback({message: 'Images Only. No GIFs.'})
-        }
-    }
-    if (!fs.existsSync('./public/uploads/staff_pictures/')) {
-        fs.mkdirSync('./public/uploads/staff_pictures/')
-    }
-    upload(req, res, (err) => {
-        if (err) {
-            res.json({err: err})
-        } else {
-            if (req.file === undefined) {
-                res.json({err: err})
-            } else {
-                res.json({file: `/uploads/staff_pictures/${req.file.filename}`});
-            }
-        }
-    });
-})
-
-router.put('/save-staff/:id', adminAuth, (req, res) => {
-    let {type, fname, lname, gender, dob, hp, address, resetpw} = req.body;
-    console.log(resetpw);
-    if (resetpw == "reset") {
-        pw = bcrypt.hashSync("23456789", 10);
-    } else {
-        User.findOne({
-            where: {
-                id: req.params.id
-            }
-        }).then((user) => {
-            pw = user.password
-        }).catch(err => console.log(err))
-    }
-    User.update({
-        type: type,
-        fname: fname,
-        lname: lname,
-        gender: gender,
-        dob: dob,
-        hp: hp,
-        address: address,
-        password: pw
-    }, {
-        where: {
-            id: req.params.id
-        }
-    }).then(() => {
-        res.redirect("/staff/accounts");
-    }).catch(err => console.log(err));
-});
-
-router.get('/delete-staff/:id', adminAuth, (req, res) => {
-    User.findOne({
-        where: {
-            id: req.params.id
-        }
-    }).then((user) => {
-        if (user == null) {
-            alertMessage(res, "danger", "User does not exist", 'fas fa-exclamation-circle', true);
-            res.redirect('/staff/accounts');
-        } else {
-            User.destroy({
-                where: {
-                    id: req.params.id
-                }
-            }).then((user) => {
-                alertMessage(res, "info", "Staff deleted", 'fas fa-exclamation-circle', true);
-                res.redirect("/staff/accounts");
-            }).catch(err => console.log(err));
-        };
-    }).catch(err => console.log(err))
-});
-
-router.get('/pdf/:id', (req, res) => {
-    User.findOne({
-        where: {
-            id: req.params.id
-        }
-    }).then((user) => {
-        var html = fs.readFileSync('./views/staff/staffPDF.handlebars', 'utf-8')
-        var options = {
+    }).then((user) => { // using retrieved user to construct pdf
+        var html = fs.readFileSync('./views/staff/staffPDF.handlebars', 'utf-8') // the format of the pdf
+        var options = { // various options
             format: "A4",
             orientation: "portrait",
             border: "10mm",
             header: {
-                height: "10mm"
+                height: "5mm"
             },
             "footer": {
                 "height": "10mm",
@@ -479,11 +268,11 @@ router.get('/pdf/:id', (req, res) => {
                 }
             }
         }
-        var x = {'fname': user.fname, 'lname': user.lname, 'type': user.type, 'email': user.email, 'dob': user.dob, 'hp': user.hp, 'address': user.address}
+        var x = {'image': user.image, 'fname': user.fname, 'lname': user.lname, 'type': user.type, 'staffId': user.staffId, 'email': user.email, 'gender': user.gender, 'dob': user.dob, 'hp': user.hp, 'address': user.address}
         var document = {
             html: html,
             data: {
-                staff: x
+                staff: x // passes in data for handlbars to cast into the staches
             },
             path: "./public/pdf/output.pdf"
         };
@@ -776,12 +565,12 @@ router.put('/inventory/stock/save-recieve/:id', (req, res) => {
 
 
 //error page
-    router.get('/error', (req, res) => {
-        let errors = [];
-        res.render('/staff/errorpage', {
-            errors
-        })
-    });
+router.get('/error', (req, res) => {
+    res.render('staff/errorpage', {
+        layout: staffMain
+    })
+});
 
+router.use('/admin', adminAuth, adminRoute);
 
 module.exports = router;

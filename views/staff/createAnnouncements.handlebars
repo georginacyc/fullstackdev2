@@ -1,8 +1,9 @@
 <div class="row">
 	<div class="col-md-6 mx-auto">
 		<div class="card card-body">
-			<h3 class="text-muted text-center">New Announcement</h3>
-			<form action="/staff/create-announcement" method="POST"><div class="form-group">
+			<h3 class="display-4 text-center">New Announcement</h3>
+			<hr class="titleHR">
+			<form action="/staff/admin/create-announcement" method="POST"><div class="form-group">
 				<label for="aDate">Date</label>
 					<input type="date" class="form-control" name="aDate" value="{{formatDate content.aDate 'YYYY-MM-DD'}}" readonly>
 				</div>

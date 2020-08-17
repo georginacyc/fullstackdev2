@@ -1,5 +1,5 @@
 <div class="card card-body">
-    <h1 class="display-4" style="text-align: center">{{custName}} Profile</h1>
+    <h1 class="display-4" style="text-align: center">{{custName}}'s Profile</h1>
     <hr class="">
     </table> 
     <form method="POST" action="/user/saveUser/{{user.id}}?_method=PUT">
@@ -11,29 +11,28 @@
                 <label for="lname">Last Name</label>
                 <input type="text" id="lname" class="form-control" name="lname" value="{{user.lname}}">
             </div>
-            {{!-- <div class="form-group">
-                <label for="gender">Gender</label>{{user.gender}}
-                <div>
-                <input type="radio" id="male" name="gender" value="male">
-                    <label for="male">Male</label><br>
-                    <input type="radio" id="female" name="gender" value="female">
-                    <label for="female">Female</label><br>
-                    <input type="radio" id="other" name="gender" value="other">
-                    <label for="other">Other</label>
-                </div>
-            </div> --}}
-            {{!-- <div class="form-group">
-                <label for="dob">Date Of Birth</label>
-                <input type="date" name="dob" class="form-control">
-            </div> --}}
             <div class="form-group">
                 <label for="hp">Mobile Number</label>
                 <input type="number" id="hp" name="hp" class="form-control" value="{{user.hp}}">
             </div>
             <div class="form-group">
                 <label for="address">Address</label>
-                <input type="text" id="address" name="address" class="form-control" value="{{user.address}}" >
+                <input type="text" id="address" name="address" size="50" class="form-control" value="{{user.address}}" >
             </div>
+            
+            <div class="form-group">
+                <label for="city">City</label>
+                <input type="text" id="city" name="city" class="form-control" value="{{user.city}}" >
+            </div>
+            <div class="form-group">
+                <label for="country">Country</label>
+                <input type="text" id="country" name="country" class="form-control" value="{{user.country}}" >
+            </div>
+            <div class="form-group">
+                <label for="postalcode">Postal Code</label>
+                <input type="number" id="postalcode" name="postalcode" class="form-control" value="{{user.postalcode}}" >
+            </div>
+            
             <div class='form-field'>
                 <label for='size'>Size Preference(Optional)</label>
                 <select id="size"  name="size" class='form-control'>
@@ -45,16 +44,23 @@
                     <option>2XL</option>
                 </select>
             </div>
-            
+            {{!-- <div class="row">
+            <div class="col-6 col-sm-12 col-md-6 col-lg-6"> --}}
+            {{!-- <br> --}}
+            <br>
+            <button type="submit" class="btn btn-dark float-right">Update</button>
+            {{!-- </br> --}}
+            {{!-- </div> --}}
+        {{!-- <div class="deleteconfirm">
+            <br> --}}
+        <a onclick="confirm_delete()" type="delete" class="btn btn-danger float-left" >Delete Account</a>
+        </br>
+        {{!-- </br>
         </div>
-            <button type="submit" class="btn btn-primary">Update</button>
-            <div class="deleteconfirm">
-            {{!-- {{#if}} {{confirm('Are you sure you want to save this thing into the database?')}}
-            {{console.log('Thing was saved to the database.')}}  --}}
-            <a style="background-color: #f44336; margin-left:850px;" onclick="confirm_delete()" type="delete" class="btn btn-primary" >Delete Account</a>
-            {{!-- {{ else }} {{ console.log('Thing was not saved to the database.') }} {{ /if}} --}}
-            </div>
-        </form>
+         </div>    --}}
+         </form>
+       
+        
         <script>
             function confirm_delete(){
                 var result = confirm("Delete?"); 

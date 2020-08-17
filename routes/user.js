@@ -9,6 +9,10 @@ const Custorder = require('../models/CustOrders');
 const CustOrders = require('../models/CustOrders');
 const Item = require('../models/Item');
 const ensureAuthenticated = require('../helpers/auth');
+// const addressValidator = require('address-validator');
+// const Address = addressValidator.Address;
+// const _ = require('underscore');
+
 
 
 router.get('/error', (req, res) => {
@@ -24,7 +28,21 @@ router.post('/register', (req, res) => {
     let type = "User";
 	let errors = [];
     // Retrieves fields from register page from request body
-    let {fname,lname,gender,dob,hp,size,address, email, password, password2} = req.body;
+    let {fname,lname,gender,dob,hp,size,address,city,country,postalcode, email, password, password2} = req.body;
+    
+    // addressValidator.validate(address, addressValidator.match.streetAddress, function(err, exact, inexact){
+    //     console.log('input: ', address.toString())
+    //     console.log('match: ', _.map(exact, function(a) {
+    //       return a.toString();
+    //     }));
+    //     console.log('did you mean: ', _.map(inexact, function(a) {
+    //       return a.toString();
+    //     }));
+     
+    //     //access some props on the exact match
+    //     var first = exact[0];
+    //     console.log(first.streetNumber + ' '+ first.street);
+    // });
 
     // Checks if both passwords entered are the same
     if(password !== password2) {
@@ -32,13 +50,15 @@ router.post('/register', (req, res) => {
     }
 
     // Checks that password length is more than 4
-    if(password.length < 4) {
-        errors.push({text: 'Password must be at least 4 characters'});
+    if(password.length < 8) {
+        errors.push({text: 'Password must be at least 8 characters'});
     }
-
+    
+    
     if (hp.length < 8) {
-        errors.push({text: 'Mobile Number has to b at least 8 digits'})
+        errors.push({text: 'Mobile Number has to b at least 8 digits'});
     }
+    
 
     if (errors.length > 0) {
         res.render('user/register', {
@@ -49,6 +69,9 @@ router.post('/register', (req, res) => {
             dob,
             hp,
             address,
+            city,
+            country,
+            postalcode,
             size,
             email,
             password,
@@ -70,6 +93,9 @@ router.post('/register', (req, res) => {
                     dob,
                     hp,
                     address,
+                    city,
+                    country,
+                    postalcode,
                     size,
                     email,
                     password,
@@ -79,7 +105,7 @@ router.post('/register', (req, res) => {
         
         password = bcrypt.hashSync(password, 10);
         // Create new user record
-        User.create({ type,fname,lname,gender,dob,hp,address,size, email, password })
+        User.create({ type,fname,lname,gender,dob,hp,address,city,country,postalcode,size, email, password })
             .then(user => {
             alertMessage(res, 'success',  ' Account created, please login', user.fname + 'fas fa-sign-in-alt', true);
             res.redirect('/');
@@ -126,7 +152,7 @@ router.get('/edit-user-account', (req,res)=>{
         res.render('user/edit-user-account', user);
     }) 
 });
-
+// User reset password page
 router.get('/reset-password', (req,res)=>{
     User.findOne({
         where: {
@@ -143,7 +169,7 @@ router.get('/reset-password', (req,res)=>{
 // Save user profile
 router.put('/saveUser/:id', (req, res) => {
     // Retrieves edited values from req.body
-    let {fname, lname, hp, address,size,resetpw} = req.body;
+    let {fname, lname, hp, address,city,country,postalcode,size,resetpw} = req.body;
     let {oldpw,newpw,newpw2} = req.body;
     let pw;
     if (resetpw == "reset") {
@@ -169,6 +195,9 @@ router.put('/saveUser/:id', (req, res) => {
                         lname: lname,
                         hp: hp,
                         address: address,
+                        city: city,
+                        country: country,
+                        postalcode: postalcode,
                         size: size,
                         password: pw
                         
@@ -179,8 +208,7 @@ router.put('/saveUser/:id', (req, res) => {
                             id: req.user.id
                     }
                     }).then(() => {
-                            // After saving, redirect to router.get(/listVideos...) to retrieve all updated
-                            // videos
+                            
                             console.log(pw)
                     res.redirect('/user/reset-password');
                     }).catch(err => console.log(err));
@@ -210,6 +238,9 @@ router.put('/saveUser/:id', (req, res) => {
                 lname: lname,
                 hp: hp,
                 address: address,
+                city: city,
+                country: country,
+                postalcode: postalcode,
                 size: size,
                 password: pw
                 
@@ -248,6 +279,7 @@ router.get('/deleteacc',(req, res)=>{
         }
         })).then((User) => {
         //alertMessage(res, 'success', 'You have deleted your account, please register to be able to login again.', true);
+        req.logout();
         res.send('/user/login?delete=1');
         })
 } );

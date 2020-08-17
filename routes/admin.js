@@ -83,15 +83,6 @@ router.post('/create-staff', (req, res) => {
             layout: staffMain
         });
     } else {
-        upload(req, res, (err) => {
-            if (err) {
-                console.log(err)
-            } else {
-                if (req.file === undefined) {
-                    console.log(err)
-                }
-            }
-        });
         let image;
         User.max('id')
         .then((x) => {
@@ -127,6 +118,21 @@ router.post('/create-staff', (req, res) => {
         }).catch(err => console.log(err));
     }
 });
+
+router.post('/upload-staff-picture', (req, res) => {
+    upload(req, res, (err) => {
+        if (err) {
+            res.json({file: '/uploads/staff_pictures/staff.png', err: err});
+        } else {
+            if (req.file === undefined) {
+                res.json({file: '/uploads/staff_pictures/staff.png', err: err});
+            } else {
+                res.json({file: `/uploads/staff_pictures/${req.file.filename}`});
+            }
+        }
+    });
+}) 
+
 router.get('/manage-staff/:id', (req, res) => {
     User.findOne({
         where: {
@@ -183,6 +189,50 @@ router.put('/save-staff/:id', (req, res) => {
         res.redirect('/staff/error');
     });
 });
+
+router.post('/save-staff-picture/:id', (req, res) => {
+    const storage2 = multer.diskStorage({
+        destination: (req, file, callback) => {
+            callback(null, './public/uploads/staff_pictures/');
+        },
+        filename: (req, file, callback) => {
+            callback(null, req.params.id + path.extname(file.originalname));
+        }
+    });
+    
+    const upload2 = multer({
+        storage: storage2,
+        limits: {
+            fileSize: 1000000
+        },
+        fileFilter: (req, file, callback) => {
+            checkFileType(file, callback);
+        }
+    }).single('staffUpload2')
+    
+    function checkFileType(file, callback) {
+        const filetypes = /jpeg|jpg|png/;
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = filetypes.test(file.mimetype);
+    
+        if (mimetype && extname) {
+            return callback(null, true);
+        } else {
+            callback({message: 'Images Only. No GIFs.'})
+        }
+    }
+    upload2(req, res, (err) => {
+        if (err) {
+            res.json({file: '/uploads/staff_pictures/staff.png', err: err});
+        } else {
+            if (req.file === undefined) {
+                res.json({file: '/uploads/staff_pictures/staff.png', err: err});
+            } else {
+                res.json({file: `/uploads/staff_pictures/${req.file.filename}`});
+            }
+        }
+    });
+})
 
 router.get('/delete-user/:id', (req, res) => {
     User.findOne({

@@ -270,7 +270,7 @@ router.get('/pdf/:id', (req, res) => { // pdf for staff summary/profile. req.par
                 }
             }
         }
-        var x = {'image': user.image, 'fname': user.fname, 'lname': user.lname, 'type': user.type, 'staffId': user.staffId, 'email': user.email, 'gender': user.gender, 'dob': user.dob, 'hp': user.hp, 'address': user.address}
+        var x = {'image': user.image, 'fname': user.fname, 'lname': user.lname, 'type': user.type, 'staffId': user.staffId, 'email': user.email, 'gender': user.gender, 'dob': user.dob, 'hp': user.hp, 'address': user.address, 'postalcode': user.postalcode}
         var document = {
             html: html,
             data: {

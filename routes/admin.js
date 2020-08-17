@@ -51,8 +51,9 @@ router.get('/create-staff', (req, res) => {
 
 router.post('/create-staff', (req, res) => {
     let errors = [];
-    let {type, fname, lname, gender, dob, hp, address, password, pw2} = req.body;
-    let patt = new RegExp('[689]{1}[0-9]{7}'); // pattern to check hp against
+    let {type, fname, lname, gender, dob, hp, address, postalcode, password, pw2} = req.body;
+    let hpPatt = new RegExp('[689]{1}[0-9]{7}'); // pattern to check hp against
+    let postalPatt = new RegExp('[0-9]{6}'); // pattern to check postal code
     
     if (password !== pw2) {
         errors.push({text: 'Password must match'});
@@ -60,8 +61,11 @@ router.post('/create-staff', (req, res) => {
     if (password.length < 8 || pw2.length < 8) {
         errors.push({text: 'Password must be at least 8 characters'});
     }
-    if (patt.test(hp) == false) {
+    if (hpPatt.test(hp) == false) {
         errors.push({text: 'Please enter a valid contact number.'});
+    }
+    if (postalPatt.test(postalcode) == false) {
+        errors.push({text: 'Please enter a valid postal code'})
     }
     if (errors.length > 0) {
         res.render('staff/createStaff', {
@@ -98,7 +102,7 @@ router.post('/create-staff', (req, res) => {
             let staffId = (1 + parseInt(c)).toString().padStart(6, '0');
             let domain = "@monoqlo.com";
             email = staffId + domain;
-            User.create({type, staffId, image, email, fname, lname, gender, dob, hp, address, password})
+            User.create({type, staffId, image, email, fname, lname, gender, dob, hp, address, postalcode, password})
             .then(user => {
                 res.redirect('/staff/admin/accounts');
                 alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
@@ -138,37 +142,64 @@ router.get('/manage-staff/:id', (req, res) => {
 });
 
 router.put('/save-staff/:id', (req, res) => {
-    let {type, fname, lname, gender, dob, hp, address, resetpw} = req.body;
-    if (resetpw == "reset") {
-        pw = bcrypt.hashSync(lname.toLowerCase() + hp.slice(0, 4), 10); // resets password to staff's last name and first 4 numbers of their phone number
-    } else {
-        User.findOne({
-            where: {
-                id: req.params.id
-            }
-        }).then((user) => {
-            pw = user.password // retrieves original password
-        }).catch(err => console.log(err))
-    }
-    User.update({
-        type: type,
-        fname: fname,
-        lname: lname,
-        gender: gender,
-        dob: dob,
-        hp: hp,
-        address: address,
-        password: pw
-    }, {
-        where: {
-            id: req.params.id
+    let errors = false;
+    let {type, fname, lname, gender, dob, hp, address, postalcode, resetpw} = req.body;
+    let pw;
+    let hpPatt = new RegExp('[689]{1}[0-9]{7}'); // pattern to check hp against
+    let postalPatt = new RegExp('[0-9]{6}'); // pattern to check postal code
+    async function check() {
+        if (resetpw == "reset") {
+            pw = bcrypt.hashSync(lname.toLowerCase() + hp.slice(0, 4), 10); // resets password to staff's last name and first 4 numbers of their phone number
+        } else {
+            User.findOne({
+                where: {
+                    staffId: req.params.id
+                }
+            }).then((user) => {
+                pw = user.password // retrieves original password
+            }).catch((err) => {
+                console.log(err);
+                res.redirect('/staff/error');
+            });
         }
-    }).then(() => {
-        res.redirect("/staff/admin/accounts");
-    }).catch((err) => {
-        console.log(err);
-        res.redirect('/staff/error');
-    });
+    }
+    if (hpPatt.test(hp) == false) {
+        errors = true
+        alertMessage(res, 'danger', 'Please enter a valid phone number.', '', true);
+    }
+    if (postalPatt.test(postalcode) == false) {
+        errors = true
+        alertMessage(res, 'danger', 'Please enter a valid postal code.', '', true);
+    }
+    if (errors) {
+        res.redirect('/staff/admin/manage-staff/' + req.params.id)
+    } else {
+        check().then(() => {
+            User.update({
+                type: type,
+                fname: fname,
+                lname: lname,
+                gender: gender,
+                dob: dob,
+                hp: hp,
+                address: address,
+                postalcode: postalcode,
+                password: pw
+            }, {
+                where: {
+                    staffId: req.params.id
+                }
+            }).then(() => {
+                res.redirect("/staff/admin/accounts");
+            }).catch((err) => {
+                console.log(err);
+                res.redirect('/staff/error');
+            });
+        }).catch((err) => {
+            console.log(err);
+            res.redirect('/staff/error');
+        });
+    }
 });
 
 router.post('/save-staff-picture/:id', (req, res) => { // formless picture uploading for when UPDATING STAFF DETAILS
@@ -213,6 +244,16 @@ router.post('/save-staff-picture/:id', (req, res) => { // formless picture uploa
             }
         }
     });
+})
+
+router.get('/confirm-delete/:id', (req, res) => {
+    User.findOne({
+        where: {
+            id: req.params.id
+        }, raw: true
+    }).then((user) => {
+        res.render('staff/confirmDelete', {layout: staffMain, user})
+    })
 })
 
 router.get('/delete-user/:id', (req, res) => { // deletion for either normal user or staff/admin accounts

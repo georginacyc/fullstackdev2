@@ -19,7 +19,7 @@ localStorage = new LocalStorage('./scratch');
 
 // initialise local storage count key 
 //comment back after first time running
-localStorage.setItem('count', 0);
+// localStorage.setItem('count', 0);
 
 //generate random Serial
 function generateSerial() {

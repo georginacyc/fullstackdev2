@@ -9,6 +9,7 @@ const Custorder = require('../models/CustOrders');
 const CustOrders = require('../models/CustOrders');
 const Item = require('../models/Item');
 const ensureAuthenticated = require('../helpers/auth');
+//const { in } = require('sequelize/types/lib/operators');
 
 
 router.get('/error', (req, res) => {
@@ -283,7 +284,9 @@ router.get('/accounts', (req, res) => {
     })
      //res.render('user/userAccount');
 });
-
+router.get('/cart', (req, res) => {
+    res.render('user/cart')
+});
 //user shopping cart
 router.get('/cart/:itemSerial', (req, res) => {
     let carts = {}
@@ -292,8 +295,10 @@ router.get('/cart/:itemSerial', (req, res) => {
             itemSerial: req.params.itemSerial
         }, raw: true
     })
-        .then((item) => {
+        .then((carts) => {
+            carts[item.itemSerial] = 1
             res.locals.carts = carts
+            res.redirect('/user/cart')
     }).catch(err => console.log(err));
 });
 
@@ -319,67 +324,50 @@ router.get('/orders', (req, res) => {
 router.post('/checkout', (req, res) => {
     let errors = [];
     // Retrieves fields from page from request body
-    let {name,card,cardcvv,expiredate} = req.body;
+    let {card,cardcvv,expiredate} = req.body;
 
     // Checks cvv is 3 digit
     if(cardcvv.length != 3) {
         errors.push({text: 'wrong cvv'});
     }
-
     // Checks that card length is correct
-    if(card.length != 16) {
-        errors.push({text: 'invalid card'});
-    }
+    //if(card.length != 16) {
+        //errors.push({text: 'invalid card'});
+    //}
     // checks if card starting with 4 , 4-visa
-    if (card[0] != 4) {
-        errors.push({text: 'invaid card'})
+    //if (card[0] != 4) {
+        //errors.push({text: 'invaid card'})
+    //}
+    if (expiredate.length != 5) {
+        errors.push({text: 'invaid expiry date'})
+    }
+    if (errors.length > 0) {
+        res.render('user/checkout', {
+            name,
+            card,
+            cardcvv,
+            expiredate
+    })
     }
     else{
         let userId = req.userId
-
+        let itemSerial = "123"
+        let quantity = 1
+        let couponCode = "10%"
+        let total_Amt = "20"
+        let comments = null
         CustOrders.create({
             userId,
             itemSerial,
             quantity,
-            status,
             couponCode,
             total_Amt,
-            order_Date, 
-            ship_Date,
-            paid_Date, 
-            completion_Date
+            comments,
         }) 
         .then(custorder => {
             res.redirect('/user/orders');})
         .catch(err => console.log(err))
     }
-    
-    /*let userId = 1001;
-    let itemSerial = "2222TF";
-    let quantity = 1;
-    let status = "pending";
-    let couponCode= "FIRST100";
-    let total_Amt = 27.99;
-    let order_Date = "2020-07-20";
-    let ship_Date = null;
-    let paid_Date = null;
-    let completion_Date = null;
-
-    CustOrders.create({
-        userId,
-        itemSerial,
-        quantity,
-        status,
-        couponCode,
-        total_Amt,
-        order_Date, 
-        ship_Date,
-        paid_Date, 
-        completion_Date
-    }) 
-    .then(custorder => {
-        res.redirect('/user/orders');})
-    .catch(err => console.log(err))*/
 
 });
 

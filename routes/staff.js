@@ -47,9 +47,9 @@ router.get('/update', (req, res) => { // updates last login for staff/admin acco
 })
 
 router.get('/home', (req, res) => { // everything below is retrieving data for charts in home page
-    let pendingShipments;
-    let thisMonthSales;
-    let OOSitems;
+    let pendingShipments = 0;
+    let thisMonthSales = 0;
+    let OOSitems = 0;
     let genderData = [];
     let ageData = [];
     let categoryData = [];

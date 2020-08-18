@@ -356,6 +356,7 @@ router.post('/checkout', (req, res) => {
         let couponCode = "10%"
         let total_Amt = "20"
         let comments = null
+        let orderDate = '2020-08-18'
         CustOrders.create({
             userId,
             itemSerial,
@@ -363,6 +364,7 @@ router.post('/checkout', (req, res) => {
             couponCode,
             total_Amt,
             comments,
+            orderDate
         }) 
         .then(custorder => {
             res.redirect('/user/orders');})

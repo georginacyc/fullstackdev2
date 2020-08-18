@@ -1,6 +1,7 @@
 // database models for orders made by user
 const Sequelize = require('sequelize');
 const db = require('../config/DBConfig');
+const sequelize = require('../config/DBConfig');
 
 const CustOrders = db.define('custorder', {
     orderId: {
@@ -27,12 +28,11 @@ const CustOrders = db.define('custorder', {
         type: Sequelize.STRING
     },
     orderDate: {
-        type: Sequelize.DATEONLY,
-        defaultValue = CURDATE()
+        type: Sequelize.DATEONLY
     },
     status: {
         type: Sequelize.STRING,
-        defaultValue = "completed"
+        defaultValue: "completed"
     },
 });
 

@@ -27,11 +27,11 @@
               <div class="p-4">
                 <p class="font-italic mb-4">Shipping and additional costs are calculated based on values you have entered.</p>
                 <ul class="list-unstyled mb-4">
-                  <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Order Subtotal </strong><strong>$15.00</strong></li>
+                  <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Order Subtotal </strong><strong>$30.00</strong></li>
                   <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Shipping and handling</strong><strong>$10.00</strong></li>
                   <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Discount</strong><strong id="code">-</strong></li>
                   <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Total</strong>
-                    <h5 class="font-weight-bold" id="total">$25.00</h5>
+                    <h5 class="font-weight-bold" id="total">$40.00</h5>
                   </li>
                 </ul><button type="button" class="btn btn-dark rounded-pill py-2 btn-block" data-toggle="modal" data-target="#payment"><i class="fa fa-credit-card mr-2"></i>Procceed to Payment</button>
                 {{!<script src="https://www.paypal.com/sdk/js?client-id=sb"></script>
@@ -84,7 +84,7 @@
   document.getElementById("applycode").addEventListener("click",apply);
   function apply(){
     document.getElementById("code").innerHTML="10%"
-    document.getElementById('total').innerHTML="$22.50";
+    document.getElementById('total').innerHTML="$36.00";
 
   };
 </script>

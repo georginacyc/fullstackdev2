@@ -354,7 +354,7 @@ router.post('/checkout', (req, res) => {
         let itemSerial = "123"
         let quantity = 1
         let couponCode = "10%"
-        let total_Amt = "20"
+        let total_Amt = 20
         let comments = null
         let orderDate = '2020-08-18'
         CustOrders.create({

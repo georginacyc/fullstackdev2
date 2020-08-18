@@ -40,18 +40,18 @@
                 <th>Name</th>
                 <th>Price</th>
                 <th>Category</th>
-                <th data-orderable="false">Sizes</th>
+                <th data-orderable="false"></th>
                 <th data-orderable="false"></th>
             </tr>
         </thead>
         <tbody>
             {{#each item}}
                 <tr>
-                    <td><a href="/view-details/{{itemSerial}}"><img src="\img\itemPlaceholder.jpg"></a></td>
+                    <td><a href="/view-details/{{itemSerial}}"><img src="/uploads/item_pictures/{{image}}"></a></td>
                     <td><a href="/view-details/{{itemSerial}}">{{itemName}}</a></td>
                     <td>S${{itemPrice}}</td>
                     <td>{{itemCategory}}</td>
-                    <td>XS, S, M, L, XL, XXL</td>
+                    <td></td>
                     {{#if (stockLevelCheck stockLevel)}}
                         <td>Out of Stock</td>
                     {{else}}

@@ -26,6 +26,14 @@ const CustOrders = db.define('custorder', {
     comments: {
         type: Sequelize.STRING
     },
+    orderDate: {
+        type: Sequelize.DATEONLY,
+        defaultValue = CURDATE()
+    },
+    status: {
+        type: Sequelize.STRING,
+        defaultValue = "completed"
+    },
 });
 
 module.exports = CustOrders;

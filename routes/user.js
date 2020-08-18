@@ -155,7 +155,7 @@ router.get('/reset-password', (req,res)=>{
 
 
 // Save user profile
-router.put('/saveUser/:id', (req, res) => {
+router.put('/save-user/:id', (req, res) => {
     // Retrieves edited values from req.body
     let {fname, lname, hp, address,city,country,postalcode,size,resetpw} = req.body;
     let {oldpw,newpw,newpw2} = req.body;

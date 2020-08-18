@@ -55,7 +55,8 @@ router.get('/catalogue/hers', (req, res) => {
         .then((item) => {
             res.render('catalogue', {
                 item : item,
-                title : "Women's"
+                title : "Women's",
+                availSizes: "XS, S, M, L, XL, XXL"
         })
     })
     
@@ -81,7 +82,6 @@ router.get('/view-details/:itemSerial', (req, res) => {
             });
     }
     viewSpecificItem().then(() => {
-        console.log(specificItem, allItems)
         res.render('view-details', {
             specificItem, //passes item that was chosen to handlebars
             allItems //passes all other items

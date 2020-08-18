@@ -10,9 +10,9 @@
             <div class="p-4">
               <p class="font-italic mb-4">If you have a coupon code, please enter it in the box below</p>
               <div class="input-group mb-4 border rounded-pill p-2">
-                <input type="text" placeholder="Apply coupon" aria-describedby="button-addon3" class="form-control border-0" name="coupon">
+                <input type="text" placeholder="Apply coupon" aria-describedby="applycode" class="form-control border-0" name="coupon" id="coupon">
                 <div class="input-group-append border-0">
-                  <button id="button-addon3" type="button" class="btn btn-dark px-4 rounded-pill"><i class="fa fa-gift mr-2"></i>Apply coupon</button>
+                  <button id="applycode" type="button" class="btn btn-dark px-4 rounded-pill"><i class="fa fa-gift mr-2"></i>Apply coupon</button>
                 </div>
               </div>
             </div>
@@ -27,11 +27,11 @@
               <div class="p-4">
                 <p class="font-italic mb-4">Shipping and additional costs are calculated based on values you have entered.</p>
                 <ul class="list-unstyled mb-4">
-                  <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Order Subtotal </strong><strong>{{itemPrice}}</strong></li>
+                  <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Order Subtotal </strong><strong>$15.00</strong></li>
                   <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Shipping and handling</strong><strong>$10.00</strong></li>
-                  <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Discount</strong><strong>-</strong></li>
+                  <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Discount</strong><strong id="code">-</strong></li>
                   <li class="d-flex justify-content-between py-3 border-bottom"><strong class="text-muted">Total</strong>
-                    <h5 class="font-weight-bold">$27.99</h5>
+                    <h5 class="font-weight-bold" id="total">$25.00</h5>
                   </li>
                 </ul><button type="button" class="btn btn-dark rounded-pill py-2 btn-block" data-toggle="modal" data-target="#payment"><i class="fa fa-credit-card mr-2"></i>Procceed to Payment</button>
                 {{!<script src="https://www.paypal.com/sdk/js?client-id=sb"></script>
@@ -43,7 +43,7 @@
                   <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                       <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLongTitle">Payment</h5>
+                        <h5 class="modal-title" id="exampleModalLongTitle">Payment <i class="fa fa-credit-card mr-2"></i></h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                           <span aria-hidden="true">&times;</span>
                         </button>
@@ -56,12 +56,15 @@
                           <div class="form-group">
                             <input type="number" name="card" class="form-control" placeholder="Enter your Card Number" minlength="16" required>
                           </div>
-                          <div class="form-group">  
-                            <input type="number" name="cardcvv" class="form-control" placeholder="Enter your cvv" minlength="3" maxlength="3" pattern="{3}" required>
+                          <div class="form-row">
+                            <div class="col">
+                              <input type="number" name="cardcvv" class="form-control" placeholder="Enter your cvv" maxlength="3" required >
+                            </div>
+                            <div class="col">
+                              <input type="text" name="expiredate" class="form-control" placeholder="MM/YY" maxlength="5" required >
+                            </div>  
                           </div>
-                          <div class="form-group">  
-                            <input type="text" name="expiredate" class="form-control" placeholder="MM/YY" required>
-                          </div>
+                          <br>
                           <div style="padding-bottom: 10px;">
                             <button type="submit" class="btn btn-dark" style="width:100%;" onclick="window.location.href='orders'">Pay</button>
                           </div>
@@ -77,118 +80,11 @@
     </div>
   </body>
 </html>
+<script>
+  document.getElementById("applycode").addEventListener("click",apply);
+  function apply(){
+    document.getElementById("code").innerHTML="10%"
+    document.getElementById('total').innerHTML="$22.50";
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <script>
-              function initPaymentRequest() {
-                let networks = ['mastercard', 'unionpay','visa'];
-                let types = ['debit', 'credit'];
-                let supportedInstruments = [{
-                  supportedMethods: 'basic-card',
-                  data: {supportedNetworks: networks, supportedTypes: types},
-                }];
-              
-                let details = {
-                  total: {label: 'Payment', amount: {currency: 'SGD', value: 27.99}},
-                  displayItems: [
-                    {
-                      label: 'Total Payment',
-                      amount: {currency: 'SGD', value: 17.99},
-                    },
-                    {
-                      label: 'Shipping Fees',
-                      amount: {currency: 'SGD', value: 10.00},
-                    },
-                  ],
-                };
-              
-                return new PaymentRequest(supportedInstruments, details);
-              }
-              
-              /**
-              * Invokes PaymentRequest for credit cards.
-              *
-              * @param {PaymentRequest} request The PaymentRequest object.
-              */
-              function onBuyClicked(request) {
-                request.show().then(function(instrumentResponse) {
-                  sendPaymentToServer(instrumentResponse);
-                })
-                .catch(function(err) {
-                  ChromeSamples.setStatus(err);
-                });
-              }
-              
-              /**
-              * Simulates processing the payment data on the server.
-              *
-              * @param {PaymentResponse} instrumentResponse The payment information to
-              * process.
-              */
-              function sendPaymentToServer(instrumentResponse) {
-                // There's no server-side component of these samples. No transactions are
-                // processed and no money exchanged hands. Instantaneous transactions are not
-                // realistic. Add a 2 second delay to make it seem more real.
-                window.setTimeout(function() {
-                  instrumentResponse.complete('success')
-                      .then(function() {
-                        window.location.href = '/user/userorders';
-                        //document.getElementById('result').innerHTML =
-                            //instrumentToJsonString(instrumentResponse);
-                      })
-                      .catch(function(err) {
-                        ChromeSamples.setStatus(err);
-                      });
-                }, 2000);
-              }
-              
-              /**
-              * Converts the payment instrument into a JSON string.
-              *
-              * @private
-              * @param {PaymentResponse} instrument The instrument to convert.
-              * @return {string} The JSON string representation of the instrument.
-              
-              function instrumentToJsonString(instrument) {
-                let details = instrument.details;
-                details.cardNumber = 'XXXX-XXXX-XXXX-' + details.cardNumber.substr(12);
-                details.cardSecurityCode = '***';
-              
-                return JSON.stringify({
-                  methodName: instrument.methodName,
-                  details: details,
-                }, undefined, 2);
-              }
-              */
-              const payButton = document.getElementById('buyButton');
-              payButton.setAttribute('style', 'display: none;');
-              if (window.PaymentRequest) {
-                let request = initPaymentRequest();
-                payButton.setAttribute('style', 'display: inline;');
-                payButton.addEventListener('click', function() {
-                  onBuyClicked(request);
-                  request = initPaymentRequest();
-                });
-              } else {
-                ChromeSamples.setStatus('This browser does not support web payments');
-              }
-            </script>
-        
+  };
+</script>

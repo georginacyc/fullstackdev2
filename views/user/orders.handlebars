@@ -2,7 +2,7 @@
 <h5 style="text-align: center;"><strong>My Orders</strong></h5>
 <br>
 <div class="container">
-    <table class="table table-fluid" id="myTable">
+    <table class="table table-hover" id="myTable">
 
       <!--Table head-->
       <thead style="background-color:gray;">
@@ -16,19 +16,14 @@
 
       <!--Table body-->
       <tbody>
-        {{#each Order}}
+        {{#each orders}}
           <tr>
             <th>{{orderId}}</th>
             <td>{{quantity}}</td>
-            <td>{{total_Amt}}</td>
+            <td>$ {{total_Amt}}</td>
           </tr>
         {{/each}}
       </tbody>
       <!--Table body-->
     </table>
 </div>
-<script>
-       $(document).ready(function () {
-        $('#myTable').DataTable();
-    });
-</script>

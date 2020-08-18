@@ -16,14 +16,21 @@
                     <div class="card-body">
                         <div class="bg-light rounded-pill px-4 py-3 text-uppercase font-weight-bold">Cart</div>
                         <div class="cart-row">
-                            <div class="col-md-5 col-lg-3 col-xl-3">
-                                <div class="view zoom overlay z-depth-1 rounded mb-3 mb-md-0">
-                                    <span class="cart-item cart-header cart-column">ITEM</span>
-                                    <span class="cart-price cart-header cart-column">PRICE</span>
-                                    <span class="cart-quantity cart-header cart-column">QUANTITY</span>
-                                </div>
-                                <div class="cart-items">
-                                </div>
+                            {{#if carts}}
+								{{#each carts}}
+									<h5>{{item.itemName}}</h5>
+                                    <p class="mb-3 text-muted text-uppercase small">{{item.itemCategory}}</p>
+                                    <p class="mb-2 text-muted text-uppercase small">{{item.itemPrice}}</p>
+                                    <p class="mb-3 text-muted text-uppercase small">{{item.itemGender}}</p>
+                                    <div class="def-number-input number-input safari_only mb-0 w-100" style="right: auto;">
+                                        <button class="minus decrease"></button>
+                                        <input class="quantity" min="0" name="quantity" value="${product.itemsNumber}" type="number">
+                                        <button class="plus increase"></button>
+                                    </div>
+								{{/each}}
+							{{else}}
+								<p class="dropdown-item-text">Your cart is empty.</p>
+							{{/if}}
                                 <hr class="mb-4">
                             </div>
                         </div>
@@ -73,7 +80,7 @@
                                     <strong>
                                         <p class="mb-0">(including GST)</p>
                                     </strong>
-                                    <span class="cart-total-price" style="padding-left: 265px;">$0</span>
+                                    <span class="cart-total-price" style="padding-left: 265px;">{{item.itemPrice}}</span>
                                 </div>
                             </li>
                         </ul>

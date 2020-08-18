@@ -15,7 +15,7 @@ var LocalStorage = require('node-localstorage').LocalStorage;
 localStorage = new LocalStorage('./scratch');
 
 // uncomment to clear local storage count key
-//localStorage.removeItem('count');
+// localStorage.removeItem('count');
 
 // initialise local storage count key 
 //comment back after first time running

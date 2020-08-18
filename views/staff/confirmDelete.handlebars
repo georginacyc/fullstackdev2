@@ -13,8 +13,12 @@
             <p>Address: {{user.address}}</p>
             <hr>
             <p>THIS ACTION IS IRREVERSIBLE. Please double-check.</p>
+            <div class="row">
+                <div class="col-12 col-sm-12 col-md-12 col-lg-12">
+                    <a class="btn btn-danger float-right" href="/staff/admin/delete-user/{{user.id}}">Delete</a>
+                </div>
+            </div>
             
-            <a class="btn btn-warning" href="/staff/admin/delete-user/{{user.id}}">Delete</a>
         </div>
     </div>
 </div>
